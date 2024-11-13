@@ -24,8 +24,8 @@ La plataforma no solo ayuda a los dueños de mascotas a encontrar a sus animales
 
 
 ## Colaboradores
-- **Barreiro, Julian**
-- **Fossati, Joaquin**
-- **Lo giudice, Julieta**
+- **Barreiro, Julián**
+- **Fossati, Joaquín**
+- **Lo Giudice, Julieta**
 - **Mariani, Gabriel**
 - **Pallero, Johanna**
