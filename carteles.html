@@ -3,122 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Publicación de Mascotas</title>
+  <title>Cartel de Mascota</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/carteles.css">
+    <link rel="stylesheet" href="css/carteles.css">
 </head>
 <body>
+  <div class="cartel">
+    <!-- Franja Roja: "SE BUSCA" -->
+    <div class="franja-roja">SE BUSCA</div>
 
-<div class="container mt-5">
-  <!-- Formulario para ingresar los datos -->
-  <form id="form-publicacion" class="mb-5">
-    <h3>Publicar Mascota</h3>
-    <div class="mb-3">
-      <label for="estado" class="form-label">Estado</label>
-      <select id="estado" class="form-select" required>
-        <option value="Se Busca">Se Busca</option>
-        <option value="Encontrado">Encontrado</option>
-        <option value="En Adopción">En Adopción</option>
-      </select>
-    </div>
-    <div class="mb-3">
-      <label for="nombre" class="form-label">Nombre de la mascota</label>
-      <input type="text" id="nombre" class="form-control" placeholder="Nombre (opcional)">
-    </div>
-    <div class="mb-3">
-      <label for="descripcion" class="form-label">Descripción</label>
-      <textarea id="descripcion" class="form-control" rows="3" placeholder="Características, detalles, etc." required></textarea>
-    </div>
-    <div class="mb-3">
-      <label for="fecha" class="form-label">Fecha</label>
-      <input type="date" id="fecha" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label for="ubicacion" class="form-label">Ubicación</label>
-      <input type="text" id="ubicacion" class="form-control" placeholder="Ubicación" required>
-    </div>
-    <div class="mb-3">
-      <label for="telefono" class="form-label">Teléfono de contacto</label>
-      <input type="tel" id="telefono" class="form-control" placeholder="Número de WhatsApp" required>
-    </div>
-    <div class="mb-3">
-      <label for="imagen" class="form-label">Subir imágenes</label>
-      <input type="file" id="imagen" class="form-control" multiple accept="image/*">
-    </div>
-    <button type="submit" class="btn btn-primary">Generar Publicación</button>
-  </form>
+    <!-- Franja Negra: "SE OFRECE RECOMPENSA" -->
+    <div class="franja-negra">SE OFRECE RECOMPENSA</div>
 
-  <!-- Aquí se generará el cartel dinámicamente -->
-  <div id="cartel-publicacion"></div>
-</div>
+    <!-- Contenido (Especificaciones y Carrusel) -->
+    <div class="contenido">
+      <!-- Información -->
+      <div class="info-contenedor">
+        <div class="info-seccion">
+          <div class="mini-franja-roja">DESCRIPCIÓN:</div>
+          <p class="info-texto descripcion">Gatita de 7 meses, tiene pelaje blanco y negro. Está recién castrada, por eso tiene rapado del lado izquierdo.</p>
+        </div>
+        <div class="info-seccion">
+          <div class="mini-franja-roja">SE VIÓ POR ÚLTIMA VEZ EL:</div>
+          <p class="info-texto fecha">15/11/2024</p>
+        </div>
+        <div class="info-seccion">
+          <div class="mini-franja-roja">UBICACIÓN O RADIO DONDE SE PERDIÓ:</div>
+          <p class="info-texto ubicacion">Carlos Casares, por el Barrio Esfuerzo Propio 8, atras de la cancha del Club Boca</p>
+        </div>
+      </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  $(document).ready(function () {
-    $('#form-publicacion').on('submit', function (e) {
-      e.preventDefault();
-
-      // Obtener valores del formulario
-      const estado = $('#estado').val();
-      const nombre = $('#nombre').val() || 'Sin nombre';
-      const descripcion = $('#descripcion').val();
-      const fecha = $('#fecha').val();
-      const ubicacion = $('#ubicacion').val();
-      const telefono = $('#telefono').val();
-      const imagenes = $('#imagen')[0].files;
-
-      // Crear carrusel de imágenes
-      let carrusel = `<div id="carouselExample" class="carousel slide">
-        <div class="carousel-inner">`;
-      $.each(imagenes, function (index, file) {
-        const imgURL = URL.createObjectURL(file);
-        carrusel += `<div class="carousel-item ${index === 0 ? 'active' : ''} carrusel-imagen">
-          <img src="${imgURL}" class="d-block w-100" alt="Imagen de la mascota">
-        </div>`;
-      });
-      carrusel += `</div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Siguiente</span>
-        </button>
-      </div>`;
-
-      // Generar HTML del cartel
-      const cartelHTML = `
-        <div class="card mx-auto" style="max-width: 800px; border: none;">
-          <div class="franja-roja">${estado.toUpperCase()}</div>
-          ${estado === 'Se Busca' ? `<div class="franja-negra">SE OFRECE RECOMPENSA</div>` : ''}
-          <div class="card-body cartel-contenido">
-            <div class="info-contenedor">
-              <ul class="list-group">
-                <li class="list-group-item"><strong class= "mini-franja-roja">Descripción:</strong> ${descripcion}</li>
-                <li class="list-group-item"><strong class= "mini-franja-roja">Última vez vista:</strong> ${fecha}</li>
-                <li class="list-group-item"><strong class= "mini-franja-roja">Ubicación:</strong> ${ubicacion}</li>
-              </ul>
+      <!-- Carrusel -->
+      <div class="carrusel-contenedor">
+        <div id="carruselMascota" class="carousel slide carrusel-imagen" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="img/aki1.jpg" class="d-block w-100" alt="Imagen 1">
             </div>
-            <div class="carrusel-contenedor">
-              ${carrusel}
-              <div class="mini-franja-roja">${nombre}</div>
+            <div class="carousel-item">
+              <img src="img/aki2.jpg" class="d-block w-100" alt="Imagen 2">
             </div>
           </div>
-          <h3 class="contact-text">Si lo ves, por favor contactate al:</h3>
-          <a href="https://wa.me/${telefono.replace(/[^0-9]/g, '')}" class="contact-btn">
-            ${telefono}
-          </a>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carruselMascota" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carruselMascota" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+          </button>
         </div>
-      `;
+        <div class="mini-franja-roja">
+          Nombre de la mascota
+        </div>
+      </div>
+    </div>
 
-      // Insertar el cartel generado en el contenedor
-      $('#cartel-publicacion').html(cartelHTML);
-    });
-  });
-</script>
+    <!-- Texto y botón de contacto -->
+    <p class="contact-text">Si lo ves, <br> por favor contactate al:</p>
+    <a href="#" class="contact-btn">
+      <img src="img/megafono.png" alt="Megáfono">
+      <span class="telefono">2396-51-2141</span>
+    </a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
