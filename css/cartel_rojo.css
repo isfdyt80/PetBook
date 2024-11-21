@@ -13,10 +13,10 @@ body {
 }
 
 .franja-roja {
-  background-color: #d32f2f;
+  background-color: #b21515;
   color: white;
   text-align: center;
-  font-size: 2.8rem;
+  font-size: 2.9rem;
   font-weight: bold;
   padding: 10px;
   border-radius: 10px;
@@ -49,15 +49,15 @@ body {
 
 .carrusel-imagen {
   border-radius: 20px;
-  border: 5px solid #d32f2f;
+  border: 5px solid #b21515;
   overflow: hidden;
 }
 
 .mini-franja-roja {
-  background-color: #d32f2f;
+  background-color: #b21515;
   color: white;
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   padding: 5px;
   border-radius: 0 0 10px 10px;
@@ -73,16 +73,16 @@ body {
 }
 
 .info-titulo {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #d32f2f;
+  color: #b21515;
 }
 
 .franja-roja-mini {
-  background-color: #d32f2f;
+  background-color: #b21515;
   color: white;
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: bold;
   padding: 5px;
   border-radius: 0 0 10px 10px;
@@ -90,7 +90,8 @@ body {
 }
 
 .info-texto {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .contact-text {
@@ -102,7 +103,7 @@ body {
 }
 
 .contact-btn {
-  background-color: #d32f2f;
+  background-color: #b21515;
   color: white;
   font-weight: bold;
   padding: 10px;
