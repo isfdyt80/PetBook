@@ -16,49 +16,64 @@
 </head>
 
 <body>
-    <ul class="nav-bar">
-        <li>
-            <a href="index.html" target="_blank">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
-                    <path
-                        d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z" />
-                </svg>
-            </a>
-        </li>
-        <li>animales perdidos</li>
-        <li>se buscan sus dueños</li>
-        <li>animales en adopcion</li>
-        <li>casos finalizados</li>
-    </ul>
+    <div class="content d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow signin" style="max-width: 400px; width: 100%;">
 
-    <h2>Sign-In</h2>
-    <div class="container-sm">
-        <div class="backButton">
-            <!-- <input type="button" value="back"> -->
+            <div class="text-center mb-3">
+                <h2><b>Registro De Usuario</b></h2>
+            </div>
+
+
+            <form method="post" id="form-sign-in">
+                <div class="row mb-1">
+                    <div class="mb-1 col-md-6">
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre"
+                            class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" id="apellido" name="apellido" placeholder="Apellido"
+                            class="form-control">
+                    </div>
+                </div>
+                
+                <div class="row mb-1">
+                    <div class="mb-1 col-md-6">
+                        <input type="tel" id="telefono" name="telefono" placeholder="Telefono" 
+                            class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" id="localidad" name="localidad" placeholder="Localidad" 
+                            class="form-control">
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <input type="email" id="mail" name="email" placeholder="E-mail" class="form-control">
+
+                </div>
+                <!-- Se utiliza la libreria check-password-strength -->
+                <div class="mb-1">
+                    <input type="password" id="password" name="password" placeholder="Contraseña"
+                        class="form-control">
+                    <small id="password-strength" class="form-text"></small>
+                </div>
+                <div class="mb-1">
+                    <input type="password" id="repeatPassword" name="repeatPassword" placeholder="Repetir Contraseña"
+                        class="form-control">
+                    <small id="password-match" class="form-text"></small>
+                </div>
+                <div class="mb-1 text-center">
+                    <input type="submit" id="sign-in" value="Registrarse" class="btn btn-outline-primary">
+                </div>
+                
+            </form>
+
+
         </div>
-        <form class="container-md registro" action="envio.php" method="post">
-            <input type="text" id="nombre" name="nombre" placeholder="Nombre" required pattern="[A-Za-z]{4,25}"> <!--El pattern se uso para test, mas a delante puede no ser necesario-->
-
-            <input type="text" id="apellido" name="apellido" placeholder="Apellido" required pattern="[A-Za-z]{4,25}">
-
-            <input type="tel" id="telefono" name="telefono" placeholder="Telefono" required>
-
-            <input type="text" id="localidad" name="localidad" placeholder="Localidad" required>
-
-            <input type="email" id="mail" name="email" placeholder="E-mail" required>
-
-            <!-- Es mejor validar las contraseñas en PHP o JavaScript con un 'regexp' seguido de un patrón -->
-            <input type="password" id="password" name="password" placeholder="Contraseña" required>
-
-            <input type="password" id="repeatPassword" name="repeatPassword" placeholder="Repetir Contraseña" required>
-
-            <input type="submit" id="sign-in" value="Registrarse">
-            <!-- <input type="reset" value="resetear"> -->
-        </form>
-
     </div>
     <script src="js/jquery-3.7.1.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
+     <script src="js/umd.js"></script> <!--Libreria check-password-strength-->
     <script src="/js/registroUsuario.js"></script>
     <!-- <script src="/js/index.js"></script> -->
 </body>
