@@ -3,6 +3,23 @@ body {
   background-color: #f8f9fa;
 }
 
+
+  .usuario-publicacion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .img-perfil {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #b21515;
+  }
+
+
+
 .cartel {
   max-width: 800px;
   background-color: white;
@@ -10,6 +27,31 @@ body {
   margin: auto;
   padding: 20px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20px;
+}
+
+.contenido-cartel {
+  flex: 1;
+}
+
+.usuario-publicacion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.usuario-publicacion .nombre-usuario {
+  font-weight: bold;
+}
+
+.usuario-publicacion .fecha-publicacion {
+  font-style: italic;
+  font-size: 1.2rem;
 }
 
 .franja-roja {
@@ -72,23 +114,6 @@ body {
   margin-top: 20px;
 }
 
-.info-titulo {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #b21515;
-}
-
-.franja-roja-mini {
-  background-color: #b21515;
-  color: white;
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: bold;
-  padding: 5px;
-  border-radius: 0 0 10px 10px;
-  margin-bottom: 10px;
-}
-
 .info-texto {
   font-size: 1.5rem;
   font-weight: bold;
@@ -130,4 +155,32 @@ body {
 .contact-btn .telefono {
   font-size: 1.8rem;
   font-weight: bold;
+}
+
+.botones-verticales {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.boton-accion {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.boton-accion:hover {
+  transform: scale(1.1);
+}
+
+.boton-accion img {
+  width: 40px;
+  height: 40px;
 }
