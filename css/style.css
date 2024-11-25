@@ -1,0 +1,16 @@
+.modal-header {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+  
+  textarea::placeholder {
+    color: #888;
+    font-style: italic;
+  }
+  
+  button[type="submit"] {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
