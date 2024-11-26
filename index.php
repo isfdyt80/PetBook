@@ -1,3 +1,4 @@
+<!-- conexion -->
 <?php 
     include 'modales/m-nueva-publicacion.html';
     include 'modales/m-perdido.html';
