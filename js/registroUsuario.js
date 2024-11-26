@@ -33,7 +33,6 @@ $().ready(function () {
 });
 
 
-
 console.log('Librería cargada:', typeof checkPasswordStrength !== 'undefined');
 console.log(checkPasswordStrength); // Debería mostrar "function"
 
