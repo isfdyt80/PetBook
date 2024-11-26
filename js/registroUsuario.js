@@ -31,30 +31,6 @@ $().ready(function () {
 
 
 });
-$(document).ready(function () {
-    $('#hash-password').on('click', function () {
-        const passwordInput = $('#password').val(); // Captura el valor del input
-        const saltRounds = 10; // Define las rondas de salt
-
-        // Validar que el campo no esté vacío
-        if ($.trim(passwordInput) === '') {
-            $('#password-strength').text('Por favor, ingresa una contraseña.');
-            return;
-            }
-    });
-    // Usar bcrypt.js para encriptar la contraseña
-    bcrypt.hash(passwordInput, saltRounds, (err, hash) => {
-        if (err) {
-            console.error("Error al encriptar la contraseña:", err);
-            document.getElementById('password-strength').innerText = 'Error al encriptar.';
-        } else {
-            console.log("Contraseña encriptada:", hash);
-            document.getElementById('password-strength').innerText = 'Contraseña encriptada con éxito.';
-            document.getElementById('hashed-password').innerText = `Hash: ${hash}`;
-        }
-    });
-});
-
 
 
 console.log('Librería cargada:', typeof checkPasswordStrength !== 'undefined');
