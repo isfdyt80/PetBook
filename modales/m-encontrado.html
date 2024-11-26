@@ -1,0 +1,64 @@
+<!-- Modal Animal Encontrado -->
+<div class="modal fade" id="ModalEncontrado" tabindex="-1" aria-labelledby="ModalEncontrado" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Encabezado del Modal -->
+            <div class="modal-header bg-warning text-white d-flex justify-content-center align-items-center">
+                <!-- Botón de Volver (flecha) -->
+                <button type="button" class="btn btn-link text-white" data-bs-toggle="modal"
+                    data-bs-target="#ModalNuevaPubli" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-arrow-left fs-7"
+                        style="color: white; opacity: 0.7; font-size: 1.5rem;"></i>
+                </button>
+                <h5 class="modal-title flex-grow-1 text-center" id="animalPerdidoModalLabel">ANIMAL ENCONTRADO (SE
+                    BUSCA DUEÑOS)</h5>
+                <!-- Botón de Cerrar (X) -->
+                <button type="button" class="btn btn-link text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa-solid fa-x fs-7" style="color: white; opacity: 0.7; font-size: 1.5rem;"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Formulario para animales encontrados -->
+                <form>
+                    <div class="mb-3 text-center">
+                        <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
+                                class="text-danger">*</span></label>
+                        <div>
+                            <i class="fa-solid fa-camera fa-2x"></i>
+                            <input type="file" class="form-control mt-2" id="fotos" name="fotos" accept="image/*"
+                                multiple required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="foundAnimalCharacteristics" class="form-label fw-bold">CARACTERÍSTICAS DEL
+                            ANIMAL:</label>
+                        <textarea class="form-control" id="foundAnimalCharacteristics" rows="3"
+                            placeholder="Describe lo más que puedas al animal, color de pelo, tamaño, detalles bien característicos."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="foundAnimalDate" class="form-label fw-bold">SE ENCONTRÓ EL:</label>
+                        <input type="date" class="form-control" id="foundAnimalDate" placeholder="DD/MM/AAAA">
+                    </div>
+                    <div class="mb-3">
+                        <label for="foundAnimalLocation" class="form-label fw-bold">UBICACIÓN O RADIO DONDE SE
+                            ENCONTRÓ:</label>
+                        <input type="text" class="form-control" id="foundAnimalLocation"
+                            placeholder="Ejemplo: Parque central">
+                    </div>
+                    <div class="mb-3">
+                        <label for="foundContact" class="form-label fw-bold">TELÉFONO DE CONTACTO:</label>
+                        <input type="text" class="form-control" id="foundContact" placeholder="Teléfono o email">
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary" form="animalEncontradoForm">
+                    PUBLICAR <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
