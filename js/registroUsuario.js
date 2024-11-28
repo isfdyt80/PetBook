@@ -1,90 +1,89 @@
-// Primero validamos los datos que no son contraseña del formulario
+// Primero validamos los datos del formulario
 $().ready(function () {
+    const $b_submit = $('#b_signin');
+    const $i_password = $('#i_signin_password');
+    const $p_strength_message = $('#password-strength');
+
+
     $('#form-sign-in').validate({
-        rules: { //toman
-            nombre: "required",
-            apellido: "required",
-            telefono:"requiresd",
-            localidad:"requiresd",
-            email:"requiresd",
-            password:"required",
-            repeatPassword:"required"
+
+        rules: { //Toman el campo 'name'
+            i_signin_name: "required",
+            i_signin_lastname: "required",
+            i_signin_telephone: "required",
+            i_signin_place: "required",
+            i_signin_mail: {
+                required: true,
+                email: true
+            },
+            i_signin_password: {
+                required: true
+            },
+            i_signin_repeat_password: {
+                required: true,
+                equalTo: "#i_signin_password"
+            }
         },
         messages: {
-            nombre: 
-                "Este campo es obligatorio",
-                // email: "El formato del email es incorrecto"
-            apellido:
-                "Este campo es obligatorio",
-            telefono:
-                "Este campo es obligatorio",
-            localidad:
-                "Este campo es obligatorio",
-            email:
-                "Este campo es obligatorio",
-            password:
-                "Este campo es obligatorio",
-            repeatPassword:
-                "Este campo es obligatorio"
+            i_signin_name: "Debes escribir almenos un nombre",
+            i_signin_lastname: "Debes escribir almenos un apellido",
+            i_signin_telephone: "Debes escribir un número de telefono",
+            i_signin_place: "Debes escribir tu localidad",
+            i_signin_mail: {
+                required: "Debes escribir un mail valido",
+                email: "El formato no es el correcto"
+            },
+            i_signin_password: "La contraseña es obligatoria",
+            i_signin_repeat_password: {
+                required: "Debes repetir la contraseña",
+                equalTo: "Las contraseñas deben coincidir"
+            }
+        },
+        errorElement: "div",
+        errorPlacement: function (error, element) {
+            error.addClass("invalid-feedback");
+            element.parent().append(error);
+        },
+        highlight: function (element) {
+            $(element).addClass("is-invalid").removeClass("is-valid");
+        },
+        unhighlight: function (element) {
+            $(element).addClass("is-valid").removeClass("is-invalid");
+        },
+
+        invalidHandler: function () {
+            $('<div class="alert alert-danger mt-3">Por favor, corrija los errores antes de enviar.</div>')
+                .insertAfter($b_submit)
+                .fadeOut(5000, function () {
+                    $(this).remove();
+                });
         }
     });
 
-
-});
-
-
-
-console.log('Librería cargada:', typeof checkPasswordStrength !== 'undefined');
-console.log(checkPasswordStrength); // Debería mostrar "function"
+    $('#form-sign-in input').on('blur', function () {
+        $(this).valid();
+    });
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const passwordInput = document.getElementById('password');
-    const passwordStrengthMessage = document.getElementById('password-strength');
-    const repeatPasswordInput = document.getElementById('repeatPassword');
-    const passwordMatchMessage = document.getElementById('password-match');
-    const submitButton = document.getElementById('sign-in');
-
-    passwordInput.addEventListener('input', () => {
-        const result = checkPasswordStrength.passwordStrength(passwordInput.value);
-        passwordStrengthMessage.textContent = `Fortaleza: ${result.value}`;
-        passwordStrengthMessage.className = 'form-text';
+    $i_password.on('input', function () {
+        const result = checkPasswordStrength.passwordStrength($i_password.val());
 
         if (result.id === 0) {
-            passwordStrengthMessage.textContent = 'La contraseña es MUY DEBIL';
-            passwordStrengthMessage.style.color = 'red';
+            $p_strength_message.text('Su contraseña es MUY DEBIL');
+            $p_strength_message.css({ color: 'red' });
         } else if (result.id === 1) {
-            passwordStrengthMessage.style.color = 'orange';
+            $p_strength_message.text('Su contraseña es DEBIL');
+            $p_strength_message.css({ color: 'orange' });
         } else if (result.id === 2) {
-            passwordStrengthMessage.style.color = 'blue';
+            $p_strength_message.text('Su contraseña es FUERTE');
+            $p_strength_message.css({ color: 'blue' });
         } else {
-            passwordStrengthMessage.style.color = 'green';
+            $p_strength_message.text('Su contraseña es MUY FUERTE');
+            $p_strength_message.css({ color: 'green' });
         }
-        validatePassword();
     });
 
-    repeatPasswordInput.addEventListener('input', validatePassword);
-
-    function validatePassword() {
-        const password = passwordInput.value;
-        const repeatPassword = repeatPasswordInput.value;
-
-        if (repeatPassword === '') {
-            passwordMatchMessage.textContent = '';
-            submitButton.disabled = true;
-            return;
-        }
-
-        if (password === repeatPassword) {
-            passwordMatchMessage.textContent = 'Las contraseñas coinciden.';
-            passwordMatchMessage.style.color = 'green';
-            submitButton.disabled = false;
-        } else {
-            passwordMatchMessage.textContent = 'Las contraseñas NO coinciden';
-            passwordMatchMessage.style.color = 'red';
-            submitButton.disabled = true;
-
-        }
-    }
-
 });
+
+
+

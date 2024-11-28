@@ -16,64 +16,62 @@
 </head>
 
 <body>
-    <div class="content d-flex justify-content-center align-items-center vh-100">
+    <div class="content d-flex flex-column justify-content-center align-items-center vh-100">
+        <div class="text-center mb-3">
+            <h2><b>Registro De Usuario</b></h2>
+        </div>
         <div class="card p-4 shadow signin" style="max-width: 400px; width: 100%;">
-
-            <div class="text-center mb-3">
-                <h2><b>Registro De Usuario</b></h2>
-            </div>
-
 
             <form method="post" id="form-sign-in">
                 <div class="row mb-1">
                     <div class="mb-1 col-md-6">
-                        <input type="text" id="nombre" name="nombre" placeholder="Nombre"
+                        <input type="text" id="i_signin_name" name="i_signin_name" placeholder="Nombre"
                             class="form-control">
+                            <small id="name_check" class="form-text"></small>
                     </div>
                     <div class="col-md-6">
-                        <input type="text" id="apellido" name="apellido" placeholder="Apellido"
+                        <input type="text" id="i_signin_lastname" name="i_signin_lastname" placeholder="Apellido"
                             class="form-control">
                     </div>
                 </div>
                 
                 <div class="row mb-1">
                     <div class="mb-1 col-md-6">
-                        <input type="tel" id="telefono" name="telefono" placeholder="Telefono" 
+                        <input type="tel" id="i_signin_telephone" name="i_signin_telephone" placeholder="Telefono" 
                             class="form-control">
                     </div>
                     <div class="col-md-6">
-                        <input type="text" id="localidad" name="localidad" placeholder="Localidad" 
+                        <input type="text" id="i_signin_place" name="i_signin_place" placeholder="Localidad" 
                             class="form-control">
                     </div>
                 </div>
                 <div class="mb-1">
-                    <input type="email" id="mail" name="email" placeholder="E-mail" class="form-control">
+                    <input type="email" id="i_signin_mail" name="i_signin_mail" placeholder="E-mail" class="form-control">
 
                 </div>
                 <!-- Se utiliza la libreria check-password-strength -->
                 <div class="mb-1">
-                    <input type="password" id="password" name="password" placeholder="Contraseña"
+                    <input type="password" id="i_signin_password" name="i_signin_password" placeholder="Contraseña"
                         class="form-control">
                     <small id="password-strength" class="form-text"></small>
                 </div>
                 <div class="mb-1">
-                    <input type="password" id="repeatPassword" name="repeatPassword" placeholder="Repetir Contraseña"
+                    <input type="password" id="i_signin_repeat_password" name="i_signin_repeat_password" placeholder="Repetir Contraseña"
                         class="form-control">
                     <small id="password-match" class="form-text"></small>
                 </div>
                 <div class="mb-1 text-center">
-                    <input type="submit" id="sign-in" value="Registrarse" class="btn btn-outline-primary">
+                    <input type="submit" id="b_signin" value="Registrarse" class="btn btn-outline-primary">
                 </div>
                 
             </form>
-
 
         </div>
     </div>
     <script src="js/jquery-3.7.1.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
-    <script src="js/jquery.validate.min.js"></script>
-     <script src="js/umd.js"></script> <!--Libreria check-password-strength-->
+    <script src="js/jquery.validate.min.js"></script> <!-- Libreria que uso para validar campos -->
+    <script src="js/umd.js"></script> <!--Libreria check-password-strength-->
     <script src="/js/registroUsuario.js"></script>
     <!-- <script src="/js/index.js"></script> -->
 </body>
