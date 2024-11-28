@@ -1,4 +1,4 @@
-$().ready(function () {
+$(document).ready(function () {
     const $b_submit = $('#b_login');
     
     $('#form_login').validate({
@@ -42,4 +42,31 @@ $().ready(function () {
         $(this).valid();
     });
 
+    $('#form_login').on("submit", function(prevent){
+
+        prevent.preventDefault();
+
+        if($(this).valid()){
+            var form_data = new FormData(this);
+
+
+            $.ajax({
+                url: "form_login.php",
+                type: "post",
+                dataType: "json",
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+            success: function(data){
+                // Aca manejo lo que pasa una ves que se enviaron con exito los datos y me contesto la DB
+                console.log("Se aceptaron los datos con exito");
+                //Pendiente de modificación
+            },
+            error: function(jqXHR, textStatus, errorTrown){
+                console.error("No se pudieron enviar los datos a la base de datos" + textStatus, errorTrown)
+            }
+            });
+        }
+    });
 });
