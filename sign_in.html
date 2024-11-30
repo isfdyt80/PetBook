@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetBook</title>
-    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/sign_in.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sign_in.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -54,6 +54,8 @@
                     <input type="password" id="i_signin_password" name="i_signin_password" placeholder="Contraseña"
                         class="form-control">
                     <small id="password-strength" class="form-text"></small>
+                    <button id="hash-password" class="btn btn-primary">Encriptar Contraseña</button>
+                    <p id="hashed-password"></p>
                 </div>
                 <div class="mb-1">
                     <input type="password" id="i_signin_repeat_password" name="i_signin_repeat_password" placeholder="Repetir Contraseña"
@@ -68,12 +70,14 @@
 
         </div>
     </div>
+    
     <script src="js/jquery-3.7.1.min.js"></script>
-    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/jquery.validate.min.js"></script> <!-- Libreria que uso para validar campos -->
     <script src="js/umd.js"></script> <!--Libreria check-password-strength-->
-    <script src="/js/sign_in.js"></script>
+    <script src="js/bcrypt.min.js"></script>
+    <script src="js/sign_in.js"></script>
+    <script src="js/encription.js"></script>
     <!-- <script src="js/index.js"></script> -->
 </body>
-
 </html>

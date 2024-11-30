@@ -1,0 +1,87 @@
+<!-- Modal Animal Perdido -->
+<div class="modal fade" id="ModalPerdido" tabindex="-1" aria-labelledby="ModalPerdido" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Encabezado del Modal -->
+            <div class="modal-header bg-danger text-white d-flex justify-content-center align-items-center">
+                <!-- Botón de Volver (flecha) -->
+                <button type="button" class="btn btn-link text-white" data-bs-toggle="modal"
+                    data-bs-target="#ModalNuevaPubli" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-arrow-left fs-7"
+                        style="color: white; opacity: 0.7; font-size: 1.5rem;"></i>
+                </button>
+                <h5 class="modal-title flex-grow-1 text-center" id="animalPerdidoModalLabel">ANIMAL PERDIDO (SE
+                    BUSCA)</h5>
+                <!-- Botón de Cerrar (X) -->
+                <button type="button" class="btn btn-link text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa-solid fa-x fs-7" style="color: white; opacity: 0.7; font-size: 1.5rem;"></i>
+                </button>
+            </div>
+
+            <!-- Cuerpo del Modal -->
+            <div class="modal-body">
+                <form id="animalPerdidoForm">
+                    <!-- Subir Fotos -->
+                    <div class="mb-3 text-center">
+                        <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
+                                class="text-danger">*</span></label>
+                        <div>
+                            <i class="fa-solid fa-camera fa-2x"></i>
+                            <input type="file" class="form-control mt-2" id="fotos" name="fotos" accept="image/*"
+                                multiple required>
+                        </div>
+                    </div>
+                    <!-- Características del Animal -->
+                    <div class="mb-3">
+                        <label for="caracteristicas" class="form-label fw-bold">CARACTERÍSTICAS DEL ANIMAL: <span
+                                class="text-danger">*</span></label>
+                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" rows="4"
+                            placeholder="Describe lo más que puedas al animal, color de pelo, tamaño, detalles bien característicos."
+                            required></textarea>
+                    </div>
+                    <!-- Fecha -->
+                    <div class="mb-3">
+                        <label for="faltaDesde" class="form-label fw-bold">FALTA DESDE EL: <span
+                                class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="faltaDesde" name="faltaDesde" required>
+                    </div>
+                    <!-- UBICACIÓN -->
+                    <div class="mb-3">
+                        <label for="ubicacion" class="form-label fw-bold">UBICACIÓN O RADIO DONDE SE PERDIÓ: <span
+                                class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="ubicacion" name="ubicacion"
+                                placeholder="Se obtendrá automáticamente">
+                            <button type="button" class="btn btn-outline-secondary" id="obtenerUbicacionBtn">Obtener
+                                Ubicación</button>
+                        </div>
+                    </div>
+                    <!-- Teléfono de Contacto -->
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label fw-bold">TELÉFONO DE CONTACTO: <span
+                                class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono"
+                            placeholder="Ejemplo: +54 9 1234-5678" required>
+                    </div>
+                    <!-- Recompensa Checkbox y Valor -->
+                    <div class="form-check mb-3">
+                        <label class="form-check-label fw-bold" for="recompensaCheckbox">RECOMPENSA</label>
+                        <input class="form-check-input" type="checkbox" id="recompensaCheckbox">
+                    </div>
+                    <div class="mb-3" id="valorRecompensaGroup" style="display: none;">
+                        <label for="valorRecompensa" class="form-label fw-bold">VALOR RECOMPENSA:</label>
+                        <input type="text" class="form-control" id="valorRecompensa">
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary" form="animalPerdidoForm">
+                    PUBLICAR <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
