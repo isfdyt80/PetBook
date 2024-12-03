@@ -94,7 +94,7 @@ $(document).ready(function () {
 
           
             $.ajax({
-                url: "form_singin.php",
+                url: "/php/form_signin.php",
                 type: "post",
                 dataType: "json",
                 data: form_data,
@@ -102,12 +102,15 @@ $(document).ready(function () {
                 contentType: false,
                 processData: false,
                 success: function (data) {
-                    // Aca manejo lo que pasa una ves que se enviaron con exito los datos y me contesto la DB
-                    console.log("Se aceptaron los datos con exito");
-                    //Pendiente de modificación
+                    if (data.status === 'success') {
+                        console.log("Se aceptaron los datos con exito");
+                    }else{
+                        console.warn("Error: " + data.message);
+                    }
                 },
-                error: function (jqXHR, textStatus, errorTrown) {
-                    console.error("No se pudieron enviar los datos a la base de datos" + textStatus, errorTrown)
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("Error: ", textStatus, errorThrown);
+                    console.error("Respuesta del servidor:", jqXHR.responseText);
                 }
             });
         }

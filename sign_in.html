@@ -22,7 +22,7 @@
         </div>
         <div class="card p-4 shadow signin" style="max-width: 400px; width: 100%;">
 
-            <form id="form-sign-in">
+            <form id="form-sign-in" enctype="multipart/form-data">
                 <div class="row mb-1">
                     <div class="mb-1 col-md-6">
                         <input type="text" id="i_signin_name" name="i_signin_name" placeholder="Nombre"
@@ -54,8 +54,8 @@
                     <input type="password" id="i_signin_password" name="i_signin_password" placeholder="Contraseña"
                         class="form-control">
                     <small id="password-strength" class="form-text"></small>
-                    <button id="hash-password" class="btn btn-primary">Encriptar Contraseña</button>
-                    <p id="hashed-password"></p>
+                    <!-- <button id="hash-password" class="btn btn-primary">Encriptar Contraseña</button>
+                    <p id="hashed-password"></p> -->
                 </div>
                 <div class="mb-1">
                     <input type="password" id="i_signin_repeat_password" name="i_signin_repeat_password" placeholder="Repetir Contraseña"
@@ -77,7 +77,7 @@
     <script src="js/umd.js"></script> <!--Libreria check-password-strength-->
     <script src="js/bcrypt.min.js"></script>
     <script src="js/sign_in.js"></script>
-    <script src="js/encription.js"></script>
+    <!-- <script src="js/encription.js"></script> -->
     <!-- <script src="js/index.js"></script> -->
 </body>
 </html>
