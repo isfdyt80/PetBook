@@ -21,12 +21,12 @@
             <h2>Log-In</h2>
         </div>
         <div class="card p-4 shadow login" style="max-width: 400px; width: 100%;">
-            <form id="form_login">
+            <form id="form_login" enctype="multipart/form-data">
                 <div class="mb-1">
-                    <input type="email" id="i_login_mail" name="mail" placeholder="E-mail" class="form-control">
+                    <input type="email" id="i_login_mail" name="i_login_mail" placeholder="E-mail" class="form-control">
                 </div>
                 <div class="mb-1">
-                    <input type="password" id="i_login_password" name="password" placeholder="Contraseña" class="form-control">
+                    <input type="password" id="i_login_password" name="i_login_password" placeholder="Contraseña" class="form-control">
                 </div>
                 <div class="text-center">
                     <input type="submit" id="b_login" value="Iniciar Sesión" class="btn btn-outline-primary">
@@ -40,7 +40,7 @@
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/bcrypt.min.js"></script> 
     <script src="js/log_in.js"></script>
-    <script src="js/encription.js"></script>
+    <!-- <script src="js/encription.js"></script> -->
     <!-- <script src="/js/index.js"></script> -->
 </body>
 </html>
