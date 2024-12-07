@@ -41,7 +41,8 @@ body {
 
 /* Contenido principal */
 .container {
-    margin-top: 90px; /* Espacio para la barra superior fija */
+    margin-top: 90px;
+    /* Espacio para la barra superior fija */
     padding: 20px;
 }
 
@@ -99,7 +100,8 @@ h1 {
 
 /* Agregar espacio entre la barra superior y los demás elementos */
 .container {
-    margin-top: 100px; /* Evitar que el contenido quede tapado por la barra superior */
+    margin-top: 100px;
+    /* Evitar que el contenido quede tapado por la barra superior */
 }
 
 /* Diseño responsivo */
