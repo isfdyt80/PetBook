@@ -54,6 +54,13 @@ CREATE TABLE publicaciones (
     FOREIGN KEY (usuario_id) REFERENCES usuarios (id) -- Relación con la tabla usuarios
 );
 
+CREATE TABLE imagenes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    publicacion_id INT NOT NULL,
+    ruta_imagen VARCHAR(255) NOT NULL,
+    FOREIGN KEY (publicacion_id) REFERENCES publicaciones (id) ON DELETE CASCADE
+);
+
 CREATE TABLE animales_perdidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     publicacion_id INT NOT NULL,
