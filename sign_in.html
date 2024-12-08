@@ -22,7 +22,7 @@
         </div>
         <div class="card p-4 shadow signin" style="max-width: 400px; width: 100%;">
 
-            <form id="form-sign-in" enctype="multipart/form-data">
+            <form id="form-sign-in">
                 <div class="row mb-1">
                     <div class="mb-1 col-md-6">
                         <input type="text" id="i_signin_name" name="i_signin_name" placeholder="Nombre"
@@ -53,9 +53,10 @@
                 <div class="mb-1">
                     <input type="password" id="i_signin_password" name="i_signin_password" placeholder="Contraseña"
                         class="form-control">
-                    <small id="password-strength" class="form-text"></small>
-                    <!-- <button id="hash-password" class="btn btn-primary">Encriptar Contraseña</button>
-                    <p id="hashed-password"></p> -->
+                    <small id="password-strength" class="form-text">(Se recomienda incluir almenos, un caracter en minuscula, un en mayuscula,
+                    un numero y un simbolo (+*?/&))
+                    </small>
+                    
                 </div>
                 <div class="mb-1">
                     <input type="password" id="i_signin_repeat_password" name="i_signin_repeat_password" placeholder="Repetir Contraseña"
@@ -63,7 +64,10 @@
                     <small id="password-match" class="form-text"></small>
                 </div>
                 <div class="mb-1 text-center">
-                    <input type="submit" id="b_signin" value="Registrarse" class="btn btn-outline-primary">
+                    <input type="submit" id="b_signin" value="Registrarse" class="btn btn-primary">
+                </div>
+                <div class="mb-1 text-center">
+                    <a href="log_in.html">¿Ya  tenes una cuenta?</a>
                 </div>
                 
             </form>
@@ -76,6 +80,7 @@
     <script src="js/jquery.validate.min.js"></script> <!-- Libreria que uso para validar campos -->
     <script src="js/umd.js"></script> <!--Libreria check-password-strength-->
     <script src="js/bcrypt.min.js"></script>
+    <script src="js/libreria.sweetalert.js"></script>
     <script src="js/sign_in.js"></script>
     <!-- <script src="js/encription.js"></script> -->
     <!-- <script src="js/index.js"></script> -->

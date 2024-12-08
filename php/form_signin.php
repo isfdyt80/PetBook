@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insert_statement->bind_param("ssssss", $nombre, $apellido, $telefono, $localidad, $email, $password_hashed);
 
         if ($insert_statement->execute()) {
-            $response = ['status' => 'success', 'message' => 'Usuario creado exitosamente.'];
+            $response = ['status' => 'success', 'message' => 'Usuario creado exitosamente.', 'redirect' => 'http://petbooklocal/log_in.html'];
         } else {
             $response = ['status' => 'error', 'message' => 'Hubo un error al crear el usuario. Inténtelo nuevamente.'];
         }

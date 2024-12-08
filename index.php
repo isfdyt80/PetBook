@@ -26,11 +26,13 @@
             <i class="fa-solid fa-plus"></i>
         </button>
 
+        <button type="button" id="close_sesion" class="btn btn-secondary">Cerrar sesión</button>
+
     </div>
     <script src="js/jquery-3.7.1.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/js/index.js"></script>
     <script src="/js/modales.js"></script>
+    <script src="/js/index.js"></script>
 </body>
 
 </html>

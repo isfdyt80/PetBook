@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const $b_submit = $('#b_login');
+    // const $b_submit = $('#b_login');
 
     $('#form_login').validate({
         rules: {
@@ -30,11 +30,11 @@ $(document).ready(function () {
         },
 
         invalidHandler: function () {
-            $('<div class="alert alert-danger mt-3">Por favor, si no ingresa sus datos correctamente, no podra entrar.</div>')
-                .insertAfter($b_submit)
-                .fadeOut(5000, function () {
-                    $(this).remove();
-                });
+            $(Swal.fire({
+                title: "Alto!",
+                icon : "warning",
+                text: "Tienes que completar todos los campos"
+            }));
         }
     });
 
@@ -51,7 +51,7 @@ $(document).ready(function () {
 
 
             $.ajax({
-                url: "/php/form_login.php",
+                url: "php/form_login.php",
                 type: "post",
                 dataType: "json",
                 data: form_data,
@@ -60,14 +60,31 @@ $(document).ready(function () {
                 processData: false,
                 success: function (data) {
                     if (data.status === 'success') {
-                        console.log("Se aceptaron los datos con exito");
+                        // Swal.fire({
+                        //     title: "Bienvenido",
+                        //     // text : "Bienvenido",
+                        //     icon: "success"
+                        // }).then(() =>{
+                            window.location.href = data.redirect;
+                        // });
+                        // console.log(data.message);
                     } else {
+                        Swal.fire({
+                            title: "Error!!",
+                            icon: "error",
+                            text: data.message
+                        });
                         console.warn("Error: " + data.message);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error("Error: ", textStatus, errorThrown);
                     console.error("Respuesta del servidor:", jqXHR.responseText);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Algo salio mal",
+                        text: "Lo siento, no pudimos procesar tus datos"
+                    });
                 }
             });
         }
