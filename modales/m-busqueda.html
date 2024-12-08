@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla de Búsqueda</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #accef0;
+            font-family: Arial, sans-serif;
+        }
+        .search-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h4 class="text-center mb-4">Pantalla de Búsqueda</h4>
+        <form>
+            <!-- Campo País -->
+            <div class="mb-3">
+                <label for="pais" class="form-label">País</label>
+                <select id="pais" class="form-select">
+                    <option selected>Argentina</option>
+                
+                </select>
+            </div>
+
+            <!-- Campo Provincia -->
+            <div class="mb-3">
+                <label for="provincia" class="form-label">Provincia</label>
+                <select id="provincia" class="form-select">
+                    <option selected>Buenos Aires</option>
+                </select>
+            </div>
+
+            <!-- Campo Ciudad -->
+            <div class="mb-3">
+                <label for="ciudad" class="form-label">Ciudad</label>
+                <select id="ciudad" class="form-select">
+                    <option selected>Seleccione una provincia primero</option>
+                </select>
+            </div>
+
+            <!-- Campo Tipo de Animal -->
+            <div class="mb-3">
+                <label for="tipo-animal" class="form-label">Tipo de Animal</label>
+                <select id="tipo-animal" class="form-select">
+                    <option selected>Todos</option>
+                    <option>Perros</option>
+                    <option>Gatos</option>
+                    <option>Aves</option>
+                    <option>Otro</option>
+                </select>
+            </div>
+
+            <!-- Campos de Rango de Fechas -->
+            <div class="mb-3">
+                <label for="fecha-desde" class="form-label">Fecha Desde</label>
+                <input type="date" id="fecha-desde" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="fecha-hasta" class="form-label">Fecha Hasta</label>
+                <input type="date" id="fecha-hasta" class="form-control">
+            </div>
+
+            <!-- Botón de Búsqueda -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-custom">Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script dinámico para actualizar ciudades -->
+    <script>
+      
+
+        document.getElementById('provincia').addEventListener('change', function () {
+            const provinciaSeleccionada = this.value;
+            const ciudadSelect = document.getElementById('ciudad');
+            ciudadSelect.innerHTML = '';
+
+            if (ciudadesPorProvincia[provinciaSeleccionada]) {
+                ciudadesPorProvincia[provinciaSeleccionada].forEach(ciudad => {
+                    const option = document.createElement('option');
+                    option.textContent = ciudad;
+                    ciudadSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.textContent = 'Seleccione una provincia primero';
+                ciudadSelect.appendChild(option);
+            }
+        });
+    </script>
+</body>
+</html>
