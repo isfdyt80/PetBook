@@ -46,9 +46,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo json_encode($response);
         exit;
     }
+    $user = $result->fetch_assoc();
 
-    $row = $result->fetch_assoc();
-    $password_hashed = $row['contraseña'];
+    if (!$user['verificado']) {
+        $response = ['status' => 'not_verified', 'message' => 'El correo no fue verificado.'];
+        echo json_encode($response);
+        exit;
+    }
+
+    $password_hashed = $user['contraseña'];
 
     if (password_verify($password, $password_hashed)) {
        

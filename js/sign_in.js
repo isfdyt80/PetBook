@@ -101,13 +101,17 @@ $(document).ready(function () {
                 contentType: false,
                 processData: false,
                 success: function (data) {
+                    console.log(data);
+                    
                     if (data.status === 'success') {
                         Swal.fire({
-                            title: "Bienvenido",
-                            icon: "success"
-                        }).then(() => {
-                            window.location.href = data.redirect;
-                        });
+                            title: "Perfecto",
+                            icon: "success",
+                            text: "Ahora verifica tu mail para poder entrar a Petbook"
+                        })
+                        // .then(() => {
+                            // window.location.href = data.redirect;
+                        // });
                         // console.log(data.message);
                     }else{
                         Swal.fire({
