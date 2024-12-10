@@ -23,7 +23,7 @@ $(document).ready(function () {
             contentType: false,
             processData: false,
             success: function (response) {
-                alert('Publicación cargada exitosamente'); // Notificación de éxito
+                console.log(response) // Notificación de éxito
                 $('#animalPerdidoForm')[0].reset(); // Limpiar el formulario
                 $('#valorRecompensaGroup').hide(); // Ocultar el campo recompensa
                 $('#ModalPerdido').modal('hide'); // Cerrar el modal
