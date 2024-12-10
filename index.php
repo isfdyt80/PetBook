@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 </head>
-
 <body>
 
     <!-- Barra de navegación superior -->
@@ -44,6 +42,7 @@
                 <div class="d-flex">
                     <img src="/images/usuario.jpg" alt="Perfil" class="me-2">
                 </div>
+                <button type="button" id="close_sesion" class="btn btn-secondary">Cerrar sesión</button>
             </div>
         </div>
     </nav>
@@ -56,7 +55,7 @@
 
     <!-- Barra lateral derecha -->
     <div class="right-sidebar">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalNuevaPubli">
+        <button type="btn btn-primary" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalNuevaPubli">
             <i class="fa-solid fa-plus"></i>
         </button>
         <button class="btn btn-info" title="Notificaciones">
@@ -78,10 +77,9 @@
     ?>
 
     <script src="js/jquery-3.7.1.min.js"></script>
-    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
     <script src="js/index.js"></script>
     <script src="js/modales.js"></script>
 
 </body>
-
 </html>

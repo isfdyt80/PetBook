@@ -1,6 +1,6 @@
 // Primero validamos los datos del formulario
 $(document).ready(function () {
-    const $b_submit = $('#b_signin');
+    // const $b_submit = $('#b_signin');
     const $i_password = $('#i_signin_password');
     const $p_strength_message = $('#password-strength');
 
@@ -52,11 +52,11 @@ $(document).ready(function () {
         },
 
         invalidHandler: function () {
-            $('<div class="alert alert-danger mt-3">Por favor, corrija los errores antes de enviar.</div>')
-                .insertAfter($b_submit)
-                .fadeOut(5000, function () {
-                    $(this).remove();
-                });
+            $(Swal.fire({
+                title: "Alto!",
+                icon : "warning",
+                text: "Tienes que completar todos los campos"
+            }));
         }
     });
 
@@ -69,16 +69,15 @@ $(document).ready(function () {
         const result = checkPasswordStrength.passwordStrength($i_password.val());
 
         if (result.id === 0) {
-            $p_strength_message.text('Su contraseña es MUY DEBIL');
             $p_strength_message.css({ color: 'red' });
         } else if (result.id === 1) {
-            $p_strength_message.text('Su contraseña es DEBIL');
+            
             $p_strength_message.css({ color: 'orange' });
         } else if (result.id === 2) {
-            $p_strength_message.text('Su contraseña es FUERTE');
+            
             $p_strength_message.css({ color: 'blue' });
         } else {
-            $p_strength_message.text('Su contraseña es MUY FUERTE');
+            
             $p_strength_message.css({ color: 'green' });
         }
     });
@@ -94,7 +93,7 @@ $(document).ready(function () {
 
           
             $.ajax({
-                url: "form_singin.php",
+                url: "php/form_signin.php",
                 type: "post",
                 dataType: "json",
                 data: form_data,
@@ -102,12 +101,35 @@ $(document).ready(function () {
                 contentType: false,
                 processData: false,
                 success: function (data) {
-                    // Aca manejo lo que pasa una ves que se enviaron con exito los datos y me contesto la DB
-                    console.log("Se aceptaron los datos con exito");
-                    //Pendiente de modificación
+                    console.log(data);
+                    
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: "Perfecto",
+                            icon: "success",
+                            text: "Ahora verifica tu mail para poder entrar a Petbook"
+                        })
+                        // .then(() => {
+                            // window.location.href = data.redirect;
+                        // });
+                        // console.log(data.message);
+                    }else{
+                        Swal.fire({
+                            title: "Error!!",
+                            icon: "error",
+                            text: data.message
+                        });
+                        console.warn("Error!!!!: " + data.message);
+                    }
                 },
-                error: function (jqXHR, textStatus, errorTrown) {
-                    console.error("No se pudieron enviar los datos a la base de datos" + textStatus, errorTrown)
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("Error: ", textStatus, errorThrown);
+                    console.error("Respuesta del servidor:", jqXHR.responseText);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Algo salio mal",
+                        text: "Lo siento, no pudimos procesar tus datos"
+                    });
                 }
             });
         }
