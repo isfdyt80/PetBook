@@ -1,0 +1,122 @@
+/* Estilos generales */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+/* Barra de navegación superior */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #343a40;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+    font-size: 16px;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+/* Contenido principal */
+.container {
+    margin-top: 90px;
+    /* Espacio para la barra superior fija */
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    color: #343a40;
+}
+
+/* Barra lateral derecha */
+.right-sidebar {
+    position: fixed;
+    top: 100px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #343a40;
+    padding: 10px;
+    border-radius: 8px 0 0 8px;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.right-sidebar button {
+    margin: 10px 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.right-sidebar button:hover {
+    background-color: #007bff;
+}
+
+/* Estilos para el botón de nueva publicación */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Agregar separación a los botones de la barra lateral */
+.right-sidebar button:first-child {
+    margin-top: 0;
+}
+
+/* Agregar espacio entre la barra superior y los demás elementos */
+.container {
+    margin-top: 100px;
+    /* Evitar que el contenido quede tapado por la barra superior */
+}
+
+/* Diseño responsivo */
+@media (max-width: 768px) {
+    .top-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .nav-links a {
+        margin-bottom: 10px;
+    }
+
+    .right-sidebar {
+        display: none;
+    }
+}
