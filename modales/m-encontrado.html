@@ -30,6 +30,14 @@
                                 multiple required>
                         </div>
                     </div>
+                    <!-- Especie -->
+                    <div class="mb-3">
+                        <label for="especie" class="form-label fw-bold">ESPECIE: <span class="text-danger">*</span></label>
+                        <select class="form-select" id="especie" name="especie">
+                            <option value="">Selecciona una especie</option>
+                            <!-- Agrega opciones de especies -->
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="foundAnimalCharacteristics" class="form-label fw-bold">CARACTERÍSTICAS DEL
                             ANIMAL:</label>
@@ -40,11 +48,27 @@
                         <label for="foundAnimalDate" class="form-label fw-bold">SE ENCONTRÓ EL:</label>
                         <input type="date" class="form-control" id="foundAnimalDate" placeholder="DD/MM/AAAA">
                     </div>
+                    <!-- UBICACIÓN -->
                     <div class="mb-3">
-                        <label for="foundAnimalLocation" class="form-label fw-bold">UBICACIÓN O RADIO DONDE SE
-                            ENCONTRÓ:</label>
-                        <input type="text" class="form-control" id="foundAnimalLocation"
-                            placeholder="Ejemplo: Parque central">
+                        <label for="pais" class="form-label fw-bold">PAÍS: <span class="text-danger">*</span></label>
+                        <select class="form-select" id="pais" name="pais">
+                            <option value="">Selecciona un país</option>
+                            <!-- Agrega opciones de países aquí -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span class="text-danger">*</span></label>
+                        <select class="form-select" id="provincia" name="provincia">
+                            <option value="">Selecciona una provincia</option>
+                            <!-- Agrega opciones de provincias aquí -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span class="text-danger">*</span></label>
+                        <select class="form-select" id="ciudad" name="ciudad">
+                            <option value="">Selecciona una ciudad</option>
+                            <!-- Agrega opciones de ciudades aquí -->
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="foundContact" class="form-label fw-bold">TELÉFONO DE CONTACTO:</label>
