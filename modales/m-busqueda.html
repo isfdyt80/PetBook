@@ -1,0 +1,81 @@
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="ModalBusqueda"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Buscar</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form>
+        <div class="modal-body">
+          <!-- Campo País -->
+          <div class="mb-3">
+            <label for="pais" class="form-label">País</label>
+            <select id="pais" class="form-select">
+              <option selected>Argentina</option>
+            </select>
+          </div>
+
+          <!-- Campo Provincia -->
+          <div class="mb-3">
+            <label for="provincia" class="form-label">Provincia</label>
+            <select id="provincia" class="form-select">
+              <option selected>Buenos Aires</option>
+            </select>
+          </div>
+
+          <!-- Campo Ciudad -->
+          <div class="mb-3">
+            <label for="ciudad" class="form-label">Ciudad</label>
+            <select id="ciudad" class="form-select">
+              <option selected>Seleccione una provincia primero</option>
+            </select>
+          </div>
+
+          <!-- Campo Tipo de Animal -->
+          <div class="mb-3">
+            <label for="tipo-animal" class="form-label">Tipo de Animal</label>
+            <select id="tipo-animal" class="form-select">
+              <option selected>Todos</option>
+              <option>Perros</option>
+              <option>Gatos</option>
+              <option>Aves</option>
+              <option>Otro</option>
+            </select>
+          </div>
+
+          <!-- Campos de Rango de Fechas -->
+          <div class="mb-3">
+            <label for="fecha-desde" class="form-label">Fecha Desde</label>
+            <input type="date" id="fecha-desde" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label for="fecha-hasta" class="form-label">Fecha Hasta</label>
+            <input type="date" id="fecha-hasta" class="form-control" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cerrar
+          </button>
+          <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
