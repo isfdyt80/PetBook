@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,35 +10,53 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 </head>
+
 <body>
 
     <!-- Barra de navegación superior -->
-    <div class="top-nav">
-        <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#animales-perdidos">Animales Perdidos</a>
-            <a href="#animales-encontrados">Animales Encontrados</a>
-            <a href="#animales-en-adopcion">Animales en Adopción</a>
-            <a href="#informacion-util">Información Útil</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">PetBook</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#animales-perdidos">Animales Perdidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#animales-encontrados">Animales Encontrados</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#animales-en-adopcion">Animales en Adopción</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#ModalBusqueda"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#informacion-util">Información Útil</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <img src="/images/usuario.jpg" alt="Perfil" class="me-2">
+                </div>
+            </div>
         </div>
-        <div>
-            <img src="/images/usuario.jpg" alt="Perfil" class="profile-img">
-        </div>
-    </div>
+    </nav>
 
     <!-- Contenido principal -->
-    <div class="container" style="margin-top: 80px;">
+    <div class="container">
         <h1>PetBook</h1>
 
-        <!-- Boton abrir modal crear publicacion -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalNuevaPubli">
-            <i class="fa-solid fa-plus"></i> Crear Publicación
-        </button>
     </div>
 
     <!-- Barra lateral derecha -->
     <div class="right-sidebar">
-        <button class="btn btn-primary" title="Nueva Publicación">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalNuevaPubli">
             <i class="fa-solid fa-plus"></i>
         </button>
         <button class="btn btn-info" title="Notificaciones">
@@ -62,6 +81,7 @@
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/index.js"></script>
     <script src="js/modales.js"></script>
-    
+
 </body>
+
 </html>
