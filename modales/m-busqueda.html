@@ -1,38 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantalla de Búsqueda</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #accef0;
-            font-family: Arial, sans-serif;
-        }
-        .search-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .btn-custom {
-            background-color: #007bff;
-            color: white;
-            border: none;
-        }
-        .btn-custom:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    <div class="search-container">
-        <h4 class="text-center mb-4">Pantalla de Búsqueda</h4>
-        <form>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Launch demo modal
+  </button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="ModalBusqueda" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Buscar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+           <form>
             <!-- Campo País -->
             <div class="mb-3">
                 <label for="pais" class="form-label">País</label>
@@ -85,32 +65,11 @@
                 <button type="submit" class="btn btn-custom">Buscar</button>
             </div>
         </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Script dinámico para actualizar ciudades -->
-    <script>
-      
-
-        document.getElementById('provincia').addEventListener('change', function () {
-            const provinciaSeleccionada = this.value;
-            const ciudadSelect = document.getElementById('ciudad');
-            ciudadSelect.innerHTML = '';
-
-            if (ciudadesPorProvincia[provinciaSeleccionada]) {
-                ciudadesPorProvincia[provinciaSeleccionada].forEach(ciudad => {
-                    const option = document.createElement('option');
-                    option.textContent = ciudad;
-                    ciudadSelect.appendChild(option);
-                });
-            } else {
-                const option = document.createElement('option');
-                option.textContent = 'Seleccione una provincia primero';
-                ciudadSelect.appendChild(option);
-            }
-        });
-    </script>
-</body>
-</html>
+  </div>
