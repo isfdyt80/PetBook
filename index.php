@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 </head>
 <body>
 
@@ -74,6 +73,7 @@
     include 'modales/m-perdido.html';
     include 'modales/m-encontrado.html';
     include 'modales/m-adopcion.html';
+    include 'modales/m-busqueda.html';
     ?>
 
     <script src="js/jquery-3.7.1.min.js"></script>
