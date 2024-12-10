@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'petbook_bd';
+$dbname = 'petbook_db';
 $username = 'petbook_user';
 $password = 'P3tB00k_P4ss';
 

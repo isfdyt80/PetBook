@@ -1,0 +1,122 @@
+body {
+    font-family: 'Dosis', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.cartel {
+    max-width: 800px;
+    background-color: white;
+    border-radius: 15px;
+    margin: auto;
+    padding: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.franja-verde {
+    background-color: #00bf63;
+    color: white;
+    text-align: center;
+    font-size: 2.9rem;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+
+.contenido {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.carrusel-contenedor {
+    flex: 1;
+    text-align: center;
+}
+
+.carrusel-imagen {
+    border-radius: 20px;
+    border: 5px solid #00bf63;
+    overflow: hidden;
+}
+
+.mini-franja-verde {
+    background-color: #00bf63;
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 0 0 10px 10px;
+    margin-top: -10px;
+}
+
+.info-contenedor {
+    flex: 1;
+}
+
+.info-seccion {
+    margin-top: 20px;
+}
+
+.info-titulo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #00bf63;
+}
+
+.franja-verde-mini {
+    background-color: #00bf63;
+    color: white;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 10px;
+}
+
+.info-texto {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.contact-text {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 25px;
+}
+
+.contact-btn {
+    background-color: #00bf63;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 50%;
+    margin: auto;
+    position: relative;
+}
+
+.contact-btn img {
+    position: absolute;
+    top: -50px;
+    left: 02%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 140px;
+}
+
+.contact-btn .telefono {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
