@@ -41,7 +41,12 @@
 
             </div>
             <div>
-                <button type="button" id="close_sesion" class="btn btn-secondary"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <button type="button" id="my_user" class="btn btn-secondary" onclick="window.location.href='my_user.php'">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+                <button type="button" id="close_sesion" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
             </div>
         </div>
     </nav>
