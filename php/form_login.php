@@ -9,16 +9,9 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-include 'config_dev_mariani.php';
+// include 'config_dev_mariani.php';
+include_once '../conexion.php';
 
-// Conexión a la base de datos
-$conexion = new mysqli($servername, $username, $password, $dbname);
-
-if ($conexion->connect_error) {
-    $response = ['status' => 'error', 'message' => 'Conexión fallida: ' . $conexion->connect_error];
-    echo json_encode($response);
-    exit;
-}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mail = $_POST['i_login_mail'] ?? null;
@@ -32,17 +25,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verificar si el email existe
     $email_notexists_query = "SELECT * FROM usuarios WHERE email = ?";
-    $email_statement = $conexion->prepare($email_notexists_query);
-    $email_statement->bind_param("s", $mail);
-    $email_statement->execute();
-    $result = $email_statement->get_result();
+    $email_statement = $pdo->prepare($email_notexists_query);
+    $email_statement->execute([$mail]);
+    $result = $email_statement->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($result->num_rows === 0) {
+    if (count($result) === 0) {
         $response = ['status' => 'not_found', 'message' => 'El correo ingresado no fue registrado.'];
         echo json_encode($response);
         exit;
     }
-    $user = $result->fetch_assoc();
+
+    $user = $result[0]; // Accede al primer registro del resultado
+
 
     if (!$user['verificado']) {
         $response = ['status' => 'not_verified', 'message' => 'El correo no fue verificado.'];
@@ -53,13 +47,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password_hashed = $user['contraseña'];
 
     // Obtener la clave secreta
-    $stmt_secret = $conexion->prepare("SELECT value FROM configuración WHERE nombre_variable = ?");
+    $stmt_secret = $pdo->prepare("SELECT value FROM configuración WHERE nombre_variable = ?");
     $nombre_variable = 'secret_key';
-    $stmt_secret->bind_param("s", $nombre_variable);
-    $stmt_secret->execute();
-    $resultado_secret = $stmt_secret->get_result();
-
-    if ($fila_secret = $resultado_secret->fetch_assoc()) {
+    $stmt_secret->execute([$nombre_variable]);
+    $fila_secret = $stmt_secret->fetch(PDO::FETCH_ASSOC);
+    
+    if ($fila_secret) {
         $secret_key = $fila_secret['value'];
     } else {
         $response = ['status' => 'error', 'message' => 'No se encontró la clave secreta.'];
@@ -67,14 +60,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Obtener el tiempo de vida del token
-    $stmt_expiration = $conexion->prepare("SELECT value FROM configuración WHERE nombre_variable = ?");
-    $nombre_variable_expiration = 'JWT_COOCKIE_DIE';
-    $stmt_expiration->bind_param("s", $nombre_variable_expiration);
-    $stmt_expiration->execute();
-    $resultado_expiration = $stmt_expiration->get_result();
 
-    if ($fila_expiration = $resultado_expiration->fetch_assoc()) {
+    // Obtener el tiempo de vida del token
+    $stmt_expiration = $pdo->prepare("SELECT value FROM configuración WHERE nombre_variable = ?");
+    $nombre_variable_expiration = 'JWT_COOCKIE_DIE';
+    $stmt_expiration->execute([$nombre_variable_expiration]);
+    $fila_expiration = $stmt_expiration->fetch(PDO::FETCH_ASSOC);
+
+    if ($fila_expiration) {
         $cookie_expiration_days = (int)$fila_expiration['value'];
     } else {
         $response = ['status' => 'error', 'message' => 'No se encontró el tiempo de vida del token.'];
@@ -99,6 +92,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     echo json_encode($response);
-    $conexion->close();
     exit;
 }
