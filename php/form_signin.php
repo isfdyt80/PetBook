@@ -11,25 +11,17 @@ use Firebase\JWT\Key;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-include 'config_dev_mariani.php';
+include_once '../conexion.php';
 
 $response = [];
-$conexion = new mysqli($servername, $username, $password, $dbname);
-
-if ($conexion->connect_error) {
-    $response = ['status' => 'error', 'message' => 'Conexión fallida: ' . $conexion->connect_error];
-    echo json_encode($response);
-    exit;
-}
 
 // Obtener la clave secreta desde la base de datos
-$stmt_secret = $conexion->prepare("SELECT value FROM configuración WHERE nombre_variable = ?");
+$stmt_secret = $pdo->prepare("SELECT value FROM configuración WHERE nombre_variable = ?");
 $nombre_variable = 'secret_key';
-$stmt_secret->bind_param("s", $nombre_variable);
-$stmt_secret->execute();
-$resultado_secret = $stmt_secret->get_result();
+$stmt_secret->execute([$nombre_variable]);
+$fila_secret = $stmt_secret->fetch(PDO::FETCH_ASSOC);
 
-if ($fila_secret = $resultado_secret->fetch_assoc()) {
+if ($fila_secret) {
     $secret_key = $fila_secret['value'];
 } else {
     $response = ['status' => 'error', 'message' => 'No se encontró la clave secreta.'];
@@ -64,12 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     $email_exists_query = "SELECT * FROM usuarios WHERE email = ?";
-    $email_statement = $conexion->prepare($email_exists_query);
-    $email_statement->bind_param("s", $email);
-    $email_statement->execute();
-    $result = $email_statement->get_result();
+    $email_statement = $pdo->prepare($email_exists_query);
+    $email_statement->execute([$email]);
+    $result = $email_statement->fetch(PDO::FETCH_ASSOC);
 
-    if ($result->num_rows > 0) {
+    if (count($result) > 0) {
         $response = ['status' => 'error', 'message' => 'El correo ya fue registrado.'];
         echo json_encode($response);
         exit;
@@ -83,15 +74,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         'exp' => time() + (7 * 24 * 60 * 60)
     ];
     $tokenverificacion = JWT::encode($token_payload, $secret_key, 'HS256');
-    $verification_url = "http://petbooklocal/php/form_signin.php?token=" . urlencode($tokenverificacion);
+    $verification_url = "http://" . $_SERVER['HTTP_HOST'] ."/php/form_signin.php?token=" . urlencode($tokenverificacion);
 
     try {
         $resultadoEnvio = enviarCorreoVerificacion($email, $verification_url);
         if ($resultadoEnvio['status'] === 'envio exitoso') {
             $insert_query = "INSERT INTO usuarios (nombre, apellido, telefono, ubicacion, email, contraseña, verificado, created_at) 
                              VALUES (?, ?, ?, ?, ?, ?, 0, NOW())";
-            $insert_statement = $conexion->prepare($insert_query);
-            $insert_statement->bind_param("ssssss", $nombre, $apellido, $telefono, $localidad, $email, $password_hashed);
+            $insert_statement = $pdo->prepare($insert_query);
+            $insert_statement->execute([$nombre, $apellido, $telefono, $localidad, $email, $password_hashed]);
 
             if ($insert_statement->execute()) {
                 $response = ['status' => 'success', 'message' => 'Usuario creado exitosamente. Por favor, verifica tu correo.', 'redirect' => 'http://petbooklocal/log_in.html'];
@@ -112,10 +103,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $email = $decoded_token->user_mail;
 
         $update_query = "UPDATE usuarios SET verificado = 1 WHERE email = ? AND verificado = 0";
-        $update_statement = $conexion->prepare($update_query);
-        $update_statement->bind_param("s", $email);
+        $update_statement = $pdo->prepare($update_query);
+        $update_statement->execute([$email]);
 
-        if ($update_statement->execute() && $update_statement->affected_rows > 0) {
+        if ($update_statement->execute() && $update_statement->rowCount() > 0) {
             $new_token_payload = [
                 'user_mail' => $email,
                 'iat' => time(),
@@ -124,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $new_token = JWT::encode($new_token_payload, $secret_key, 'HS256');
             setcookie('jwt', $new_token, time() + (7 * 24 * 60 * 60), '/', $_SERVER['HTTP_HOST'], false, true);
 
-            header("Location: http://petbooklocal");
+            header("Location: http://" . $_SERVER['HTTP_HOST']);
             exit;
         } else {
             $response = ['status' => 'error', 'message' => 'El usuario ya está verificado o no existe.'];
@@ -136,6 +127,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $response = ['status' => 'error', 'message' => 'Método no permitido.'];
 }
 
-$conexion->close();
+
 echo json_encode($response);
 exit;
