@@ -1,36 +1,34 @@
 // Primero validamos los datos del formulario
 $(document).ready(function () {
-    // const $b_submit = $('#b_signin');
-    const $i_password = $('#i_signin_password');
-    const $p_strength_message = $('#password-strength');
+    const $i_password = $('#i_signin_password'); // Campo de contraseña
+    const $p_strength_message = $('#password-strength'); // Mensaje de fuerza de la contraseña
 
-
+    // Configura la validación del formulario de registro
     $('#form-sign-in').validate({
-
-        rules: { //Toman el campo 'name'
-            i_signin_name: "required",
-            i_signin_lastname: "required",
-            i_signin_telephone: "required",
-            i_signin_place: "required",
+        rules: { // Reglas de validación para los campos del formulario
+            i_signin_name: "required", // El nombre es obligatorio
+            i_signin_lastname: "required", // El apellido es obligatorio
+            i_signin_telephone: "required", // El teléfono es obligatorio
+            i_signin_place: "required", // La localidad es obligatoria
             i_signin_mail: {
-                required: true,
-                email: true
+                required: true, // El correo es obligatorio
+                email: true // Debe ser un formato de correo válido
             },
             i_signin_password: {
-                required: true
+                required: true // La contraseña es obligatoria
             },
             i_signin_repeat_password: {
-                required: true,
-                equalTo: "#i_signin_password"
+                required: true, // Repetir la contraseña es obligatorio
+                equalTo: "#i_signin_password" // Debe coincidir con la contraseña
             }
         },
-        messages: {
-            i_signin_name: "Debes escribir almenos un nombre",
-            i_signin_lastname: "Debes escribir almenos un apellido",
-            i_signin_telephone: "Debes escribir un número de telefono",
+        messages: { // Mensajes de error para los campos del formulario
+            i_signin_name: "Debes escribir al menos un nombre",
+            i_signin_lastname: "Debes escribir al menos un apellido",
+            i_signin_telephone: "Debes escribir un número de teléfono",
             i_signin_place: "Debes escribir tu localidad",
             i_signin_mail: {
-                required: "Debes escribir un mail valido",
+                required: "Debes escribir un mail válido",
                 email: "El formato no es el correcto"
             },
             i_signin_password: "La contraseña es obligatoria",
@@ -39,81 +37,73 @@ $(document).ready(function () {
                 equalTo: "Las contraseñas deben coincidir"
             }
         },
-        errorElement: "div",
+        errorElement: "div", // Elemento HTML para mostrar los errores
         errorPlacement: function (error, element) {
-            error.addClass("invalid-feedback");
-            element.parent().append(error);
+            error.addClass("invalid-feedback"); // Añade la clase de Bootstrap para los errores
+            element.parent().append(error); // Añade el error después del elemento
         },
         highlight: function (element) {
-            $(element).addClass("is-invalid").removeClass("is-valid");
+            $(element).addClass("is-invalid").removeClass("is-valid"); // Añade la clase de error y quita la de éxito
         },
         unhighlight: function (element) {
-            $(element).addClass("is-valid").removeClass("is-invalid");
+            $(element).addClass("is-valid").removeClass("is-invalid"); // Añade la clase de éxito y quita la de error
         },
-
         invalidHandler: function () {
+            // Muestra una alerta si hay campos inválidos
             $(Swal.fire({
                 title: "Alto!",
-                icon : "warning",
+                icon: "warning",
                 text: "Tienes que completar todos los campos"
             }));
         }
     });
 
+    // Valida el campo cuando pierde el foco
     $('#form-sign-in input').on('blur', function () {
         $(this).valid();
     });
 
-
+    // Verifica la fuerza de la contraseña mientras se escribe
     $i_password.on('input', function () {
         const result = checkPasswordStrength.passwordStrength($i_password.val());
 
         if (result.id === 0) {
-            $p_strength_message.css({ color: 'red' });
+            $p_strength_message.css({ color: 'red' }); // Contraseña débil
         } else if (result.id === 1) {
-            
-            $p_strength_message.css({ color: 'orange' });
+            $p_strength_message.css({ color: 'orange' }); // Contraseña media
         } else if (result.id === 2) {
-            
-            $p_strength_message.css({ color: 'blue' });
+            $p_strength_message.css({ color: 'blue' }); // Contraseña fuerte
         } else {
-            
-            $p_strength_message.css({ color: 'green' });
+            $p_strength_message.css({ color: 'green' }); // Contraseña muy fuerte
         }
     });
 
-
-
+    // Maneja el evento de envío del formulario
     $('#form-sign-in').on("submit", function (prevent) {
+        prevent.preventDefault(); // Previene el envío del formulario por defecto
 
-        prevent.preventDefault();
+        if ($(this).valid()) { // Si el formulario es válido
+            var form_data = new FormData(this); // Crea un objeto FormData con los datos del formulario
 
-        if ($(this).valid()) {
-            var form_data = new FormData(this);
-
-          
+            // Envía los datos del formulario mediante AJAX
             $.ajax({
-                url: "php/form_signin.php",
-                type: "post",
-                dataType: "json",
-                data: form_data,
+                url: "php/form_signin.php", // URL del script del servidor
+                type: "post", // Método de envío
+                dataType: "json", // Tipo de datos esperados del servidor
+                data: form_data, // Datos del formulario
                 cache: false,
                 contentType: false,
                 processData: false,
                 success: function (data) {
                     console.log(data);
-                    
+
                     if (data.status === 'success') {
                         Swal.fire({
                             title: "Perfecto",
                             icon: "success",
                             text: "Ahora verifica tu mail para poder entrar a Petbook"
-                        })
-                        // .then(() => {
-                            // window.location.href = data.redirect;
-                        // });
-                        // console.log(data.message);
-                    }else{
+                        });
+                    } else {
                         Swal.fire({
                             title: "Error!!",
                             icon: "error",
@@ -123,20 +113,16 @@ $(document).ready(function () {
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
+                    // Maneja los errores de la solicitud AJAX
                     console.error("Error: ", textStatus, errorThrown);
                     console.error("Respuesta del servidor:", jqXHR.responseText);
                     Swal.fire({
                         icon: "error",
-                        title: "Algo salio mal",
+                        title: "Algo salió mal",
                         text: "Lo siento, no pudimos procesar tus datos"
                     });
                 }
             });
         }
     });
-
 });
-
-
-
-
