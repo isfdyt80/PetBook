@@ -3,73 +3,92 @@
     Launch demo modal
   </button>
   
-  <!-- Modal -->
-  <div class="modal fade" id="ModalBusqueda" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Buscar</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <!--
+Este código HTML define un modal de búsqueda utilizando Bootstrap.
+El modal permite a los usuarios filtrar resultados según país, provincia, ciudad,
+tipo de animal y un rango de fechas. Contiene un formulario con distintos
+campos de selección y entradas de fecha.
+-->
+
+<!-- Modal -->
+<div
+class="modal fade"  <!-- Define un modal que se desvanece (fade) al mostrarse -->
+id="ModalBusqueda"  <!-- Identificador único del modal -->
+tabindex="-1"  <!-- Evita que el modal reciba foco al abrirse -->
+aria-labelledby="exampleModalLabel"  <!-- Asocia el modal con una etiqueta accesible -->
+aria-hidden="true"  <!-- Inicialmente el modal está oculto -->
+>
+<div class="modal-dialog">  <!-- Contenedor del diálogo modal -->
+  <div class="modal-content">  <!-- Contenedor del contenido del modal -->
+    <div class="modal-header">  <!-- Encabezado del modal -->
+      <h5 class="modal-title" id="exampleModalLabel">Buscar</h5>  <!-- Título del modal -->
+      <button
+        type="button"
+        class="btn-close"  <!-- Botón para cerrar el modal -->
+        data-bs-dismiss="modal"  <!-- Atributo de Bootstrap para cerrar el modal -->
+        aria-label="Close"  <!-- Etiqueta accesible para lectores de pantalla -->
+      ></button>
+    </div>
+    <form>  <!-- Formulario dentro del modal -->
+      <div class="modal-body">  <!-- Cuerpo del modal donde están los campos de búsqueda -->
+        
+        <!-- Campo País -->
+        <div class="mb-3">  <!-- Margen inferior para separar elementos -->
+          <label for="pais" class="form-label">País</label>  <!-- Etiqueta del campo -->
+          <select id="pais" class="form-select">  <!-- Menú desplegable -->
+            <option selected>Argentina</option>  <!-- Opción seleccionada por defecto -->
+          </select>
         </div>
-        <div class="modal-body">
-           <form>
-            <!-- Campo País -->
-            <div class="mb-3">
-                <label for="pais" class="form-label">País</label>
-                <select id="pais" class="form-select">
-                    <option selected>Argentina</option>
-                
-                </select>
-            </div>
 
-            <!-- Campo Provincia -->
-            <div class="mb-3">
-                <label for="provincia" class="form-label">Provincia</label>
-                <select id="provincia" class="form-select">
-                    <option selected>Buenos Aires</option>
-                </select>
-            </div>
-
-            <!-- Campo Ciudad -->
-            <div class="mb-3">
-                <label for="ciudad" class="form-label">Ciudad</label>
-                <select id="ciudad" class="form-select">
-                    <option selected>Seleccione una provincia primero</option>
-                </select>
-            </div>
-
-            <!-- Campo Tipo de Animal -->
-            <div class="mb-3">
-                <label for="tipo-animal" class="form-label">Tipo de Animal</label>
-                <select id="tipo-animal" class="form-select">
-                    <option selected>Todos</option>
-                    <option>Perros</option>
-                    <option>Gatos</option>
-                    <option>Aves</option>
-                    <option>Otro</option>
-                </select>
-            </div>
-
-            <!-- Campos de Rango de Fechas -->
-            <div class="mb-3">
-                <label for="fecha-desde" class="form-label">Fecha Desde</label>
-                <input type="date" id="fecha-desde" class="form-control">
-            </div>
-            <div class="mb-3">
-                <label for="fecha-hasta" class="form-label">Fecha Hasta</label>
-                <input type="date" id="fecha-hasta" class="form-control">
-            </div>
-
-            <!-- Botón de Búsqueda -->
-            <div class="text-center">
-                <button type="submit" class="btn btn-custom">Buscar</button>
-            </div>
-        </form>
+        <!-- Campo Provincia -->
+        <div class="mb-3">
+          <label for="provincia" class="form-label">Provincia</label>
+          <select id="provincia" class="form-select">
+            <option selected>Buenos Aires</option>
+          </select>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+
+        <!-- Campo Ciudad -->
+        <div class="mb-3">
+          <label for="ciudad" class="form-label">Ciudad</label>
+          <select id="ciudad" class="form-select">
+            <option selected>Seleccione una provincia primero</option>
+          </select>
+        </div>
+
+        <!-- Campo Tipo de Animal -->
+        <div class="mb-3">
+          <label for="tipo-animal" class="form-label">Tipo de Animal</label>
+          <select id="tipo-animal" class="form-select">
+            <option selected>Todos</option>
+            <option>Perros</option>
+            <option>Gatos</option>
+            <option>Aves</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <!-- Campos de Rango de Fechas -->
+        <div class="mb-3">
+          <label for="fecha-desde" class="form-label">Fecha Desde</label>
+          <input type="date" id="fecha-desde" class="form-control" />  <!-- Campo de fecha de inicio -->
+        </div>
+        <div class="mb-3">
+          <label for="fecha-hasta" class="form-label">Fecha Hasta</label>
+          <input type="date" id="fecha-hasta" class="form-control" />  <!-- Campo de fecha de fin -->
         </div>
       </div>
-    </div>
+      <div class="modal-footer">  <!-- Pie del modal con los botones de acción -->
+        <button
+          type="button"
+          class="btn btn-secondary"  <!-- Botón para cerrar el modal -->
+          data-bs-dismiss="modal"
+        >
+          Cerrar
+        </button>
+        <button type="submit" class="btn btn-primary">Buscar</button>  <!-- Botón para enviar el formulario -->
+      </div>
+    </form>
   </div>
+</div>
+</div>
