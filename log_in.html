@@ -1,3 +1,5 @@
+<!-- Formulario de Ingreso de Usuario -->
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetBook</title>
+    <!-- Enlaces a recursos de estilos -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/log_in.css">
@@ -16,31 +19,40 @@
 </head>
 
 <body>
+    <!-- Contenedor principal -->
     <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+        <!-- Contenedor del titulo -->
         <div class="text-center mb-3">
             <h2>Log-In</h2>
         </div>
+        <!-- Contenedor del formulario-->
         <div class="card p-4 shadow login" style="max-width: 400px; width: 100%;">
-            <form id="form_login">
+            <form id="form_login" > 
+                <!-- Input de email y contraseña + boton de ingreso -->
                 <div class="mb-1">
-                    <input type="email" id="i_login_mail" name="mail" placeholder="E-mail" class="form-control">
+                    <input type="email" id="i_login_mail" name="i_login_mail" placeholder="E-mail" class="form-control">
                 </div>
                 <div class="mb-1">
-                    <input type="password" id="i_login_password" name="password" placeholder="Contraseña" class="form-control">
+                    <input type="password" id="i_login_password" name="i_login_password" placeholder="Contraseña" class="form-control">
                 </div>
-                <div class="text-center">
+                <div class="mt-2 text-center">
                     <input type="submit" id="b_login" value="Iniciar Sesión" class="btn btn-outline-primary">
+                </div>
+                
+                <div class="mt-1 text-center">
+                    <!-- Link de redireccionamiento-->
+                    <a href="sign_in.html">Registrate a Petbook</a>
+                    <a href="">¿Olvidaste tu contraseña?</a>
                 </div>
             </form>
         </div>
     </div>
-    
+    <!-- Recursos JavaScripts para validaciones, funcionalidades y estilos -->
     <script src="js/jquery-3.7.1.min.js"></script>
-    <script src="js/jquery.validate.min.js"></script>
+    <script src="js/jquery.validate.min.js"></script> <!-- Libreria que uso para validar campos -->
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/bcrypt.min.js"></script> 
+    <script src="js/libreria.sweetalert.js"></script>
     <script src="js/log_in.js"></script>
-    <script src="js/encription.js"></script>
-    <!-- <script src="/js/index.js"></script> -->
 </body>
 </html>

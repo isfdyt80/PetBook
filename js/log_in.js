@@ -1,71 +1,87 @@
+// Ejecuta el código cuando el documento esté listo
 $(document).ready(function () {
-    const $b_submit = $('#b_login');
-    
+
+    // Configura la validación del formulario de inicio de sesión
     $('#form_login').validate({
-        rules: { 
+        rules: {
             i_login_mail: {
-                required: true,
-                email: true
+                required: true, // El correo es obligatorio
+                email: true // Debe ser un formato de correo válido
             },
-            i_login_password: "required"
+            i_login_password: "required" // La contraseña es obligatoria
         },
         messages: {
             i_login_mail: {
-                required: "Debes ingresar tu correo",
-                email: "El formato del correo no es correcto"
+                required: "Debes ingresar tu correo", // Mensaje si el correo no está ingresado
+                email: "El formato del correo no es correcto" // Mensaje si el formato del correo es incorrecto
             },
-            i_login_password:
-                "La contraseña es obligatoria"
+            i_login_password: "La contraseña es obligatoria" // Mensaje si la contraseña no está ingresada
         },
-        errorElement: "div",
+        errorElement: "div", // Elemento HTML para mostrar los errores
         errorPlacement: function (error, element) {
-            error.addClass("invalid-feedback");
-            element.parent().append(error);
+            error.addClass("invalid-feedback"); // Añade la clase de Bootstrap para los errores
+            element.parent().append(error); // Añade el error después del elemento
         },
         highlight: function (element) {
-            $(element).addClass("is-invalid").removeClass("is-valid");
+            $(element).addClass("is-invalid").removeClass("is-valid"); // Añade la clase de error y quita la de éxito
         },
         unhighlight: function (element) {
-            $(element).addClass("is-valid").removeClass("is-invalid");
+            $(element).addClass("is-valid").removeClass("is-invalid"); // Añade la clase de éxito y quita la de error
         },
-
         invalidHandler: function () {
-            $('<div class="alert alert-danger mt-3">Por favor, si no ingresa sus datos correctamente, no podra entrar.</div>')
-                .insertAfter($b_submit)
-                .fadeOut(5000, function () {
-                    $(this).remove();
-                });
+            // Muestra una alerta si hay campos inválidos
+            $(Swal.fire({
+                title: "Alto!",
+                icon: "warning",
+                text: "Tienes que completar todos los campos"
+            }));
         }
     });
 
-    $('#form_login input').on('blur', function(){
+    // Valida el campo cuando pierde el foco
+    $('#form_login input').on('blur', function () {
         $(this).valid();
     });
 
-    $('#form_login').on("submit", function(prevent){
+    // Maneja el evento de envío del formulario
+    $('#form_login').on("submit", function (prevent) {
+        prevent.preventDefault(); // Previene el envío del formulario por defecto
 
-        prevent.preventDefault();
+        if ($(this).valid()) { // Si el formulario es válido
+            var form_data = new FormData(this); // Crea un objeto FormData con los datos del formulario
 
-        if($(this).valid()){
-            var form_data = new FormData(this);
-
-
+            // Envía los datos del formulario mediante AJAX
             $.ajax({
-                url: "form_login.php",
-                type: "post",
-                dataType: "json",
-                data: form_data,
+                url: "php/form_login.php", // URL del script del servidor
+                type: "post", // Método de envío
+                dataType: "json", // Tipo de datos esperados del servidor
+                data: form_data, // Datos del formulario
                 cache: false,
                 contentType: false,
                 processData: false,
-            success: function(data){
-                // Aca manejo lo que pasa una ves que se enviaron con exito los datos y me contesto la DB
-                console.log("Se aceptaron los datos con exito");
-                //Pendiente de modificación
-            },
-            error: function(jqXHR, textStatus, errorTrown){
-                console.error("No se pudieron enviar los datos a la base de datos" + textStatus, errorTrown)
-            }
+                success: function (data) {
+                    if (data.status === 'success') {
+                        window.location.href = data.redirect; // Redirige si el inicio de sesión es exitoso
+                    } else {
+                        // Muestra un mensaje de error si el inicio de sesión falla
+                        Swal.fire({
+                            title: "Error!!",
+                            icon: "error",
+                            text: data.message
+                        });
+                        console.warn("Error: " + data.message);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Maneja los errores de la solicitud AJAX
+                    console.error("Error: ", textStatus, errorThrown);
+                    console.error("Respuesta del servidor:", jqXHR.responseText);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Algo salio mal",
+                        text: "Lo siento, no pudimos procesar tus datos"
+                    });
+                }
             });
         }
     });

@@ -1,0 +1,32 @@
+.user-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 15px;
+    max-width: 600px;
+    margin: 20px auto;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+}
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    margin-right: 15px;
+}
+.user-details {
+    font-size: 16px;
+}
+.user-details b {
+    font-size: 18px;
+}
