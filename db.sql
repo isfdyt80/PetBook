@@ -92,6 +92,11 @@ CREATE TABLE IF NOT EXISTS `provincias` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
+CREATE TABLE `configuración` (
+    `nombre_variable` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish_ci NOT NULL,
+    `value` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish_ci NOT NULL
+) ENGINE = MyISAM DEFAULT CHARSET = utf8mb3 COLLATE = utf8mb3_spanish2_ci
+
 --
 -- Volcar la base de datos para la tabla `provincias`
 --
