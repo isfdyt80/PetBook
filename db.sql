@@ -11,7 +11,7 @@ CREATE USER 'petbook_user' @'%' IDENTIFIED BY 'P3tB00k_P4ss';
 GRANT ALL PRIVILEGES ON petbook_db.* TO 'petbook_user' @'%';
 
 FLUSH PRIVILEGES;
-
+-- esta tabla por ahora no se está usando
 CREATE TABLE mascotas (
     mascotaId INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -39,63 +39,62 @@ CREATE TABLE usuarios (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_general_ci;
 
-CREATE TABLE publicaciones (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL, -- Clave foránea hacia la tabla usuarios
-    estado ENUM(
-        'perdido',
-        'encontrado',
-        'adopcion'
-    ) NOT NULL,
-    descripcion TEXT NOT NULL,
-    ubicacion VARCHAR(255),
-    nombre_mascota VARCHAR(255),
-    fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios (id) -- Relación con la tabla usuarios
-);
+-- Crear la tabla de países
+CREATE TABLE IF NOT EXISTS paises (
+  id INT AUTO_INCREMENT NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE imagenes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    publicacion_id INT NOT NULL,
-    ruta_imagen VARCHAR(255) NOT NULL,
-    FOREIGN KEY (publicacion_id) REFERENCES publicaciones (id) ON DELETE CASCADE
-);
+-- Crear la tabla de provincias con relación a países
+CREATE TABLE IF NOT EXISTS provincias (
+  id INT AUTO_INCREMENT NOT NULL,
+  id_pais INT NOT NULL,
+  provincia VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (id_pais) REFERENCES paises(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE animales_perdidos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    publicacion_id INT NOT NULL,
-    fecha_ult_vez DATE NOT NULL,
-    valor_recompensa DECIMAL(10, 2),
-    tel_dueño VARCHAR(20),
-    FOREIGN KEY (publicacion_id) REFERENCES publicaciones (id)
-);
+-- Crear la tabla de localidades con relación a provincias
+CREATE TABLE IF NOT EXISTS localidades (
+  id INT AUTO_INCREMENT NOT NULL,
+  id_provincia INT NOT NULL,
+  localidad VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (id_provincia) REFERENCES provincias(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE animales_encontrados (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    publicacion_id INT NOT NULL,
-    tel_contacto VARCHAR(20),
-    FOREIGN KEY (publicacion_id) REFERENCES publicaciones (id)
-);
+-- Crear la tabla de especies
+CREATE TABLE IF NOT EXISTS especies (
+  id INT AUTO_INCREMENT NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE animales_adopcion (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    publicacion_id INT NOT NULL,
-    requisitos_adopcion TEXT NOT NULL,
-    tel_contacto VARCHAR(20),
-    FOREIGN KEY (publicacion_id) REFERENCES publicaciones (id)
-);
+-- Crear la tabla de publicaciones con claves foráneas
+CREATE TABLE IF NOT EXISTS publicaciones (
+  id INT AUTO_INCREMENT NOT NULL,
+  fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  tipo_publicacion VARCHAR(20) NOT NULL,
+  foto VARCHAR(500),
+  especie INT NOT NULL,
+  descripcion VARCHAR(500),
+  telefono VARCHAR(20),
+  pais INT NOT NULL,
+  provincia INT NOT NULL,
+  ciudad INT NOT NULL,
+  falta_desde DATE,
+  encontrado_el DATE,
+  valor_recompensa INT,
+  PRIMARY KEY (id),
+  FOREIGN KEY (especie) REFERENCES especies(id) ON DELETE CASCADE,
+  FOREIGN KEY (pais) REFERENCES paises(id) ON DELETE CASCADE,
+  FOREIGN KEY (provincia) REFERENCES provincias(id) ON DELETE CASCADE,
+  FOREIGN KEY (ciudad) REFERENCES localidades(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE IF NOT EXISTS `provincias` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `provincia` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
-CREATE TABLE `configuración` (
-    `nombre_variable` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish_ci NOT NULL,
-    `value` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish_ci NOT NULL
-) ENGINE = MyISAM DEFAULT CHARSET = utf8mb3 COLLATE = utf8mb3_spanish2_ci
 
 --
 -- Volcar la base de datos para la tabla `provincias`
