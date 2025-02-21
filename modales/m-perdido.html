@@ -20,6 +20,7 @@
             <!-- Cuerpo del Modal -->
             <div class="modal-body">
                 <form id="animalPerdidoForm" enctype="multipart/form-data">
+                    <input id="tipoPublicacion" name="tipoPublicacion" type="hidden" value="perdido" />
                     <!-- Subir Fotos -->
                     <div class="mb-3 text-center">
                         <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
@@ -32,7 +33,8 @@
                     </div>
                     <!-- Especie -->
                     <div class="mb-3">
-                        <label for="especie" class="form-label fw-bold">ESPECIE: <span class="text-danger">*</span></label>
+                        <label for="especie" class="form-label fw-bold">ESPECIE: <span
+                                class="text-danger">*</span></label>
                         <select class="form-select" id="especie" name="especie">
                             <option value="">Selecciona una especie</option>
                             <!-- Agrega opciones de especies -->
@@ -61,14 +63,16 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span class="text-danger">*</span></label>
+                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span
+                                class="text-danger">*</span></label>
                         <select class="form-select" id="provincia" name="provincia">
                             <option value="">Selecciona una provincia</option>
                             <!-- Agrega opciones de provincias aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span class="text-danger">*</span></label>
+                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span
+                                class="text-danger">*</span></label>
                         <select class="form-select" id="ciudad" name="ciudad">
                             <option value="">Selecciona una ciudad</option>
                             <!-- Agrega opciones de ciudades aquí -->

@@ -7,8 +7,7 @@
                 <!-- Botón de Volver (flecha) -->
                 <button type="button" class="btn btn-link text-white" data-bs-toggle="modal"
                     data-bs-target="#ModalNuevaPubli" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-arrow-left fs-7"
-                        style="color: white; opacity: 0.7; font-size: 1.5rem;"></i>
+                    <i class="fa-solid fa-arrow-left fs-7" style="color: white; opacity: 0.7; font-size: 1.5rem;"></i>
                 </button>
                 <h5 class="modal-title flex-grow-1 text-center" id="animalPerdidoModalLabel">ANIMAL EN ADOPCIÓN</h5>
                 <!-- Botón de Cerrar (X) -->
@@ -20,6 +19,7 @@
             <div class="modal-body">
                 <!-- Formulario para adopción -->
                 <form>
+                    <input id="tipoPublicacion" name="tipoPublicacion" type="hidden" value="adopcion" />
                     <div class="mb-3 text-center">
                         <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
                                 class="text-danger">*</span></label>
@@ -31,7 +31,8 @@
                     </div>
                     <!-- Especie -->
                     <div class="mb-3">
-                        <label for="especie" class="form-label fw-bold">ESPECIE: <span class="text-danger">*</span></label>
+                        <label for="especie" class="form-label fw-bold">ESPECIE: <span
+                                class="text-danger">*</span></label>
                         <select class="form-select" id="especie" name="especie">
                             <option value="">Selecciona una especie</option>
                             <!-- Agrega opciones de especies -->
@@ -57,14 +58,16 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span class="text-danger">*</span></label>
+                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span
+                                class="text-danger">*</span></label>
                         <select class="form-select" id="provincia" name="provincia">
                             <option value="">Selecciona una provincia</option>
                             <!-- Agrega opciones de provincias aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span class="text-danger">*</span></label>
+                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span
+                                class="text-danger">*</span></label>
                         <select class="form-select" id="ciudad" name="ciudad">
                             <option value="">Selecciona una ciudad</option>
                             <!-- Agrega opciones de ciudades aquí -->
