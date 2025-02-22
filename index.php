@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
 
     <!-- Barra de navegación superior -->
@@ -54,8 +56,8 @@
     <!-- Contenido principal -->
     <div class="container">
         <h1>PetBook</h1>
-      
-      <div id="contenedorPublicaciones"></div>
+
+        <div id="contenedorPublicaciones"></div>
 
     </div>
 
@@ -75,7 +77,7 @@
         </button>
     </div>
 
-   
+
     <?php
     include 'modales/m-nueva-publicacion.html';
     include 'modales/m-perdido.html';
@@ -88,7 +90,8 @@
     <script src="/bootstrap/js/bootstrap.min.js"></script>
     <script src="js/index.js"></script>
     <script src="js/modales.js"></script>
-    <script src="js/form_perdido.js"></script>
+    <script src="js/libreria.sweetalert.js"></script>
+    <script src="js/procesar_publicacion.js"></script>
 
 </body>
 

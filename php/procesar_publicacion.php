@@ -1,5 +1,5 @@
 <?php
-require 'conexion.php'; // Archivo con la conexión a la base de datos
+require '../conexion.php'; // Archivo con la conexión a la base de datos
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {

@@ -19,52 +19,54 @@
             <div class="modal-body">
                 <!-- Formulario para adopción -->
                 <form>
-                    <input id="tipoPublicacion" name="tipoPublicacion" type="hidden" value="adopcion" />
+                    <input id="tipo_publicacion_adopcion" name="tipo_publicacion_adopcion" type="hidden"
+                        value="adopcion" />
                     <div class="mb-3 text-center">
-                        <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
+                        <label for="foto_adopcion" class="form-label fw-bold">SUBIR FOTOS: <span
                                 class="text-danger">*</span></label>
                         <div>
                             <i class="fa-solid fa-camera fa-2x"></i>
-                            <input type="file" class="form-control mt-2" id="fotos" name="fotos" accept="image/*"
-                                multiple required>
+                            <input type="file" class="form-control mt-2" id="foto_adopcion" name="foto_adopcion"
+                                accept="image/*" multiple required>
                         </div>
                     </div>
                     <!-- Especie -->
                     <div class="mb-3">
-                        <label for="especie" class="form-label fw-bold">ESPECIE: <span
+                        <label for="especie_adopcion" class="form-label fw-bold">ESPECIE: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="especie" name="especie">
+                        <select class="form-select" id="especie_adopcion" name="especie_adopcion">
                             <option value="">Selecciona una especie</option>
                             <!-- Agrega opciones de especies -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="adoptionAnimalCharacteristics" class="form-label fw-bold">DESCRIPCIÓN Y/O REQUISITOS
+                        <label for="descripcion" class="form-label fw-bold">DESCRIPCIÓN Y/O REQUISITOS
                             PARA ADOPTAR:</label>
-                        <textarea class="form-control" id="adoptionAnimalCharacteristics" rows="3"
+                        <textarea class="form-control" id="descripcion_adopcion" name="descripcion_adopcion" rows="3"
                             placeholder="Describe lo más que puedas al animal, color de pelo, tamaño, detalles bien característicos."></textarea>
                     </div>
 
                     <!-- UBICACIÓN -->
                     <div class="mb-3">
-                        <label for="pais" class="form-label fw-bold">PAÍS: <span class="text-danger">*</span></label>
-                        <select class="form-select" id="pais" name="pais">
+                        <label for="pais_adopcion" class="form-label fw-bold">PAÍS: <span
+                                class="text-danger">*</span></label>
+                        <select class="form-select" id="pais_adopcion" name="pais_adopcion">
                             <option value="">Selecciona un país</option>
                             <!-- Agrega opciones de países aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span
+                        <label for="provincia_adopcion" class="form-label fw-bold">PROVINCIA: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="provincia" name="provincia">
+                        <select class="form-select" id="provincia_adopcion" name="provincia_adopcion">
                             <option value="">Selecciona una provincia</option>
                             <!-- Agrega opciones de provincias aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span
+                        <label for="ciudad_adopcion" class="form-label fw-bold">CIUDAD: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="ciudad" name="ciudad">
+                        <select class="form-select" id="ciudad_adopcion" name="ciudad_adopcion">
                             <option value="">Selecciona una ciudad</option>
                             <!-- Agrega opciones de ciudades aquí -->
                         </select>
