@@ -20,60 +20,63 @@
             <!-- Cuerpo del Modal -->
             <div class="modal-body">
                 <form id="animalPerdidoForm" enctype="multipart/form-data">
-                    <input id="tipoPublicacion" name="tipoPublicacion" type="hidden" value="perdido" />
+                    <input id="tipo_publicacion_perdido" name="tipo_publicacion_perdido" type="hidden"
+                        value="perdido" />
                     <!-- Subir Fotos -->
                     <div class="mb-3 text-center">
-                        <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
+                        <label for="foto_perdido" class="form-label fw-bold">SUBIR FOTOS: <span
                                 class="text-danger">*</span></label>
                         <div>
                             <i class="fa-solid fa-camera fa-2x"></i>
-                            <input type="file" class="form-control mt-2" id="fotos" name="fotos" accept="image/*"
-                                multiple required>
+                            <input type="file" class="form-control mt-2" id="foto_perdido" name="foto_perdido"
+                                accept="image/*" multiple required>
                         </div>
                     </div>
                     <!-- Especie -->
                     <div class="mb-3">
-                        <label for="especie" class="form-label fw-bold">ESPECIE: <span
+                        <label for="especie_perdido" class="form-label fw-bold">ESPECIE: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="especie" name="especie">
+                        <select class="form-select" id="especie_perdido" name="especie_perdido">
                             <option value="">Selecciona una especie</option>
                             <!-- Agrega opciones de especies -->
                         </select>
                     </div>
                     <!-- Características del Animal -->
                     <div class="mb-3">
-                        <label for="caracteristicas" class="form-label fw-bold">CARACTERÍSTICAS DEL ANIMAL: <span
+                        <label for="descripcion_perdido" class="form-label fw-bold">CARACTERÍSTICAS DEL ANIMAL: <span
                                 class="text-danger">*</span></label>
-                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" rows="4"
+                        <textarea class="form-control" id="descripcion_perdido" name="descripcion_perdido" rows="4"
                             placeholder="Describe lo más que puedas al animal, color de pelo, tamaño, detalles bien característicos."
                             required></textarea>
                     </div>
                     <!-- Fecha -->
                     <div class="mb-3">
-                        <label for="faltaDesde" class="form-label fw-bold">FALTA DESDE EL: <span
+                        <label for="falta_desde_perdido" class="form-label fw-bold">FALTA DESDE EL: <span
                                 class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="faltaDesde" name="faltaDesde" required>
+                        <input type="date" class="form-control" id="falta_desde_perdido" name="falta_desde_perdido"
+                            required>
                     </div>
                     <!-- UBICACIÓN -->
                     <div class="mb-3">
-                        <label for="pais" class="form-label fw-bold">PAÍS: <span class="text-danger">*</span></label>
-                        <select class="form-select" id="pais" name="pais">
+                        <label for="pais_perdido" class="form-label fw-bold">PAÍS: <span
+                                class="text-danger">*</span></label>
+                        <select class="form-select" id="pais_perdido" name="pais_perdido">
                             <option value="">Selecciona un país</option>
                             <!-- Agrega opciones de países aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span
+                        <label for="provincia_perdido" class="form-label fw-bold">PROVINCIA: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="provincia" name="provincia">
+                        <select class="form-select" id="provincia_perdido" name="provincia_perdido">
                             <option value="">Selecciona una provincia</option>
                             <!-- Agrega opciones de provincias aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span
+                        <label for="ciudad_perdido" class="form-label fw-bold">CIUDAD: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="ciudad" name="ciudad">
+                        <select class="form-select" id="ciudad_perdido" name="ciudad_perdido">
                             <option value="">Selecciona una ciudad</option>
                             <!-- Agrega opciones de ciudades aquí -->
                         </select>
@@ -81,9 +84,9 @@
 
                     <!-- Teléfono de Contacto -->
                     <div class="mb-3">
-                        <label for="telefono" class="form-label fw-bold">TELÉFONO DE CONTACTO: <span
+                        <label for="telefono_perdido" class="form-label fw-bold">TELÉFONO DE CONTACTO: <span
                                 class="text-danger">*</span></label>
-                        <input type="tel" class="form-control" id="telefono" name="telefono"
+                        <input type="tel" class="form-control" id="telefono_perdido" name="telefono_perdido"
                             placeholder="Ejemplo: +54 9 1234-5678" required>
                     </div>
                     <!-- Recompensa Checkbox y Valor -->
@@ -92,8 +95,9 @@
                         <input class="form-check-input" type="checkbox" id="recompensaCheckbox">
                     </div>
                     <div class="mb-3" id="valorRecompensaGroup" style="display: none;">
-                        <label for="valorRecompensa" class="form-label fw-bold">VALOR RECOMPENSA:</label>
-                        <input type="text" class="form-control" id="valorRecompensa">
+                        <label for="valor_recompensa_perdido" class="form-label fw-bold">VALOR RECOMPENSA:</label>
+                        <input type="text" class="form-control" id="valor_recompensa_perdido"
+                            name="valor_recompensa_perdido">
                     </div>
 
                 </form>

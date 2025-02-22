@@ -19,63 +19,68 @@
 
             <div class="modal-body">
                 <!-- Formulario para animales encontrados -->
-                <form>
-                    <input id="tipoPublicacion" name="tipoPublicacion" type="hidden" value="encontrado" />
+                <form id="animalEncontradoForm" enctype="multipart/form-data">
+                    <input id="tipo_publicacion_encontrado" name="tipo_publicacion_encontrado" type="hidden"
+                        value="encontrado" />
                     <div class="mb-3 text-center">
-                        <label for="fotos" class="form-label fw-bold">SUBIR FOTOS: <span
+                        <label for="foto_encontrado" class="form-label fw-bold">SUBIR FOTOS: <span
                                 class="text-danger">*</span></label>
                         <div>
                             <i class="fa-solid fa-camera fa-2x"></i>
-                            <input type="file" class="form-control mt-2" id="fotos" name="fotos" accept="image/*"
-                                multiple required>
+                            <input type="file" class="form-control mt-2" id="foto_encontrado" name="foto_encontrado"
+                                accept="image/*" multiple required>
                         </div>
                     </div>
                     <!-- Especie -->
                     <div class="mb-3">
-                        <label for="especie" class="form-label fw-bold">ESPECIE: <span
+                        <label for="especie_encontrado" class="form-label fw-bold">ESPECIE: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="especie" name="especie">
+                        <select class="form-select" id="especie_encontrado" name="especie_encontrado">
                             <option value="">Selecciona una especie</option>
                             <!-- Agrega opciones de especies -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="foundAnimalCharacteristics" class="form-label fw-bold">CARACTERÍSTICAS DEL
+                        <label for="descripcion_encontrado" class="form-label fw-bold">CARACTERÍSTICAS DEL
                             ANIMAL:</label>
-                        <textarea class="form-control" id="foundAnimalCharacteristics" rows="3"
+                        <textarea class="form-control" name="descripcion_encontrado" id="descripcion_encontrado"
+                            rows="3"
                             placeholder="Describe lo más que puedas al animal, color de pelo, tamaño, detalles bien característicos."></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="foundAnimalDate" class="form-label fw-bold">SE ENCONTRÓ EL:</label>
-                        <input type="date" class="form-control" id="foundAnimalDate" placeholder="DD/MM/AAAA">
+                        <label for="encontrado_el_encontrado" class="form-label fw-bold">SE ENCONTRÓ EL:</label>
+                        <input type="date" class="form-control" name="encontrado_el_encontrado"
+                            id="encontrado_el_encontrado" placeholder="DD/MM/AAAA">
                     </div>
                     <!-- UBICACIÓN -->
                     <div class="mb-3">
-                        <label for="pais" class="form-label fw-bold">PAÍS: <span class="text-danger">*</span></label>
-                        <select class="form-select" id="pais" name="pais">
+                        <label for="pais_encontrado" class="form-label fw-bold">PAÍS: <span
+                                class="text-danger">*</span></label>
+                        <select class="form-select" id="pais_encontrado" name="pais_encontrado">
                             <option value="">Selecciona un país</option>
                             <!-- Agrega opciones de países aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="provincia" class="form-label fw-bold">PROVINCIA: <span
+                        <label for="provincia_encontrado" class="form-label fw-bold">PROVINCIA: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="provincia" name="provincia">
+                        <select class="form-select" id="provincia_encontrado" name="provincia_encontrado">
                             <option value="">Selecciona una provincia</option>
                             <!-- Agrega opciones de provincias aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="ciudad" class="form-label fw-bold">CIUDAD: <span
+                        <label for="ciudad_encontrado" class="form-label fw-bold">CIUDAD: <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select" id="ciudad" name="ciudad">
+                        <select class="form-select" id="ciudad_encontrado" name="ciudad_encontrado">
                             <option value="">Selecciona una ciudad</option>
                             <!-- Agrega opciones de ciudades aquí -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="foundContact" class="form-label fw-bold">TELÉFONO DE CONTACTO:</label>
-                        <input type="text" class="form-control" id="foundContact" placeholder="Teléfono o email">
+                        <label for="telefono_encontrado" class="form-label fw-bold">TELÉFONO DE CONTACTO:</label>
+                        <input type="text" class="form-control" name="telefono_encontrado" id="telefono_encontrado"
+                            placeholder="Teléfono o email">
                     </div>
                 </form>
             </div>
