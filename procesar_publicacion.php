@@ -1,63 +1,52 @@
 <?php
+require 'conexion.php'; // Archivo con la conexión a la base de datos
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    try {
 
-include 'conexion.php';
+        // Sanitización de los datos
+        $tipo_publicacion = trim($_POST['tipo_publicacion']);
+        $descripcion = trim($_POST['descripcion']);
+        $telefono = trim($_POST['telefono']);
+        $pais = intval($_POST['pais']);
+        $provincia = intval($_POST['provincia']);
+        $ciudad = intval($_POST['ciudad']);
+        $especie = intval($_POST['especie']);
+        $falta_desde = !empty($_POST['falta_desde']) ? $_POST['falta_desde'] : NULL;
+        $encontrado_el = !empty($_POST['encontrado_el']) ? $_POST['encontrado_el'] : NULL;
+        $valor_recompensa = isset($_POST['valor_recompensa']) ? intval($_POST['valor_recompensa']) : NULL;
 
-// Capturar datos del formulario
-$usuario_id = 1; // Simula un usuario autenticado
-$caracteristicas = $_POST['caracteristicas'];
-$falta_desde = $_POST['faltaDesde'];
-$ubicacion = $_POST['ubicacion'];
-$telefono = $_POST['telefono'];
-$recompensa = isset($_POST['recompensaCheckbox']) ? 1 : 0;
-$valor_recompensa = $recompensa ? $_POST['valorRecompensa'] : null;
-
-// Manejar la carga de fotos
-$fotos = [];
-if (isset($_FILES['fotos'])) {
-    $directorio_destino = $_SERVER['DOCUMENT_ROOT'] . "/img_publicaciones/";
-    if (!is_dir($directorio_destino)) {
-        mkdir($directorio_destino, 0777, true); // Crear la carpeta si no existe
-    }
-
-    foreach ($_FILES['fotos']['tmp_name'] as $key => $tmp_name) {
-        $nombre_foto = uniqid() . "_" . basename($_FILES['fotos']['name'][$key]);
-        $ruta_destino = $directorio_destino . $nombre_foto;
-        if (move_uploaded_file($tmp_name, $ruta_destino)) {
-            $fotos[] = $ruta_destino;
+        if (empty($tipo_publicacion) || empty($descripcion) || empty($telefono) || empty($pais) || empty($provincia) || empty($ciudad) || empty($especie)) {
+            echo json_encode(["success" => false, "message" => "Todos los campos obligatorios deben completarse."]);
+            exit();
         }
+
+        // Manejo de la imagen
+        $foto = NULL;
+        if (!empty($_FILES['foto']['name'])) {
+            $ruta_destino = "uploads/";
+            $nombre_archivo = time() . "_" . basename($_FILES["foto"]["name"]);
+            $ruta_completa = $ruta_destino . $nombre_archivo;
+
+            if (move_uploaded_file($_FILES["foto"]["tmp_name"], $ruta_completa)) {
+                $foto = $ruta_completa;
+            } else {
+                echo json_encode(["success" => false, "message" => "Error al subir la imagen."]);
+                exit();
+            }
+        }
+
+        // Inserción de datos en la tabla publicaciones
+        $sql = "INSERT INTO publicaciones (fecha_publicacion, tipo_publicacion, foto, especie, descripcion, telefono, pais, provincia, ciudad, falta_desde, encontrado_el, valor_recompensa) 
+                VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tipo_publicacion, $foto, $especie, $descripcion, $telefono, $pais, $provincia, $ciudad, $falta_desde, $encontrado_el, $valor_recompensa]);
+
+        echo json_encode(["success" => true, "message" => "Publicación guardada exitosamente."]);
+    } catch (PDOException $e) {
+        echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
     }
+} else {
+    echo json_encode(["success" => false, "message" => "Acceso denegado."]);
 }
-
-echo $fotos;
-
-// Insertar datos en la tabla publicaciones
-$sql = "INSERT INTO publicaciones (usuario_id, estado, descripcion, ubicacion, nombre_mascota, fecha_publicacion)
-        VALUES (?, 'perdido', ?, ?, NULL, NOW())";
-$stmt = $conexion->prepare($sql);
-$stmt->bind_param("iss", $usuario_id, $caracteristicas, $ubicacion);
-$stmt->execute();
-$publicacion_id = $stmt->insert_id; // Obtener el ID de la publicación recién creada
-
-// Insertar datos específicos en animales_perdidos
-$sql_perdido = "INSERT INTO animales_perdidos (publicacion_id, fecha_ult_vez, valor_recompensa, tel_dueño)
-                VALUES (?, ?, ?, ?)";
-$stmt_perdido = $conexion->prepare($sql_perdido);
-$stmt_perdido->bind_param("isss", $publicacion_id, $falta_desde, $valor_recompensa, $telefono);
-$stmt_perdido->execute();
-
-// Insertar las rutas de las imágenes en la tabla imagenes
-if (!empty($fotos)) {
-    $sql_imagen = "INSERT INTO imagenes (publicacion_id, ruta_imagen) VALUES (?, ?)";
-    $stmt_imagen = $conexion->prepare($sql_imagen);
-    foreach ($fotos as $ruta) {
-        $stmt_imagen->bind_param("is", $publicacion_id, $ruta);
-        $stmt_imagen->execute();
-    }
-}
-
-$conexion->close();
-//echo "Publicación guardada exitosamente.";
