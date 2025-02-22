@@ -107,11 +107,15 @@ $(document).ready(function () {
     });
 
     // Evento para manejar el envío del formulario con AJAX
-    $('#animalPerdidoForm, #animalEncontradoForm, #animalAdopcionForm').submit(function (event) {
+    $(document).on('submit', '#animalPerdidoForm, #animalEncontradoForm, #animalAdopcionForm', function (event) {
         event.preventDefault(); // Evita el envío normal del formulario
 
         let form = $(this);
-        let formData = new FormData(form[0]);
+        let formData = new FormData(this);
+        // Depuración: Muestra los datos antes de enviarlos
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
 
         $.ajax({
             url: 'php/procesar_publicacion.php',
