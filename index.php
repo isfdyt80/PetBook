@@ -4,10 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetBook</title>
+    <title>Petbook</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/carteles.css">
+    <link rel="stylesheet" href="css/cartel_rojo.css">
+    <link rel="stylesheet" href="css/cartel_amarillo.css">
+    <link rel="stylesheet" href="css/cartel_verde.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -55,7 +60,6 @@
 
     <!-- Contenido principal -->
     <div class="container">
-        <h1>PetBook</h1>
 
         <div id="contenedorPublicaciones"></div>
 
@@ -91,7 +95,9 @@
     <script src="js/index.js"></script>
     <script src="js/modales.js"></script>
     <script src="js/libreria.sweetalert.js"></script>
+    <script src="js/obtener_publicaciones.js"></script>
     <script src="js/procesar_publicacion.js"></script>
+
 
 </body>
 
