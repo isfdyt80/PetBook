@@ -64,7 +64,7 @@
         
         <!-- Botón para editar el perfil del usuario -->
         <div>
-            <button class="btn btn-dark" id="edit_user">Español</button>
+            <button class="btn btn-dark" id="Usuario">Editar usuario</button>
         </div>
     </div>
 </body>
