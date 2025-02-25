@@ -57,14 +57,14 @@
             <!-- Información del usuario -->
             <div class="user-details">
                 <b>username</b><br>
-                joafossa@gmail.com <i class="fa-regular fa-envelope"></i><br>
-                2395-40-7262 <i class="fa-solid fa-phone"></i>
+                emailaleatorio@dominio.com <i class="fa-regular fa-envelope"></i><br>
+                1234-123456 <i class="fa-solid fa-phone"></i>
             </div>
         </div>
         
         <!-- Botón para editar el perfil del usuario -->
         <div>
-            <button class="btn btn-dark" id="edit_user">Edit User</button>
+            <button class="btn btn-dark" id="edit_user">Español</button>
         </div>
     </div>
 </body>
