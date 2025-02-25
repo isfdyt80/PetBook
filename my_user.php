@@ -56,7 +56,7 @@
             
             <!-- Información del usuario -->
             <div class="user-details">
-                <b>username</b><br>
+                <b>Usuario</b><br>
                 emailaleatorio@dominio.com <i class="fa-regular fa-envelope"></i><br>
                 1234-123456 <i class="fa-solid fa-phone"></i>
             </div>
@@ -64,7 +64,7 @@
         
         <!-- Botón para editar el perfil del usuario -->
         <div>
-            <button class="btn btn-dark" id="Usuario">Editar usuario</button>
+            <button class="btn btn-dark" id="edit_user">Editar usuario</button>
         </div>
     </div>
 </body>
