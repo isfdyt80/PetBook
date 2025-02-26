@@ -126,7 +126,7 @@ $(document).ready(function () {
                 <div class="info-contenedor">
                     <div class="info-seccion">
                         <div class="mini-franja mini-franja-amarilla">DESCRIPCIÓN:</div>
-                        <p class="info-texto descripcion"${publicacion.descripcion}</p>
+                        <p class="info-texto descripcion">${publicacion.descripcion}</p>
                     </div>
                     <div class="info-seccion">
                         <div class="mini-franja mini-franja-amarilla">ENCONTRADO EL:</div>
