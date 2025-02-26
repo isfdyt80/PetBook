@@ -3,14 +3,18 @@ create database petbook_db;
 
 use petbook_db;
 
+# cambiar a codificación utf8
 alter database petbook_db character set utf8 collate utf8_spanish2_ci;
 
 # crear usuario
 CREATE USER 'petbook_user' @'%' IDENTIFIED BY 'P3tB00k_P4ss';
 
+# aplicar todos los permisos al usuario petboot_user en la base de datos petbook_db 
 GRANT ALL PRIVILEGES ON petbook_db.* TO 'petbook_user' @'%';
 
+# aplica y actualiza los permisos
 FLUSH PRIVILEGES;
+
 -- esta tabla por ahora no se está usando
 CREATE TABLE mascotas (
     mascotaId INT AUTO_INCREMENT PRIMARY KEY,
@@ -93,57 +97,47 @@ CREATE TABLE IF NOT EXISTS publicaciones (
   FOREIGN KEY (ciudad) REFERENCES localidades(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
+--
+-- Volcar la base de datos para la tabla `pais`
+--
+INSERT INTO `provincias` (`id`, `nombre`) VALUES
+(1, 1, 'Argentina');
 
 --
 -- Volcar la base de datos para la tabla `provincias`
 --
+INSERT INTO `provincias` (`id`, `id_pais`, `provincia`) VALUES
+(1, 1, 'Buenos Aires'),
+(2, 1, 'Buenos Aires-GBA'),
+(3, 1, 'Capital Federal'),
+(4, 1, 'Catamarca'),
+(5, 1, 'Chaco'),
+(6, 1, 'Chubut'),
+(7, 1, 'Córdoba'),
+(8, 1, 'Corrientes'),
+(9, 1, 'Entre Ríos'),
+(10, 1, 'Formosa'),
+(11, 1, 'Jujuy'),
+(12, 1, 'La Pampa'),
+(13, 1, 'La Rioja'),
+(14, 1, 'Mendoza'),
+(15, 1, 'Misiones'),
+(16, 1, 'Neuquén'),
+(17, 1, 'Río Negro'),
+(18, 1, 'Salta'),
+(19, 1, 'San Juan'),
+(20, 1, 'San Luis'),
+(21, 1, 'Santa Cruz'),
+(22, 1, 'Santa Fe'),
+(23, 1, 'Santiago del Estero'),
+(24, 1, 'Tierra del Fuego'),
+(25, 1, 'Tucumán');
 
-INSERT INTO `provincias` (`id`, `provincia`) VALUES
-(1, 'Buenos Aires'),
-(2, 'Buenos Aires-GBA'),
-(3, 'Capital Federal'),
-(4, 'Catamarca'),
-(5, 'Chaco'),
-(6, 'Chubut'),
-(7, 'Córdoba'),
-(8, 'Corrientes'),
-(9, 'Entre Ríos'),
-(10, 'Formosa'),
-(11, 'Jujuy'),
-(12, 'La Pampa'),
-(13, 'La Rioja'),
-(14, 'Mendoza'),
-(15, 'Misiones'),
-(16, 'Neuquén'),
-(17, 'Río Negro'),
-(18, 'Salta'),
-(19, 'San Juan'),
-(20, 'San Luis'),
-(21, 'Santa Cruz'),
-(22, 'Santa Fe'),
-(23, 'Santiago del Estero'),
-(24, 'Tierra del Fuego'),
-(25, 'Tucumán');
-
-
---
--- Estructura de tabla para la tabla `localidades`
---
-
-CREATE TABLE IF NOT EXISTS `localidades` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_privincia` int(11) NOT NULL,
-  `localidad` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2383 ;
 
 --
 -- Volcar la base de datos para la tabla `localidades`
 --
-
-INSERT INTO `localidades` (`id`, `id_privincia`, `localidad`) VALUES
+INSERT INTO `localidades` (`id`, `id_provincia`, `localidad`) VALUES
 (1, 1, '25 de Mayo'),
 (2, 1, '3 de febrero'),
 (3, 1, 'A. Alsina'),
@@ -2216,10 +2210,7 @@ INSERT INTO `localidades` (`id`, `id_privincia`, `localidad`) VALUES
 (2070, 22, 'Oliveros'),
 (2071, 22, 'Palacios'),
 (2072, 22, 'Pavón'),
-(2073, 22, 'Pavón Arriba');
-
-
-INSERT INTO `localidades` (`id`, `id_privincia`, `localidad`) VALUES
+(2073, 22, 'Pavón Arriba'),
 (2074, 22, 'Pedro Gómez Cello'),
 (2075, 22, 'Pérez'),
 (2076, 22, 'Peyrano'),
@@ -2529,4 +2520,3 @@ INSERT INTO `localidades` (`id`, `id_privincia`, `localidad`) VALUES
 (2380, 25, 'Yánima'),
 (2381, 25, 'Yerba Buena'),
 (2382, 25, 'Yerba Buena (S)');
-}
