@@ -1,34 +1,35 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php'; // Carga el autoloader de Composer
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 
+// Carga las variables de entorno
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');  
 $dotenv->load();
 
 function enviarCorreoVerificacion($destinatario, $url)
 {
-    $mail = new PHPMailer(true);
+    $mail = new PHPMailer(true); // Crea una nueva instancia de PHPMailer
 
     try {
-        $mail->SMTPDebug = 0;  
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['SMTP_USER']; 
-        $mail->Password   = $_ENV['SMTP_PASS']; 
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->SMTPDebug = 0; // Desactiva la depuración SMTP
+        $mail->isSMTP(); // Configura el correo para usar SMTP
+        $mail->Host       = 'smtp.gmail.com'; // Servidor SMTP de Gmail
+        $mail->SMTPAuth   = true; // Habilita la autenticación SMTP
+        $mail->Username   = $_ENV['SMTP_USER']; // Usuario SMTP desde las variables de entorno
+        $mail->Password   = $_ENV['SMTP_PASS']; // Contraseña SMTP desde las variables de entorno
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Habilita el cifrado TLS
+        $mail->Port       = 587; // Puerto SMTP para TLS
 
-        
+        // Configura el remitente del correo
         $mail->setFrom($_ENV['SMTP_USER'], 'PetBook');
-        $mail->addAddress($destinatario);
+        $mail->addAddress($destinatario); // Añade el destinatario
 
-        
-        $mail->isHTML(true);
-        $mail->Subject = 'Verificacion de Registro';
+        // Configura el contenido del correo
+        $mail->isHTML(true); // Establece el formato del correo como HTML
+        $mail->Subject = 'Verificacion de Registro'; // Asunto del correo
         $mail->Body = 
         '<html>
             <meta charset="UTF-8">
@@ -44,11 +45,11 @@ function enviarCorreoVerificacion($destinatario, $url)
             </body>
         </html>';
 
-        
+        // Envía el correo
         $mail->send();
         return [
             'status' => 'envio exitoso',
-            'message' => 'Correo enviado exitosamente.jejejeje',
+            'message' => 'Correo enviado exitosamente.',
         ];
     } catch (Exception $e) {
         // Log de errores

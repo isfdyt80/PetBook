@@ -1,9 +1,9 @@
 <?php
-header("Content-Type: application/json");
-include '../conexion.php';
+header("Content-Type: application/json"); // Establece el tipo de contenido de la respuesta como JSON
+include '../conexion.php'; // Incluye el archivo de conexión a la base de datos
 
 try {
-
+    // Consulta SQL para obtener las publicaciones
     $sql = "SELECT 
                 p.id,
                 p.fecha_publicacion,
@@ -25,10 +25,11 @@ try {
             JOIN localidades ci ON p.ciudad = ci.id
             ORDER BY p.fecha_publicacion DESC";
 
-    $stmt = $pdo->query($sql);
-    $publicaciones = $stmt->fetchAll();
+    $stmt = $pdo->query($sql); // Ejecuta la consulta
+    $publicaciones = $stmt->fetchAll(); // Obtiene todos los resultados
 
-    echo json_encode($publicaciones);
+    echo json_encode($publicaciones); // Devuelve los resultados en formato JSON
 } catch (PDOException $e) {
+    // Maneja cualquier error de conexión
     echo json_encode(["error" => "Error de conexión: " . $e->getMessage()]);
 }

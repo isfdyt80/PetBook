@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 
-</html>
 <head>
     <!-- Define la codificación de caracteres para admitir caracteres especiales -->
     <meta charset="UTF-8">
@@ -62,7 +61,7 @@
                     </li>
                 </ul>
             </div>
-         <!-- Botones de usuario -->
+            <!-- Botones de usuario -->
             <div>
                 <!-- Botón para ir al perfil del usuario -->
                 <button type="button" id="my_user" class="btn btn-secondary" onclick="window.location.href='my_user.php'">
