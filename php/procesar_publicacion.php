@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $valor_recompensa = isset($_POST['valor_recompensa_adopcion']) ? intval($_POST['valor_recompensa_adopcion']) : " ";
         }
 
-
+        // Verifica si todos los campos obligatorios están completos
         if (empty($tipo_publicacion) || empty($descripcion) || empty($telefono) || empty($pais) || empty($provincia) || empty($ciudad) || empty($especie)) {
             echo json_encode(["success" => false, "message" => "Todos los campos obligatorios deben completarse."]);
             exit();
