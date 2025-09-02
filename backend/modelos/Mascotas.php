@@ -9,7 +9,7 @@ class Mascotas {
     public $raza_id;
     public $usuario_id;
 
-    public function __construct($id = null, $estado, $nombre, $fecha_nacimiento, $raza_id, $usuario_id) {
+    public function __construct($estado, $nombre, $fecha_nacimiento, $raza_id, $usuario_id, $id = null) {
         $this->id        = $id;
         $this->estado    = $estado;
         $this->nombre    = $nombre;
