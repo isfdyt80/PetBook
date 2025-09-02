@@ -58,15 +58,15 @@
         e.preventDefault();
 
         $.ajax({
-            url: "../backend/UsuarioController.php",
+            url: "../backend/controladores/UsuarioController.php",
             type: "POST",
-            data: {
+            data: JSON.stringify({
                 nombre: $("#nombre").val(),
                 apellido: $("#apellido").val(),
                 email: $("#email").val(),
                 clave: $("#clave").val(),
                 domicilio: $("#domicilio").val()
-            },
+            }),
             success: function (response) {
                 alert(response);
             },
