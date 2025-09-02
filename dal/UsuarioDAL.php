@@ -36,13 +36,13 @@ class UsuarioDAL {
 
         if ($data) {
             return new Usuario(
-                $data['rol_id'],
+                $data['rol_id'] = 2, // rol_id por defecto = usuario
                 $data['nombre'],
                 $data['apellido'],
                 $data['email'],
                 $data['clave'],
                 $data['domicilio'],
-                $data['id']
+                $data['usuario_id']
             );
         }
 

@@ -68,7 +68,13 @@
                 domicilio: $("#domicilio").val()
             }),
             success: function (response) {
-                alert(response);
+                let res;
+                try {
+                    res = typeof response === "string" ? JSON.parse(response) : response;
+                    $("#mensaje").html(res.success ? res.message : res.error).css("color", res.success ? "green" : "red");
+                } catch (e) {
+                    $("#mensaje").html("Error inesperado en el servidor").css("color", "red");
+                }
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);

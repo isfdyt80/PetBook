@@ -6,11 +6,19 @@ use Core\Env;
 
 // Autoload básico para clases
 spl_autoload_register(function ($class) {
-    $base_dir = __DIR__;
-    $class = str_replace('\\', DIRECTORY_SEPARATOR, $class);
-    $file = $base_dir . DIRECTORY_SEPARATOR . $class . '.php';
-    if (file_exists($file)) {
-        require_once $file;
+    $base_dirs = [
+        __DIR__ . '/backend/modelos',
+        __DIR__ . '/dal',
+        __DIR__ . '/database',
+        __DIR__ . '/core'
+    ];
+    $class = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+    foreach ($base_dirs as $base_dir) {
+        $file = $base_dir . DIRECTORY_SEPARATOR . basename($class);
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
     }
 });
 
