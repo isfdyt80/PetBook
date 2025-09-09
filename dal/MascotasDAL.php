@@ -2,12 +2,12 @@
 namespace DAL;
 
 use Database\Conexion;
-use Modelos\Mascotas;
+use Modelos\Mascota;
 use PDO;
 use PDOException;
 
-class MascotasDAL {
-    public static function crear(Mascotas $mascotas) {
+class MascotaDAL {
+    public static function crear(Mascota $mascotas) {
         $pdo = Conexion::getConexion();
 
         $sql = "INSERT INTO mascotas (estado, nombre, fecha_nacimiento, raza_id, usuario_id)
@@ -32,7 +32,7 @@ class MascotasDAL {
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data) {
-            return new Mascotas(
+            return new Mascota(
                 $data['id'],
                 $data['estado'],
                 $data['nombre'],

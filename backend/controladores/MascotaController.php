@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../../bootstrap.php';
 
-use Modelos\Mascotas;
-use DAL\MascotasDAL;
+use Modelos\Mascota;
+use DAL\MascotaDAL;
 
 header('Content-Type: application/json');
 
@@ -46,7 +46,7 @@ try {
         }
 
         // Crear objeto Mascota
-        $mascota = new Mascotas(
+        $mascota = new Mascota(
             null,
             $usuario_id,
             $raza_id,
@@ -57,7 +57,7 @@ try {
             $fecha_nacimiento
         );
 
-        if (MascotasDAL::crear($mascota)) {
+        if (MascotaDAL::crear($mascota)) {
             echo json_encode(["success" => true, "message" => "Mascota registrada correctamente"]);
         } else {
             echo json_encode(["error" => "Error al registrar la mascota"]);
