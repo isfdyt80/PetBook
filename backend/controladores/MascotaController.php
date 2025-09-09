@@ -47,14 +47,15 @@ try {
 
         // Crear objeto Mascota
         $mascota = new Mascota(
-            null,
-            $usuario_id,
-            $raza_id,
-            $nombre,
             $estado,
-            $fotoRuta ?? "",
-            1,
-            $fecha_nacimiento
+            $nombre,
+            $fecha_nacimiento,
+            $raza_id,
+            $usuario_id,
+            null,
+            $fotoRuta ?? null,
+            null,
+            1
         );
 
         if (MascotaDAL::crear($mascota)) {
