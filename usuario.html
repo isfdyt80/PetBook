@@ -4,11 +4,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="scss/custom.css">
+    <title>User</title>
 </head>
+
 
 <body>
 
+
+    <div class="container-fluid">
+        <!-- <div class="row">
+            <div class="col border">1</div>
+            <div class="col border">2</div>
+            <div class="col border">3</div>
+            <div class="col border">4</div>
+            <div class="col border">5</div>
+            <div class="col border">6</div>
+            <div class="col border">7</div>
+            <div class="col border">8</div>
+            <div class="col border">9</div>
+            <div class="col border">10</div>
+            <div class="col border">11</div>
+            <div class="col border">12</div>
+        </div> -->
+
+        <!-- div personal foto/descripcion -->
+        <div class="row mt-2">
+            <div class="col-2">
+
+                <div class="card ">
+                    <img src="https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png"
+                        class="card-img rounded">
+
+                    <div class="card-body">
+                        <h5 class="card-title">Nombre</h5>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="col-9 offset-1">
+
+                <div class="card h-100">
+
+                    <div class="card-header bg-">
+                        Contacto
+                    </div>
+
+                    <div class="card-body">
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- pestañas en si -->
+        <ul class="nav nav-tabs mt-5" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane"
+                    type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Home</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane"
+                    type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Profile</button>
+            </li>
+            <!-- <li class="nav-item" role="presentation">
+                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane"
+                    type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Contact</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane"
+                    type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false"
+                    disabled>Disabled</button>
+            </li> -->
+        </ul>
+        <!-- Contenido de las cards -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Home -->
+            <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab"
+                tabindex="0">
+
+                <div class="row border mt-3">
+                    <!-- Primer card -->
+                    <div class="col-3 border">
+                        <div class="card border mt-1 mb-1">
+                            <img src="https://www.consumer.es/app/uploads/fly-images/106400/img_perros-comportamientos-1200x550-cc.jpg"
+                                class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up
+                                    the bulk of the card’s content.</p>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">An item</li>
+                                <li class="list-group-item">A second item</li>
+                                <li class="list-group-item">A third item</li>
+                            </ul>
+                            <div class="card-body">
+                                <a href="#" class="card-link">Card link</a>
+                                <a href="#" class="card-link">Another link</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- segunda card -->
+                    <div class="col-3 border">
+                        <div class="card border mt-1 mb-1">
+                            <img src="https://www.consumer.es/app/uploads/fly-images/106400/img_perros-comportamientos-1200x550-cc.jpg"
+                                class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up
+                                    the bulk of the card’s content.</p>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">An item</li>
+                                <li class="list-group-item">A second item</li>
+                                <li class="list-group-item">A third item</li>
+                            </ul>
+                            <div class="card-body">
+                                <a href="#" class="card-link">Card link</a>
+                                <a href="#" class="card-link">Another link</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- Profile -->
+            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+
+                <div class="row border mt-3">
+                    <!-- Primer card -->
+                    <div class="col-3 border">
+                        <div class="card mt-1 mb-1">
+                            <img src="https://www.consumer.es/app/uploads/fly-images/106400/img_perros-comportamientos-1200x550-cc.jpg"
+                                class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up
+                                    the bulk of the card’s content.</p>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">An item</li>
+                                <li class="list-group-item">A second item</li>
+                                <li class="list-group-item">A third item</li>
+                            </ul>
+                            <div class="card-body">
+                                <a href="#" class="card-link">Card link</a>
+                                <a href="#" class="card-link">Another link</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Segunda card -->
+                    <div class="col-3 border">
+                        <div class="card border mt-1 mb-1">
+                            <img src="https://www.consumer.es/app/uploads/fly-images/106400/img_perros-comportamientos-1200x550-cc.jpg"
+                                class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up
+                                    the bulk of the card’s content.</p>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">An item</li>
+                                <li class="list-group-item">A second item</li>
+                                <li class="list-group-item">A third item</li>
+                            </ul>
+                            <div class="card-body">
+                                <a href="#" class="card-link">Card link</a>
+                                <a href="#" class="card-link">Another link</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+                ...</div> -->
+
+            <!-- <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab"
+                tabindex="0">...</div> -->
+        </div>
+    </div>
+    <script src="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
