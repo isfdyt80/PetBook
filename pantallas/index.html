@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketplace - Publicaciones</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="fontawesome/css/all.min.css" />
+
+  <style>
+    body {
+      background-color: #9BA0BB; /* color4 */
+    }
+    .card-publi {
+      background-color: #F4F3FC; /* color1 */
+      border-radius: 15px;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .card-publi:hover {
+      transform: scale(1.03);
+    }
+    .card-publi img {
+      border-radius: 15px 15px 0 0;
+      height: 180px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <h2 class="text-center mb-4 text-white">
+      <i class="fas fa-dog me-2"></i>Publicaciones
+    </h2>
+
+    <!-- Grilla de publicaciones -->
+    <div class="row g-4">
+      <!-- Publicación 1 -->
+      <div class="col-md-4">
+        <div class="card shadow card-publi publi" data-publi="1">
+          <img src="img/perro1.jpg" class="card-img-top" alt="Perro perdido">
+          <div class="card-body">
+            <p class="card-text">Firulais - Perdido en Parque Central</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Publicación 2 -->
+      <div class="col-md-4">
+        <div class="card shadow card-publi publi" data-publi="2">
+          <img src="img/perro2.jpg" class="card-img-top" alt="Perro encontrado">
+          <div class="card-body">
+            <p class="card-text">Luna - Encontrada cerca del río</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Publicación 3 -->
+      <div class="col-md-4">
+        <div class="card shadow card-publi publi" data-publi="3">
+          <img src="img/perro3.jpg" class="card-img-top" alt="Perro en adopción">
+          <div class="card-body">
+            <p class="card-text">Rocky - En adopción</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modales -->
+<!-- Modal 1: Firulais -->
+<div class="modal fade" id="modalPerro1" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4" style="border-radius: 15px; background-color:#F4F3FC;">
+      <h3 class="mb-4">Detalles de Firulais</h3>
+      <div class="row">
+        <!-- Imagen -->
+        <div class="col-md-5 text-center">
+          <img src="img/perro1.jpg" class="img-fluid rounded mb-3" style="max-height:250px; object-fit:cover;">
+        </div>
+        <!-- Datos -->
+        <div class="col-md-7">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" value="Firulais" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Edad aproximada</label>
+            <input type="text" class="form-control" value="3 años" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <input type="text" class="form-control" value="Perdido" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" rows="4" readonly>
+Firulais se perdió el 15/08 en la zona del Parque Central. Mestizo, tamaño mediano, muy dócil y responde a su nombre.
+            </textarea>
+          </div>
+          <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Luna -->
+<div class="modal fade" id="modalPerro2" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4" style="border-radius: 15px; background-color:#F4F3FC;">
+      <h3 class="mb-4">Detalles de Luna</h3>
+      <div class="row">
+        <!-- Imagen -->
+        <div class="col-md-5 text-center">
+          <img src="img/perro2.jpg" class="img-fluid rounded mb-3" style="max-height:250px; object-fit:cover;">
+        </div>
+        <!-- Datos -->
+        <div class="col-md-7">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" value="Luna" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Edad aproximada</label>
+            <input type="text" class="form-control" value="2 años" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <input type="text" class="form-control" value="Encontrada" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" rows="4" readonly>
+Encontrada el 20/08 cerca del río. Muy juguetona, busca a su dueño.
+            </textarea>
+          </div>
+          <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 3: Rocky -->
+<div class="modal fade" id="modalPerro3" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4" style="border-radius: 15px; background-color:#F4F3FC;">
+      <h3 class="mb-4">Detalles de Rocky</h3>
+      <div class="row">
+        <!-- Imagen -->
+        <div class="col-md-5 text-center">
+          <img src="img/perro3.jpg" class="img-fluid rounded mb-3" style="max-height:250px; object-fit:cover;">
+        </div>
+        <!-- Datos -->
+        <div class="col-md-7">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" value="Rocky" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Edad aproximada</label>
+            <input type="text" class="form-control" value="2 años" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <input type="text" class="form-control" value="En adopción" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" rows="4" readonly>
+Rocky tiene 2 años, cariñoso y busca una familia que lo adopte. Se entrega con vacunas y desparasitado.
+            </textarea>
+          </div>
+          <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Scripts -->
+  <script src="js/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/publicaciones.js"></script>
+
+</body>
+</html>
