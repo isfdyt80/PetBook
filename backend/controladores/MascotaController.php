@@ -14,12 +14,17 @@ error_reporting(E_ALL);
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (!$data) {
+            echo json_encode(["error" => "Datos inválidos"]);
+            exit;
+        }
         // Recibir datos del formulario
-        $nombre  = $_POST['nombre'] ?? null;
-        $estado  = $_POST['estado'] ?? null;
-        $fecha_nacimiento = $_POST['fecha_nacimiento'] ?? null;
-        $raza_id = $_POST['raza_id'] ?? null;
-        $usuario_id = $_POST['usuario_id'] ?? null;
+        $nombre              = $data['nombre'] ?? null;
+        $estado              = $data['estado'] ?? null;
+        $fecha_nacimiento    = $data['fecha_nacimiento'] ?? null;
+        $raza_id             = $data['raza_id'] ?? null;
+        $usuario_id          = $data['usuario_id'] ?? null;
 
         // Validación
         if (!$nombre || !$estado || !$raza_id || !$usuario_id) {
