@@ -27,9 +27,9 @@ $(document).on('click', '.post-card', function (e) {
   const modal = new bootstrap.Modal(modalEl);
   modal.show();
 
-  // 🟡 Simulamos una "petición AJAX" (como si trajera datos del servidor)
+  // Simulacion  "petición AJAX" 
   setTimeout(() => {
-    // Simulamos datos que el servidor mandaría
+    // 
     const data = {
       id: id,
       nombre: "Max el Husky",
@@ -38,7 +38,7 @@ $(document).on('click', '.post-card', function (e) {
       imagen_url: "https://sadenir.com.uy/equilibrio/wp-content/uploads/sites/2/2020/08/simon-rae-jY_2XG-6HU0-unsplash-1.jpg"
     };
 
-    // 🧱 Estructura HTML que reemplaza al spinner dentro del modal
+    //  Estructura HTML que Remplazada
     const content = `
       <div class="modal-header">
         <h5 class="modal-title">${data.nombre}</h5>
