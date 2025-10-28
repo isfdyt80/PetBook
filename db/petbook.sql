@@ -47,7 +47,6 @@ CREATE TABLE Usuarios (
     clave VARCHAR(255) NOT NULL,
     domicilio VARCHAR(255) NOT NULL,
     foto VARCHAR(255) NOT NULL,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (rol_id) REFERENCES Roles(rol_id)
 );
@@ -99,18 +98,7 @@ CREATE TABLE Publicaciones (
     FOREIGN KEY (mascota_id) REFERENCES Mascotas(mascota_id)
 );
 
--- Comentarios de otros usuarios
-/*
-CREATE TABLE Comentarios (
-    comentario_id INT PRIMARY KEY AUTO_INCREMENT,
-    publicacion_id INT NOT NULL,
-    usuario_id INT NOT NULL,
-    texto VARCHAR(255) NOT NULL,
-    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (publicacion_id) REFERENCES Publicaciones(publicacion_id),
-    FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
-);
-*/
+
 
 -- Localización
 CREATE TABLE Paises (

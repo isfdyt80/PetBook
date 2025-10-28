@@ -1,67 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/Src/scss/custom.css">
     <title>Register</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 
 <body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h3 class="text-center mb-4">Registro</h3>
 
-</body>
+                        <form id="formRegistro" novalidate enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
 
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" required>
+                            </div>
 
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-4">
-                    <h3 class="text-center mb-4">Registro</h3>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" minlength="6"
+                                    required>
+                            </div>
 
-                    <form id="formRegistro" novalidate>
-                        <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre completo</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" required>
-                            <div class="invalid-feedback">Por favor, ingresa tu nombre completo.</div>
-                        </div>
+                            <div class="mb-3">
+                                <label for="confirmarPassword" class="form-label">Confirmar contraseña</label>
+                                <input type="password" class="form-control" id="confirmarPassword"
+                                    name="confirmarPassword" required>
+                            </div>
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                            <div class="invalid-feedback">Por favor, ingresa un correo válido.</div>
-                        </div>
+                            <button type="submit" class="btn btn-primary w-100">Registrarme</button>
+                        </form>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="password" name="password" minlength="6"
-                                required>
-                            <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="confirmarPassword" class="form-label">Confirmar contraseña</label>
-                            <input type="password" class="form-control" id="confirmarPassword" name="confirmarPassword"
-                                required>
-                            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="terminos" required>
-                            <label class="form-check-label" for="terminos">Acepto los términos y condiciones</label>
-                            <div class="invalid-feedback">Debes aceptar los términos.</div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Registrarme</button>
-                    </form>
-
-                    <div id="mensaje" class="mt-3 text-center"></div>
+                        <div id="mensaje" class="mt-3 text-center"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-</html>

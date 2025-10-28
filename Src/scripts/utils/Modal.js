@@ -1,81 +1,95 @@
-$(document).on('click', '.post-card', function (e) {
-  e.preventDefault();
-  const id = $(this).data('id');
-  if (!id) return;
+export function initPostModalHandlers() {
+  $(document).off('click', '.post-card').on('click', '.post-card', function (e) {
+    e.preventDefault();
 
-  $('#pubModal').remove();
+    const $el = $(this);
+    const id = $el.attr('data-id') || '';
+    if (!id) return;
 
-  const modalHtml = `
-    <div class="modal fade" id="pubModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Cargando publicación...</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-          <div class="modal-body d-flex justify-content-center align-items-center" style="min-height:120px;">
-            <div class="spinner-border" role="status"><span class="visually-hidden">Cargando...</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+    const estado = $el.attr('data-estado') || '';
+    const nombre = $el.attr('data-nombre') || 'Sin nombre';
+    const edad = $el.attr('data-edad') || '';
+    const imagen_url = $el.attr('data-foto') || '';
+    const raza = $el.attr('data-raza') || '';
+    const descripcion = $el.attr('data-descripcion') || '';
+    const usuario = $el.attr('data-usuario') || '';
 
-  $('body').append(modalHtml);
+    $('#pubModal').remove();
 
-  const modalEl = document.getElementById('pubModal');
-  const modal = new bootstrap.Modal(modalEl);
-  modal.show();
-
-  // Simulacion  "petición AJAX" 
-  setTimeout(() => {
-    // 
-    const data = {
-      id: id,
-      nombre: "Max el Husky",
-      estado: "En adopción",
-      descripcion: "Max es un perro muy cariñoso y juguetón. Le encanta correr en la nieve y dormir en lugares cálidos.",
-      imagen_url: "https://sadenir.com.uy/equilibrio/wp-content/uploads/sites/2/2020/08/simon-rae-jY_2XG-6HU0-unsplash-1.jpg"
-    };
-
-    //  Estructura HTML que Remplazada
-    const content = `
-      <div class="modal-header">
-        <h5 class="modal-title">${data.nombre}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body">
-        <div class="d-flex mb-3 align-items-center">
-          <img src="${data.imagen_url}" 
-               alt="${data.nombre}" 
-               style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
-          <div class="ms-3">
-            <h6 class="mb-1">${data.nombre}</h6>
-            <small class="text-muted">${data.estado}</small>
+    const loadingHtml = `
+      <div class="modal fade" id="pubModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Cargando publicación...</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center" style="min-height:120px;">
+              <div class="spinner-border" role="status"><span class="visually-hidden">Cargando...</span></div>
+            </div>
           </div>
         </div>
-
-        <p>${data.descripcion}</p>
-      </div>
-
-      <div class="modal-footer">
-        <button id="btnComunicar" type="button" class="btn btn-primary">Comunicar</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     `;
 
-    // Reemplazamos todo el contenido del modal por el nuevo HTML
-    $('#pubModal .modal-content').html(content);
+    $('body').append(loadingHtml);
+    const modalEl = document.getElementById('pubModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
 
-    // Acción del botón (solo para probar)
-    $('#btnComunicar').on('click', function () {
-      alert(`Hablando sobre: ${data.nombre}`);
+    setTimeout(() => {
+      const estadoLabel = (estado === 'perdido') ? 'Perdido' : (estado === 'adopcion' ? 'En adopción' : estado);
+      const badgeClass = (estado === 'perdido') ? 'bg-danger' : 'bg-success';
+
+      const content = `
+        <div class="modal-header">
+          <h5 class="modal-title">${escapeHtml(nombre)}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="d-flex mb-3 align-items-center">
+            <img src="${escapeHtml(imagen_url)}"
+                 alt="${escapeHtml(nombre)}"
+                 style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
+            <div class="ms-3">
+              <h6 class="mb-1">${escapeHtml(nombre)} <span class="badge ${badgeClass} ms-2">${escapeHtml(estadoLabel)}</span></h6>
+              <small class="text-muted">${escapeHtml(raza)}</small><br>
+              <small class="text-muted">Publicado por: ${usuario || '—'}</small><br>
+              <small class="text-muted">Edad: ${escapeHtml(edad)} año(s)</small>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <h6>Descripción</h6>
+            <p class="mb-0">${escapeHtml(descripcion)}</p>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button id="btnComunicar" type="button" class="btn btn-primary">Comunicar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      `;
+
+      $('#pubModal .modal-content').html(content);
+
+      $('#btnComunicar').on('click', function () {
+        alert(`Hablando sobre: ${nombre}`);
+      });
+    }, 300);
+
+    $('#pubModal').on('hidden.bs.modal', function () {
+      $(this).remove();
     });
-  }, 1000); // simulamos 1 segundo de espera
 
-  // Cuando se cierre, eliminar del DOM
-  $('#pubModal').on('hidden.bs.modal', function () {
-    $(this).remove();
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"'`=\/]/g, function (s) {
+        return ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
+        })[s];
+      });
+    }
   });
-});
+};
