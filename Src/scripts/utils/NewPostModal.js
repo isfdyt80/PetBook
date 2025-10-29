@@ -72,6 +72,27 @@ export function initNewPostHandlers() {
     $('#newPostForm').on('submit', function (e) {
       e.preventDefault();
 
+      var formData = new FormData(document.getElementById("newPostForm"));
+      $.ajax({
+        url: "backend/controladores/PublicacionController.php",
+        type: "post",
+        dataType: "json",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          if(data.success){
+            console.log("todo ok!", data.message);
+          }
+          console.log(data.error);
+        },
+        error: function (error) {
+          console.error("Error:", error);
+        },
+      });
+    });
+/*
       const estado = $('#postEstado').val();
       const nombre = $('#postNombre').val().trim();
       const edad = $('#postEdad').val();
@@ -136,9 +157,10 @@ export function initNewPostHandlers() {
     function escapeHtml(text) {
       return String(text).replace(/[&<>"'`=\/]/g, function (s) {
         return ({
-          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '`': '&#x60;', '=': '&#x3D;'
         })[s];
       });
     }
+      */
   });
 }
