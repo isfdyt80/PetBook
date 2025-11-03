@@ -66,23 +66,42 @@ export function initNewPetHandlers() {
     modal.show();
 
     // cargar razas desde backend; si falla, usa fallback de prueba
-    $.getJSON('/backend/controladores/MascotaController.php')
-      .done(function (data) {
-        populateRazas(data);
-      })
-      .fail(function () {
-        const fallback = [
-          { id: 1, nombre: 'Husky' },
-          { id: 2, nombre: 'Labrador' },
-          { id: 3, nombre: 'Criollo' }
-        ];
-        populateRazas(fallback);
-      });
+    const razasUrl = '../backend/controladores/MascotaController.php?action=razas';
+
+    // Petición AJAX (jQuery) para traer razas
+    $.ajax({
+      url: razasUrl,
+      method: 'GET',
+      dataType: 'json',
+      // Si necesitás enviar cookies en cross-domain, descomenta xhrFields:
+      // xhrFields: { withCredentials: true },
+      success: function(list) {
+        if (!Array.isArray(list)) {
+          console.warn('Formato de respuesta inesperado para razas', list);
+          populateRazasFallback();
+          return;
+        }
+        populateRazas(list);
+      },
+      error: function(xhr, status, err) {
+        console.warn('No se pudieron cargar las razas desde backend:', status, err, xhr.responseText);
+        populateRazasFallback();
+      }
+    });
 
     function populateRazas(list) {
       const $sel = $('#petRaza').empty();
       $sel.append('<option value="">Seleccioná una raza</option>');
       list.forEach(r => $sel.append(`<option value="${escapeHtml(r.id)}">${escapeHtml(r.nombre)}</option>`));
+    }
+
+    function populateRazasFallback() {
+      const fallback = [
+        { id: 1, nombre: 'Husky' },
+        { id: 2, nombre: 'Labrador' },
+        { id: 3, nombre: 'Criollo' }
+      ];
+      populateRazas(fallback);
     }
 
     // preview de la imagen local
@@ -139,7 +158,11 @@ export function initNewPetHandlers() {
           $(document).trigger('mascota:creada', [res]);
         },
         error: function (xhr) {
-          const msg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error al guardar la mascota.';
+          let msg = 'Error al guardar la mascota.';
+          try {
+            const json = JSON.parse(xhr.responseText || '{}');
+            if (json && json.error) msg = json.error;
+          } catch (e) { /* ignore parse errors */ }
           alert(msg);
         }
       });

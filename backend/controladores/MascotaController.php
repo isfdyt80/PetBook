@@ -1,10 +1,12 @@
 <?php
 require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../DAL/RazaDAL.php';
 
+use DAL\RazaDAL;
 use Modelos\Mascota;
 use DAL\MascotaDAL;
 
-header('Content-Type: application/json');
+header('Conten  t-Type: application/json');
 
 // Mostrar errores en desarrollo
 ini_set('display_errors', 1);
@@ -12,6 +14,29 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 try {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'razas') {
+    try {
+        $razas = RazaDAL::listar();
+        echo json_encode($razas);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al obtener razas', 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
+    // === GET: listar mascotas del usuario
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        if (!$usuario_id) {
+            http_response_code(401);
+            echo json_encode(["error" => "Usuario no autenticado"]);
+            exit;
+        }
+
+        $mascotas = MascotaDAL::buscarPorUsuario($usuario_id);
+        echo json_encode($mascotas);
+        exit;
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $data = json_decode(file_get_contents("php://input"), true);
