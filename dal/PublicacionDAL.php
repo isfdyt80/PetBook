@@ -31,9 +31,9 @@ class PublicacionDAL {
                 $publicacion->estado,
                 $publicacion->mascota_id,
                 $publicacion->usuario_id,
-                $publicacion->foto,
+                $publicacion->foto ?? 'Sin imagen',
                 $publicacion->recompensa,
-                $publicacion->ubicacion,
+                $publicacion->ubicacion ?? 'Laguna los pisos',
                 $publicacion->activo ?? 1
             ]);
 
@@ -55,6 +55,38 @@ class PublicacionDAL {
         try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$id]);
+
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($data) {
+                return new Publicacion(
+                    $data['descripcion'],
+                    $data['estado'],
+                    $data['mascota_id'],
+                    $data['usuario_id'],
+                    $data['publicacion_id'],
+                    $data['activo'],
+                    $data['fecha_creacion'],
+                    $data['foto'],
+                    $data['recompensa'],
+                    $data['ubicacion']
+                );
+            }
+
+            return null;
+
+        } catch (PDOException $e) {
+            error_log("Error al buscar publicación: " . $e->getMessage());
+            throw new \Exception("Error al consultar la base de datos.");
+        }
+    }
+    public static function traerPublicaciones() {
+        $pdo = Conexion::getConexion();
+        $sql = "SELECT * FROM publicaciones";
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
 
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
 

@@ -17,15 +17,6 @@ export function initNewPetHandlers() {
                   <label for="petNombre" class="form-label">Nombre</label>
                   <input id="petNombre" class="form-control" required>
                 </div>
-
-                <div class="mb-3">
-                  <label for="petEstado" class="form-label">Estado</label>
-                  <select id="petEstado" class="form-select" required>
-                    <option value="perdido">Perdido</option>
-                    <option value="adopcion">En adopción</option>
-                  </select>
-                </div>
-
                 <div class="mb-3">
                   <label for="petFecha" class="form-label">Fecha de nacimiento</label>
                   <input id="petFecha" type="date" class="form-control" required>
@@ -122,12 +113,11 @@ export function initNewPetHandlers() {
       ev.preventDefault();
 
       const nombre = $('#petNombre').val().trim();
-      const estado = $('#petEstado').val();
       const fecha_nacimiento = $('#petFecha').val();
       const raza_id = $('#petRaza').val();
       const usuario_id = $('#petUsuarioId').val();
 
-      if (!nombre || !estado || !fecha_nacimiento || !raza_id) {
+      if (!nombre || !fecha_nacimiento || !raza_id) {
         alert('Completá todos los campos.');
         return;
       }
@@ -138,7 +128,6 @@ export function initNewPetHandlers() {
       // === Envío como FormData (multipart) ===
       const fd = new FormData();
       fd.append('nombre', nombre);
-      fd.append('estado', estado);
       fd.append('fecha_nacimiento', fecha_nacimiento);
       fd.append('raza_id', raza_id);
       // preferible tomar usuario_id en backend desde session; si no, lo enviamos
@@ -147,7 +136,7 @@ export function initNewPetHandlers() {
       if (file) fd.append('foto', file);
 
       $.ajax({
-        url: '/backend/controladores/MascotaController.php',
+        url: '../backend/controladores/MascotaController.php',
         method: 'POST',
         data: fd,
         processData: false, // importante para FormData

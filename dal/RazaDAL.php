@@ -10,22 +10,22 @@ class RazaDAL
 {
     public static function listar(): array
     {
-        $pdo = Conexion::getConexion(); // o \Database\Conexion::getConexion();
-        $sql = "SELECT raza_id AS id, nombre AS nombre FROM Razas ORDER BY nombre";
+        $pdo = Conexion::getConexion(); 
+        $sql = "SELECT raza_id AS id, nombre AS nombre FROM razas ORDER BY nombre";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function buscarPorId(int $id)
     {
         if ($id <= 0) return null;
         $pdo = Conexion::getConexion();
-        $sql = "SELECT raza_id AS id, especie_id, nombre, descripcion FROM Razas WHERE raza_id = :id LIMIT 1";
+        $sql = "SELECT raza_id AS id, especie_id, nombre, descripcion FROM razas WHERE raza_id = :id LIMIT 1";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }
 }

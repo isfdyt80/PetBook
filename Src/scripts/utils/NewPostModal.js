@@ -13,46 +13,48 @@ export function initNewPostHandlers() {
             </div>
 
             <div class="modal-body">
+              <!-- Lista / selector de mascotas y botón para añadir -->
+              <div id="misMascotasBlock" class="mb-3">
+                <label class="form-label">Seleccioná una mascota (usar datos guardados)</label>
+                <div class="d-flex gap-2">
+                  <select id="postMascotaSelect" name="mascota_id" class="form-select">
+                    <option value="">Cargando mascotas...</option>
+                  </select>
+                  <button type="button" id="abrirAgregarMascotaBtn" class="btn btn-outline-primary">Añadir mascota</button>
+                </div>
+                <div id="postMascotaPreview" class="mt-2"></div>
+              </div>
+
               <form id="newPostForm" enctype="multipart/form-data">
                 <div class="mb-3">
                   <label for="postEstado" class="form-label">Estado</label>
-                  <select id="postEstado" class="form-select" required>
+                  <select id="postEstado" name="estado" class="form-select" required>
                     <option value="perdido">Perdido</option>
                     <option value="adopcion">En adopción</option>
                   </select>
-                  <div class="form-text">Marca si la mascota está perdida o en adopción.</div>
-                </div>
-
-                <div class="mb-3">
-                  <label for="postNombre" class="form-label">Nombre de la mascota</label>
-                  <input type="text" class="form-control" id="postNombre" placeholder="Ej: Max" required>
-                </div>
-
-                <div class="mb-3">
-                  <label for="postEdad" class="form-label">Edad (años)</label>
-                  <input type="number" min="0" step="1" class="form-control" id="postEdad" placeholder="Ej: 3" required>
-                </div>
-
-                <div class="mb-3">
-                  <label for="postFotoFile" class="form-label">Foto (desde tu equipo)</label>
-                  <input type="file" accept="image/*" class="form-control" id="postFotoFile" required>
-                </div>
-
-                <div class="mb-3">
-                  <label for="postRaza" class="form-label">Raza</label>
-                  <input type="text" class="form-control" id="postRaza" placeholder="Ej: Husky" required>
+                  <div class="form-text">Marca si la publicación es por mascota perdida o por adopción.</div>
                 </div>
 
                 <div class="mb-3">
                   <label for="postDescripcion" class="form-label">Descripción</label>
-                  <textarea id="postDescripcion" class="form-control" rows="3" placeholder="Describe la mascota..." required></textarea>
+                  <textarea id="postDescripcion" name="descripcion" class="form-control" rows="3" placeholder="Describe la publicación..." required></textarea>
                 </div>
 
                 <div class="mb-3">
-                  <label for="postUsuario" class="form-label">Usuario</label>
-                  <input type="text" class="form-control" id="postUsuario" placeholder="Nombre del usuario" value="" disabled>
-                  <div class="form-text">El usuario se completará cuando el sistema de login esté listo.</div>
+                  <label for="postFotoFile" class="form-label">Foto de la publicación (opcional)</label>
+                  <input type="file" accept="image/*" class="form-control" id="postFotoFile" name="foto_publicacion" >
+                  <div class="mt-2">
+                    <img id="postFotoPreview" src="" alt="Preview" style="display:none; width:120px; height:120px; object-fit:cover; border-radius:6px; border:1px solid #ddd;">
+                  </div>
                 </div>
+
+                <div class="mb-3">
+                  <label for="postRecompensa" class="form-label">Recompensa (opcional)</label>
+                  <input type="text" id="postRecompensa" name="recompensa" class="form-control" placeholder="Ej: 5000">
+                  <div class="form-text">Si corresponde, importe o detalles de la recompensa.</div>
+                </div>
+
+                <input type="hidden" id="useMascotaFoto" name="use_mascota_foto" value="1">
 
                 <div class="text-end">
                   <button type="submit" class="btn btn-primary">Publicar</button>
@@ -66,101 +68,170 @@ export function initNewPostHandlers() {
     `;
 
     $('body').append(modalHtml);
-    const modal = new bootstrap.Modal(document.getElementById('newPostModal'));
-    modal.show();
+    const modalEl = document.getElementById('newPostModal');
+    const bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
 
-    $('#newPostForm').on('submit', function (e) {
-      e.preventDefault();
-
-      var formData = new FormData(document.getElementById("newPostForm"));
-      $.ajax({
-        url: "backend/controladores/PublicacionController.php",
-        type: "post",
-        dataType: "json",
-        data: formData,
-        cache: false,
-        contentType: false,
-        processData: false,
-        success: function (data) {
-          if(data.success){
-            console.log("todo ok!", data.message);
-          }
-          console.log(data.error);
-        },
-        error: function (error) {
-          console.error("Error:", error);
-        },
+    // UTIL: escapeHtml
+    function escapeHtml(text) {
+      return String(text || '').replace(/[&<>"'`=\/]/g, function (s) {
+        return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' })[s];
       });
-    });
-/*
-      const estado = $('#postEstado').val();
-      const nombre = $('#postNombre').val().trim();
-      const edad = $('#postEdad').val();
-      const fileInput = $('#postFotoFile')[0];
-      const raza = $('#postRaza').val().trim();
-      const descripcion = $('#postDescripcion').val().trim();
-      const usuario = ''; // se llenará más tarde cuando implementes login
+    }
 
-      if (!nombre || !edad || !fileInput.files.length || !raza || !descripcion) {
-        alert('Por favor completá todos los campos y subí una foto.');
+    // preview local de la foto de la publicación
+    $('#postFotoFile').on('change', function () {
+      const f = this.files && this.files[0];
+      if (!f) {
+        $('#postFotoPreview').hide().attr('src', '');
+        // si no hay archivo volver a permitir uso de foto de mascota por defecto
+        $('#useMascotaFoto').val('1');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        $('#postFotoPreview').attr('src', ev.target.result).show();
+      };
+      reader.readAsDataURL(f);
+      // si el usuario eligió archivo, no usar foto de mascota por defecto
+      $('#useMascotaFoto').val('0');
+    });
+
+    // cargar mascotas del usuario por AJAX
+    const misMascotasUrl = '../backend/controladores/MascotaController.php?action=mis_mascotas';
+    function cargarMisMascotas(preselectId) {
+      $.ajax({
+        url: misMascotasUrl,
+        method: 'GET',
+        dataType: 'json',
+          success: function(list) {
+          const $sel = $('#postMascotaSelect').empty();
+          if (!Array.isArray(list) || list.length === 0) {
+            $sel.append('<option value="">No tenés mascotas</option>');
+            $('#postMascotaPreview').html('<small class="text-muted">Ninguna mascota. Podés crear una nueva.</small>');
+            $('#postMascotaId').remove();
+            return;
+          }
+          $sel.append('<option value="">Elegí una mascota</option>');
+          list.forEach(m => {
+            const text = (m.nombre || '—') + (m.raza_nombre ? ' — ' + m.raza_nombre : '');
+            $sel.append(`<option value="${escapeHtml(m.id)}" data-foto="${escapeHtml(m.foto||'')}" data-raza="${escapeHtml(m.raza_nombre||'')}">${escapeHtml(text)}</option>`);
+          });
+
+          if (preselectId) {
+            $sel.val(String(preselectId));
+            $sel.trigger('change');
+          }
+        },
+        error: function(xhr) {
+          $('#postMascotaSelect').empty().append('<option value="">Error cargando mascotas</option>');
+          console.warn('Error al cargar mascotas:', xhr.responseText || xhr.statusText);
+        }
+      });
+    }
+
+    // inicial cargar
+    cargarMisMascotas();
+
+    // change: actualizar preview de mascota y hidden mascota_id
+    $(document).off('change', '#postMascotaSelect').on('change', '#postMascotaSelect', function() {
+      const $sel = $(this);
+      const val = $sel.val();
+      if (!val) {
+        $('#postMascotaPreview').html('');
+        $('#postMascotaId').remove();
+        return;
+      }
+      const foto = $sel.find('option:selected').data('foto') || '';
+      const raza = $sel.find('option:selected').data('raza') || '';
+      const text = $sel.find('option:selected').text();
+
+      let html = `<div class="d-flex align-items-center"><div style="width:64px;height:64px;overflow:hidden;border-radius:6px;margin-right:10px">`;
+      if (foto) html += `<img src="${escapeHtml('../backend/' + foto).replace('//','/')}" style="width:64px;height:64px;object-fit:cover;">`;
+      else html += `<div style="width:64px;height:64px;background:#f0f0f0;border-radius:6px"></div>`;
+      html += `</div><div><div><strong>${escapeHtml(text)}</strong></div><small class="text-muted">${escapeHtml(raza)}</small></div></div>`;
+
+      $('#postMascotaPreview').html(html);
+
+      if ($('#postMascotaId').length === 0) {
+        $('#newPostForm').append('<input type="hidden" id="postMascotaId" name="mascota_id" value="">');
+      }
+      $('#postMascotaId').val(val);
+
+      // si no hay archivo seleccionado, mantener useMascotaFoto=1 para que la publicación use la foto de la mascota
+      const hasFile = $('#postFotoFile')[0].files && $('#postFotoFile')[0].files.length;
+      if (!hasFile) $('#useMascotaFoto').val('1');
+    });
+
+    // botón para abrir el modal de añadir mascota (reutilizar handler existente)
+    $(document).off('click', '#abrirAgregarMascotaBtn').on('click', '#abrirAgregarMascotaBtn', function() {
+      $('#añadir_mascotas').trigger('click');
+    });
+
+    // cuando se publique una mascota desde cualquier parte del sitio, recargamos y preseleccionamos
+    $(document).off('mascota:creada.newpost').on('mascota:creada.newpost', function(ev, nuevaMascota) {
+      if (nuevaMascota && nuevaMascota.id) {
+        cargarMisMascotas(nuevaMascota.id);
+      } else {
+        cargarMisMascotas();
+      }
+    });
+
+    // submit del formulario: enviamos descripcion, estado, foto_publicacion (si hay), mascota_id, recompensa y use_mascota_foto
+    $('#newPostForm').on('submit', function (ev) {
+      ev.preventDefault();
+
+      const estado = $('#postEstado').val();
+      const descripcion = $('#postDescripcion').val().trim();
+      const mascota_id = $('#postMascotaId').length ? $('#postMascotaId').val() : '';
+
+      if (!descripcion) {
+        alert('Completá la descripción.');
         return;
       }
 
-      const file = fileInput.files[0];
-      const reader = new FileReader();
+      const fd = new FormData();
+      fd.append('estado', estado);
+      fd.append('descripcion', descripcion);
+      if (mascota_id) fd.append('mascota_id', mascota_id);
 
-      reader.onload = function (ev) {
-        const fotoDataUrl = ev.target.result;
-        const id = Date.now();
+      const file = $('#postFotoFile')[0].files && $('#postFotoFile')[0].files[0];
+      if (file) {
+        fd.append('foto_publicacion', file);
+        fd.append('use_mascota_foto', '0');
+      } else {
+        fd.append('use_mascota_foto', '1');
+      }
 
-        // preview corto para la card
-        const preview = descripcion.length > 120 ? descripcion.slice(0, 120) + '...' : descripcion;
+      const recompensa = $('#postRecompensa').val();
+      if (recompensa !== undefined) fd.append('recompensa', recompensa);
 
-        const newCard = `
-          <a href="#" class="card p-1 col-md-3 ms-5 text-decoration-none post-card"
-             data-id="${id}"
-             data-estado="${escapeHtml(estado)}"
-             data-nombre="${escapeHtml(nombre)}"
-             data-edad="${escapeHtml(edad)}"
-             data-foto="${escapeHtml(fotoDataUrl)}"
-             data-raza="${escapeHtml(raza)}"
-             data-descripcion="${escapeHtml(descripcion)}"
-             data-usuario="${escapeHtml(usuario)}">
-            <div>
-              <img src="${escapeHtml(fotoDataUrl)}" class="card-img-top" alt="${escapeHtml(nombre)}" style="height:160px; object-fit:cover;">
-              <div class="card-body">
-                <h5 class="card-title">${escapeHtml(nombre)}</h5>
-                <p class="card-text text-muted mb-1">${escapeHtml(raza)}</p>
-                <p class="card-text small text-secondary mb-1 description-preview">${escapeHtml(preview)}</p>
-                <small class="text-muted">Publicado por ${usuario || '—'}</small>
-              </div>
-            </div>
-          </a>
-        `;
-
-        const targetRow = $('main .row').first();
-        if (targetRow.length) {
-          targetRow.append(newCard);
-        } else {
-          $('main').append(`<div class="row mt-3">${newCard}</div>`);
+      $.ajax({
+        url: '../backend/controladores/PublicacionController.php',
+        method: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(res) {
+          if (res && res.success) {
+            bsModal.hide();
+            $('#newPostModal').on('hidden.bs.modal', function () { $(this).remove(); });
+            $(document).trigger('publicacion:creada', [res]);
+          } else {
+            const msg = res && res.error ? res.error : 'Error al crear la publicación.';
+            alert(msg);
+          }
+        },
+        error: function(xhr) {
+          let msg = 'Error al crear la publicación.';
+          try {
+            const json = JSON.parse(xhr.responseText || '{}');
+            if (json && json.error) msg = json.error;
+          } catch (e) {}
+          alert(msg);
         }
-
-        modal.hide();
-        $('#newPostModal').on('hidden.bs.modal', function () {
-          $(this).remove();
-        });
-      };
-
-      reader.readAsDataURL(file);
-    });
-
-    function escapeHtml(text) {
-      return String(text).replace(/[&<>"'`=\/]/g, function (s) {
-        return ({
-          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '`': '&#x60;', '=': '&#x3D;'
-        })[s];
       });
-    }
-      */
+    });
   });
 }
