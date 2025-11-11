@@ -1,59 +1,13 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        crossorigin="anonymous"></script>
-    <title>PetBook - Publicaciones</title>
-
-    <style>
-        body {
-            background-color: #f9f6fb;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        nav {
-            background-color: #f3e8ff;
-        }
-
-        .nav-link {
-            color: #6a1b9a;
-            font-weight: 500;
-        }
-
-        .nav-link:hover {
-            background-color: #e1bee7;
-            color: #4a0072;
-        }
-
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(133, 81, 158, 0.2);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: scale(1.02);
-        }
-
-        .btn-primary {
-            background-color: #8e24aa;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #6a1b9a;
-        }
-
-        .modal-header {
-            background-color: #8e24aa;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="Src/scss/custom.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Index</title>
 </head>
 
 <body>
@@ -61,131 +15,61 @@
         <div class="row">
 
             <!-- Navbar lateral -->
-<!-- <nav class="col-2 border vh-100 d-flex flex-column position-sticky" style="top: 0;">
+            <nav class="col-2 border vh-100 d-flex flex-column position-sticky" style="top: 0;">
                 <a href="#" class="mb-3 h4 text-decoration-none ms-2">Logo</a>
                 <ul class="nav nav-pills flex-column">
+
                     <li class="nav-item mb-2">
-                        <a class="nav-link" href="/Public/Prueba_Index.html">Inicio</a>
+                        <a class="nav-link active" href="Index.html">Inicio</a>
                     </li>
-                    <li class="nav-item mb-1">
+                    <!-- <li class="nav-item mb-1">
                         <a class="nav-link" href="#">Explorar</a>
-                    </li>
+                    </li> -->
                     <li class="nav-item mb-1">
-                        <a class="nav-link" href="/Public/Notificaciones.html">Notificaciones</a>
-                    </li>
+                        <a class="nav-link" href="Public/Notificaciones.html">Notificaciones</a>
+
                     <li class="nav-item mb-1">
-                        <a class="nav-link" href="/Public/usuario.html">Perfil</a>
+                        <a class="nav-link" href="Public/usuario.html">Perfil</a>
                     </li>
+
                 </ul>
+
+                <div class="mt-auto px-2 pb-2">
+                    <a id="newPostLink" class=" active text-decoration-none p-2" href="#" style="margin:0;">Nueva
+                        Publicacion</a>
+                </div>
             </nav>
 
-            <!-- Contenido principal -->
-<!-- <main class="col-10 p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="text-dark">Publicaciones</h3>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPublicacion">➕ Publicar</button>
+            <!-- Feed Principal -->
+            <main class="col-10 p-0">
+                <div class="container-fluid ">
+                    <h3 class="text-center">Incio</h3>
                 </div>
 
-                <!-- Grilla de publicaciones -->
-<!-- <div class="row" id="publicacionesContainer">
-                    <!-- Las publicaciones se van agregando acá -->
-<!-- </div>
+                <div class="container-fluid  vh-100">
+
+
+                    <div class="mt-1 p-1">
+
+
+                        <div class="row" id="card-container">
+
+
+
+                        </div>
+
+
+
+
+
+                    </div>
+
             </main>
         </div>
-    </div> -->
+    </div>
 
-<!-- Modal para crear publicación -->
-<!-- <div class="modal fade" id="modalPublicacion" tabindex="-1" aria-labelledby="modalPublicacionLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalPublicacionLabel">Crear nueva publicación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formPublicacion">
-                        <div class="mb-3">
-                            <label class="form-label">Foto del animal</label>
-                            <input type="file" id="foto" class="form-control" accept="image/*">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nombre o descripción corta</label>
-                            <input type="text" id="descripcion" class="form-control" placeholder="Ej: Gatito perdido en Palermo">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Estado</label>
-                            <select id="estado" class="form-select">
-                                <option value="Perdido">Perdido</option>
-                                <option value="En adopción">En adopción</option>
-                                <option value="Encontrado">Encontrado</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Publicar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>  -->
-
-
-
-<!-- <script>
-        const publicacionesContainer = document.getElementById('publicacionesContainer');
-        const formPublicacion = document.getElementById('formPublicacion');
-
-        formPublicacion.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const descripcion = document.getElementById('descripcion').value;
-            const estado = document.getElementById('estado').value;
-            const fotoInput = document.getElementById('foto');
-            const file = fotoInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (event) {
-                const nuevaCard = document.createElement('div');
-                nuevaCard.classList.add('col-md-4', 'mb-4');
-                nuevaCard.innerHTML = `
-                    <div class="card">
-                        <img src="${event.target.result}" class="card-img-top" alt="Foto de mascota">
-                        <div class="card-body">
-                            <h5 class="card-title">${estado}</h5>
-                            <p class="card-text">${descripcion}</p>
-                            <button class="btn btn-outline-primary btn-sm" onclick="verDescripcion('${descripcion}', '${estado}', '${event.target.result}')">Ver más</button>
-                        </div>
-                    </div>
-                `;
-                publicacionesContainer.prepend(nuevaCard);
-                formPublicacion.reset();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('modalPublicacion'));
-                modal.hide();
-            };
-
-            if (file) reader.readAsDataURL(file);
-        });
-
-        function verDescripcion(descripcion, estado, foto) {
-            const modalHTML = `
-                <div class="modal fade" id="modalVerDescripcion" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title">${estado}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <img src="${foto}" class="img-fluid rounded mb-3">
-                                <p>${descripcion}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            const modal = new bootstrap.Modal(document.getElementById('modalVerDescripcion'));
-            modal.show();
-            document.getElementById('modalVerDescripcion').addEventListener('hidden.bs.modal', e => e.target.remove());
-        }
-    </script>
+    <script type="module" src="Src/scripts/Main.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
-</html>  -->
+
+</html>

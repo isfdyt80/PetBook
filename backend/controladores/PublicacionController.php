@@ -14,18 +14,19 @@ try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     $contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
 
-    // GET: devolver mascotas del usuario (útil para pruebas y para llenar select)
+    // GET: devolver publicaciones (para el feed)
     if ($method === 'GET') {
         header('Content-Type: application/json; charset=utf-8');
 
-        if (!$usuario_id) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Usuario no autenticado (dev)']);
-            exit;
+        try {
+            $publicaciones = DAL\PublicacionDAL::traerPublicaciones();
+            // devolver siempre un array JSON
+            echo json_encode($publicaciones);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al obtener publicaciones', 'message' => $e->getMessage()]);
         }
 
-        $mascotas = MascotaDAL::buscarPorUsuario((int)$usuario_id);
-        echo json_encode($mascotas);
         exit;
     }
 
