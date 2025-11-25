@@ -163,13 +163,151 @@ export function initNewPostHandlers() {
       if (!hasFile) $('#useMascotaFoto').val('1');
     });
 
-    // botón para abrir el modal de añadir mascota (reutilizar handler existente)
-    $(document).off('click', '#abrirAgregarMascotaBtn').on('click', '#abrirAgregarMascotaBtn', function() {
-      $('#añadir_mascotas').trigger('click');
+    // botón para abrir el modal de añadir mascota (disparar el mismo handler que la barra lateral)
+    $(document).off('click', '#abrirAgregarMascotaBtn').on('click', '#abrirAgregarMascotaBtn', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Crear el modal de mascota directamente aquí
+      if ($('#newPetModal').length > 0) $('#newPetModal').remove();
+
+      const modalHtml = `
+        <div class="modal fade" id="newPetModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Agregar mascota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+              <div class="modal-body">
+                <form id="newPetFormModal" enctype="multipart/form-data">
+                  <div class="mb-3">
+                    <label for="petNombreModal" class="form-label">Nombre</label>
+                    <input id="petNombreModal" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="petFechaModal" class="form-label">Fecha de nacimiento</label>
+                    <input id="petFechaModal" type="date" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="petRazaModal" class="form-label">Raza</label>
+                    <select id="petRazaModal" class="form-select" required>
+                      <option value="">Cargando...</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="petFotoFileModal" class="form-label">Foto (desde tu equipo)</label>
+                    <input id="petFotoFileModal" type="file" accept="image/*" class="form-control">
+                    <div class="mt-2">
+                      <img id="petFotoPreviewModal" src="" alt="Preview" style="display:none; width:120px; height:120px; object-fit:cover; border-radius:6px; border:1px solid #ddd;">
+                    </div>
+                  </div>
+                  <input type="hidden" id="petUsuarioIdModal" value="">
+                  <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      $('body').append(modalHtml);
+      const modalEl = document.getElementById('newPetModal');
+      const petModal = new bootstrap.Modal(modalEl);
+      petModal.show();
+
+      // Cargar razas
+      $.ajax({
+        url: window.getApiUrl('backend/controladores/MascotaController.php?action=razas'),
+        method: 'GET',
+        dataType: 'json',
+        success: function(list) {
+          if (Array.isArray(list) && list.length > 0) {
+            const $sel = $('#petRazaModal').empty();
+            list.forEach(r => {
+              $sel.append(`<option value="${r.id}">${escapeHtml(r.nombre)}</option>`);
+            });
+          }
+        },
+        error: function() {
+          $('#petRazaModal').html('<option value="">Error al cargar razas</option>');
+        }
+      });
+
+      // Preview de imagen
+      $('#petFotoFileModal').on('change', function() {
+        const f = this.files && this.files[0];
+        if (!f) {
+          $('#petFotoPreviewModal').hide().attr('src', '');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          $('#petFotoPreviewModal').attr('src', ev.target.result).show();
+        };
+        reader.readAsDataURL(f);
+      });
+
+      // Submit del formulario de mascota
+      $('#newPetFormModal').on('submit', function(ev) {
+        ev.preventDefault();
+
+        const nombre = $('#petNombreModal').val().trim();
+        const fecha_nacimiento = $('#petFechaModal').val();
+        const raza_id = $('#petRazaModal').val();
+        const usuario_id = 2; // Dev: hardcoded
+
+        if (!nombre || !fecha_nacimiento || !raza_id) {
+          alert('Completá todos los campos.');
+          return;
+        }
+
+        const fileInput = $('#petFotoFileModal')[0];
+        const file = fileInput.files && fileInput.files[0];
+
+        const fd = new FormData();
+        fd.append('nombre', nombre);
+        fd.append('fecha_nacimiento', fecha_nacimiento);
+        fd.append('raza_id', raza_id);
+        fd.append('usuario_id', usuario_id);
+        if (file) fd.append('foto', file);
+
+        $.ajax({
+          url: window.getApiUrl('backend/controladores/MascotaController.php'),
+          method: 'POST',
+          data: fd,
+          processData: false,
+          contentType: false,
+          dataType: 'json',
+          success: function(res) {
+            petModal.hide();
+            $('#newPetModal').remove();
+            // Disparar el evento para que el modal de publicación lo escuche
+            $(document).trigger('mascota:creada', [res]);
+          },
+          error: function(xhr) {
+            let msg = 'Error al guardar la mascota.';
+            try {
+              const json = JSON.parse(xhr.responseText || '{}');
+              if (json && json.error) msg = json.error;
+            } catch (e) {}
+            alert(msg);
+          }
+        });
+      });
+
+      function escapeHtml(text) {
+        return String(text || '').replace(/[&<>"'`=\/]/g, function (s) {
+          return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' })[s];
+        });
+      }
     });
 
     // cuando se publique una mascota desde cualquier parte del sitio, recargamos y preseleccionamos
-    $(document).off('mascota:creada.newpost').on('mascota:creada.newpost', function(ev, nuevaMascota) {
+    $(document).off('mascota:creada').on('mascota:creada', function(ev, nuevaMascota) {
       if (nuevaMascota && nuevaMascota.id) {
         cargarMisMascotas(nuevaMascota.id);
       } else {
@@ -216,7 +354,15 @@ export function initNewPostHandlers() {
         success: function(res) {
           if (res && res.success) {
             bsModal.hide();
-            $('#newPostModal').on('hidden.bs.modal', function () { $(this).remove(); });
+            $('#newPostModal').on('hidden.bs.modal', function () { 
+              $(this).remove();
+              // Recargar publicaciones automáticamente después de crear una nueva
+              setTimeout(() => {
+                if (window.loadPublicaciones) {
+                  window.loadPublicaciones();
+                }
+              }, 300);
+            });
             $(document).trigger('publicacion:creada', [res]);
           } else {
             const msg = res && res.error ? res.error : 'Error al crear la publicación.';

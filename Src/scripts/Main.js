@@ -3,6 +3,9 @@ import { initNewPostHandlers } from './utils/NewPostModal.js';
 import { initNewPetHandlers } from './utils/initNewPetHandlers.js';
 import { loadPublicaciones } from './utils/loadPosts.js';
 
+// Exponer loadPublicaciones globalmente para que otros módulos puedan usarlo
+window.loadPublicaciones = loadPublicaciones;
+
 // Función auxiliar global para construir rutas de API
 // Detecta si estamos en una carpeta (Public/) o en raíz (Index.html)
 window.getApiUrl = function(endpoint) {
