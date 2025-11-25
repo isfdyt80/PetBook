@@ -57,7 +57,7 @@ export function initNewPetHandlers() {
     modal.show();
 
     // cargar razas desde backend; si falla, usa fallback de prueba
-    const razasUrl = '../backend/controladores/MascotaController.php?action=razas';
+    const razasUrl = window.getApiUrl('backend/controladores/MascotaController.php?action=razas');
 
     // Petición AJAX (jQuery) para traer razas
     $.ajax({
@@ -136,7 +136,7 @@ export function initNewPetHandlers() {
       if (file) fd.append('foto', file);
 
       $.ajax({
-        url: '../backend/controladores/MascotaController.php',
+        url: window.getApiUrl('backend/controladores/MascotaController.php'),
         method: 'POST',
         data: fd,
         processData: false, // importante para FormData

@@ -30,7 +30,7 @@ class PublicacionDAL {
                 $publicacion->descripcion,
                 $publicacion->estado,
                 $publicacion->mascota_id,
-                $publicacion->usuario_id,
+                $publicacion->usuario_id ?? 2,
                 $publicacion->foto ?? 'Sin imagen',
                 $publicacion->recompensa,
                 $publicacion->ubicacion ?? 'Laguna los pisos',
@@ -80,6 +80,54 @@ class PublicacionDAL {
             throw new \Exception("Error al consultar la base de datos.");
         }
     }
+    public static function eliminar($publicacion_id) {
+        $pdo = Conexion::getConexion();
+        $sql = "UPDATE publicaciones SET activo = 0 WHERE publicacion_id = ?";
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            $resultado = $stmt->execute([(int)$publicacion_id]);
+            return $resultado;
+        } catch (PDOException $e) {
+            error_log("Error al eliminar publicación: " . $e->getMessage());
+            throw new \Exception("Error al eliminar la publicación en la base de datos.");
+        }
+    }
+
+    public static function modificar($publicacion_id, array $fields) {
+        $pdo = Conexion::getConexion();
+
+        // Campos permitidos para actualizar
+        $allowed = ['descripcion', 'estado', 'ubicacion', 'recompensa', 'foto'];
+        $set = [];
+        $params = [];
+
+        foreach ($allowed as $col) {
+            if (array_key_exists($col, $fields)) {
+                $set[] = "$col = ?";
+                $params[] = $fields[$col];
+            }
+        }
+
+        if (empty($set)) {
+            // Nothing to update
+            return false;
+        }
+
+        $params[] = (int)$publicacion_id;
+
+        $sql = "UPDATE publicaciones SET " . implode(', ', $set) . " WHERE publicacion_id = ?";
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            $ok = $stmt->execute($params);
+            return $ok;
+        } catch (PDOException $e) {
+            error_log("Error al modificar publicación: " . $e->getMessage());
+            throw new \Exception("Error al modificar la publicación en la base de datos.");
+        }
+    }
+
     public static function traerPublicaciones() {
         $pdo = Conexion::getConexion();
 
@@ -114,11 +162,30 @@ class PublicacionDAL {
             // Normalizar resultado: si no hay filas, devolver array vacío
             if (!$rows) return [];
 
-            // Ajustes mínimos: preferir foto de publicación, si no existe usar foto de mascota
+            // Ajustes mínimos: construir rutas completas para las imágenes
             foreach ($rows as &$r) {
-                if (empty($r['foto']) || $r['foto'] === 'Sin imagen') {
-                    $r['foto'] = !empty($r['mascota_foto']) ? $r['mascota_foto'] : 'assets/img/default_pet.jpg';
+                $pubFoto = isset($r['foto']) ? trim($r['foto']) : '';
+                $mascFoto = isset($r['mascota_foto']) ? trim($r['mascota_foto']) : '';
+
+                // Si la publicación tiene foto válida, usarla y asegurar prefijo
+                if ($pubFoto !== '' && strtolower($pubFoto) !== 'sin imagen') {
+                    if (strpos($pubFoto, 'uploads/') === 0 || preg_match('/^https?:\/\//', $pubFoto)) {
+                        $r['foto'] = $pubFoto;
+                    } else {
+                        $r['foto'] = 'uploads/publicaciones/' . $pubFoto;
+                    }
                 }
+                // Si no, pero la mascota tiene foto, usar la de la mascota con su prefijo
+                else if ($mascFoto !== '' && strtolower($mascFoto) !== 'sin imagen') {
+                    if (strpos($mascFoto, 'uploads/') === 0 || preg_match('/^https?:\/\//', $mascFoto)) {
+                        $r['foto'] = $mascFoto;
+                    } else {
+                        $r['foto'] = 'uploads/mascotas/' . $mascFoto;
+                    }
+                } else {
+                    $r['foto'] = 'assets/img/default_pet.jpg';
+                }
+
                 // Asegurar campos esperados por el front
                 $r['id'] = (int)$r['id'];
                 $r['mascota_id'] = isset($r['mascota_id']) ? (int)$r['mascota_id'] : null;

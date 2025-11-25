@@ -97,7 +97,7 @@ try {
         }
 
         // Manejo de la foto (solo si multipart y archivo presente)
-        $fotoRuta = "uploads\mascotas\mascota_690a934b7067c_Grafico matriz foda sencillo formal neutro azul gris.jpg"; // Valor por defecto
+        $fotoRuta = "assets/img/default_pet.jpg"; // Valor por defecto
         if ($isMultipart && isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
             $directorio = __DIR__ . "../../uploads/mascotas/";
             if (!is_dir($directorio)) {

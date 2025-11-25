@@ -98,7 +98,7 @@ export function initNewPostHandlers() {
     });
 
     // cargar mascotas del usuario por AJAX
-    const misMascotasUrl = '../backend/controladores/MascotaController.php?action=mis_mascotas';
+    const misMascotasUrl = window.getApiUrl('backend/controladores/MascotaController.php?action=mis_mascotas');
     function cargarMisMascotas(preselectId) {
       $.ajax({
         url: misMascotasUrl,
@@ -147,7 +147,7 @@ export function initNewPostHandlers() {
       const text = $sel.find('option:selected').text();
 
       let html = `<div class="d-flex align-items-center"><div style="width:64px;height:64px;overflow:hidden;border-radius:6px;margin-right:10px">`;
-      if (foto) html += `<img src="${escapeHtml('../backend/' + foto).replace('//','/')}" style="width:64px;height:64px;object-fit:cover;">`;
+      if (foto) html += `<img src="${escapeHtml(window.getApiUrl('backend/' + foto))}" style="width:64px;height:64px;object-fit:cover;">`;
       else html += `<div style="width:64px;height:64px;background:#f0f0f0;border-radius:6px"></div>`;
       html += `</div><div><div><strong>${escapeHtml(text)}</strong></div><small class="text-muted">${escapeHtml(raza)}</small></div></div>`;
 
@@ -207,7 +207,7 @@ export function initNewPostHandlers() {
       if (recompensa !== undefined) fd.append('recompensa', recompensa);
 
       $.ajax({
-        url: '../backend/controladores/PublicacionController.php',
+        url: window.getApiUrl('backend/controladores/PublicacionController.php'),
         method: 'POST',
         data: fd,
         processData: false,
