@@ -41,8 +41,8 @@ export function initNewPostHandlers() {
                 </div>
 
                 <div class="mb-3">
-                  <label for="postFotoFile" class="form-label">Foto de la publicación (opcional)</label>
-                  <input type="file" accept="image/*" class="form-control" id="postFotoFile" name="foto_publicacion" >
+                  <label for="postFotoFile" class="form-label">Foto de la publicación</label>
+                  <input type="file" accept="image/*" class="form-control" id="postFotoFile" name="foto_publicacion" required>
                   <div class="mt-2">
                     <img id="postFotoPreview" src="" alt="Preview" style="display:none; width:120px; height:120px; object-fit:cover; border-radius:6px; border:1px solid #ddd;">
                   </div>

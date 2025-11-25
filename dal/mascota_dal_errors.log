@@ -1,0 +1,12 @@
+[2025-11-05 00:46:03] crear: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2025-11-05 00:46:22] crear: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2025-11-05 00:48:10] crear: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2025-11-05 00:49:58] crear: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2025-11-05 00:50:28] crear: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2025-11-05 00:50:34] crear: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2025-11-05 00:51:42] crear: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'foto' cannot be null
+[2025-11-05 00:51:58] crear: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'foto' cannot be null
+[2025-11-05 00:53:36] crear: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'foto' cannot be null
+[2025-11-05 00:53:52] crear: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'foto' cannot be null
+[2025-11-05 00:59:07] crear: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'foto' cannot be null
+[2025-11-05 01:00:28] crear: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'foto' cannot be null

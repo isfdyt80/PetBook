@@ -116,6 +116,14 @@ try {
             $useMascotaFoto = $data['use_mascota_foto'] ?? '1';
         }
 
+        // Validar que la foto esté presente
+        if (!isset($_FILES['foto_publicacion']) || $_FILES['foto_publicacion']['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'La foto de la publicación es obligatoria']);
+            exit;
+        }
+
         if (empty($descripcion) || empty($estado) || empty($mascota_id)) {
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
