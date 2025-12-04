@@ -2,6 +2,7 @@
 // core/Env.php
 namespace Core;
 use Exception;
+
 class Env {
     private static $vars = [];
 
