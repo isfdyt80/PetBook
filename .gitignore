@@ -1,7 +1,2 @@
-test-dev-mariani.php
 .vscode
-/php/config_dev_mariani.php
 .env
-config/
-composer.json
-composer.lock
