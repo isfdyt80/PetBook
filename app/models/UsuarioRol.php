@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Core\Database;
 use PDO;
 
 class UsuarioRol 
@@ -11,8 +12,9 @@ class UsuarioRol
     {
         $db = Database::getConnection();
 
-        $sql = "INSERT INTO usuario_rol (id_usuario, id_rol)
-                VALUES (:idUsuario, :idRol)";
+        $sql = "INSERT INTO usuario_rol (id_usuario, id_rol, eliminado)
+                VALUES (:idUsuario, :idRol, 0)";
+                //tengo que chequear que exista eliminado en la bd 
 
         $stmt = $db->prepare($sql);
 
@@ -49,6 +51,7 @@ class UsuarioRol
 
         return $stmt->execute([
             ':id' => $id
+         
         ]);
     }
 }
