@@ -7,6 +7,9 @@ use App\Core\Database;
 
 class TipoReaccion
 {
+    /**
+     * Lista todos los tipos de reacción disponibles .
+     */
     public static function listar(): array
     {
         $db = Database::getConnection();

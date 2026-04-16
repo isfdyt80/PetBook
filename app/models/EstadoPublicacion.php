@@ -7,6 +7,9 @@ use App\Core\Database;
 
 class EstadoPublicacion
 {
+    /**
+     * lista todos los estados posibles de publicacion
+     */
     public static function listar(): array
     {
         $db = Database::getConnection();
@@ -19,6 +22,9 @@ class EstadoPublicacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Busca un estado por su nombre 
+     */
     public static function buscarPorNombre(string $nombre): ?array
     {
         $db = Database::getConnection();

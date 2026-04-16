@@ -7,6 +7,9 @@ use App\Core\Database;
 
 class Reaccion
 {
+    /**
+     * Crea una reacción.
+     */
     public static function crear(int $idUsuario, int $idPublicacion, int $idTipoReaccion): bool
     {
         $db = Database::getConnection();
@@ -26,6 +29,9 @@ class Reaccion
         ]);
     }
 
+    /**
+     * Actualiza una reacción existente.
+     */
     public static function actualizar(int $idUsuario, int $idPublicacion, int $idTipoReaccion): bool
     {
         $db = Database::getConnection();
@@ -44,6 +50,9 @@ class Reaccion
         ]);
     }
 
+    /**
+     * Elimina una reacción (no requiere soft delete).
+     */
     public static function eliminar(int $idUsuario, int $idPublicacion): bool
     {
         $db = Database::getConnection();
@@ -60,6 +69,9 @@ class Reaccion
         ]);
     }
 
+    /**
+     * Cuenta reacciones por tipo en una publicación.
+     */
     public static function contarPorPublicacion(int $idPublicacion): array
     {
         $db = Database::getConnection();

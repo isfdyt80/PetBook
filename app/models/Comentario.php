@@ -7,6 +7,9 @@ use App\Core\Database;
 
 class Comentario
 {
+    /**
+     * Crea un comentario asociado a una publicación.
+     */
     public static function crear(array $datos): int
     {
         $db = Database::getConnection();
@@ -26,10 +29,14 @@ class Comentario
         return (int)$db->lastInsertId();
     }
 
+    /**
+     * Lista comentarios activos (no eliminados) de una publicación con paginación.
+     */
     public static function listarPorPublicacion(int $idPublicacion, int $pagina, int $porPagina): array
     {
         $db = Database::getConnection();
 
+        // Validación mínima para evitar offsets inválidos
         $pagina = max(1, $pagina);
         $porPagina = max(1, $porPagina);
 
@@ -52,6 +59,9 @@ class Comentario
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Soft delete: marca el comentario como eliminado sin borrarlo físicamente.
+     */
     public static function eliminar(int $id): bool
     {
         $db = Database::getConnection();
