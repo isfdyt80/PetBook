@@ -1,0 +1,10 @@
+Options -Indexes
+
+RewriteEngine On
+
+# Permitir acceso directo a archivos y carpetas que existen (css, js, imágenes)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás va al front controller
+RewriteRule ^(.*)$ index.php [QSA,L]
