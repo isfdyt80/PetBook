@@ -4,14 +4,15 @@
 // Front controller: punto de entrada único de la aplicación.
 // El .htaccess redirige todas las requests aquí.
 
-// ── Configuración de la aplicación ───────────────────────────────────────
-// Define constantes: APP_PATH, APP_URL, CONFIG_PATH, APP_ENV, APP_DEBUG, etc.
-require_once dirname(__DIR__) . '/config/app.php';
-
 // ── Autoload de Composer (PSR-4) ──────────────────────────────────────────
-// Carga automáticamente todas las clases declaradas en composer.json.
+// Debe cargarse PRIMERO para que phpdotenv y todas las clases estén disponibles.
 // Ejecutar `composer install` antes de levantar el proyecto.
 require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+// ── Configuración de la aplicación ───────────────────────────────────────
+// Carga el .env con phpdotenv y define constantes globales.
+// Requiere que vendor/autoload.php ya esté cargado.
+require_once dirname(__DIR__) . '/config/app.php';
 
 // ── Manejo global de excepciones no capturadas ────────────────────────────
 // Captura cualquier Throwable que ocurra antes o fuera del router.
