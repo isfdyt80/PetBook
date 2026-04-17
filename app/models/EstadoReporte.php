@@ -1,4 +1,8 @@
 <?php
+
+namespace App\Models;
+use PDO;
+
 class EstadoReporte
 {
     private $db;
@@ -15,7 +19,10 @@ class EstadoReporte
     // lista todos los estados
     public function listar()
     {
-        $stmt = $this->db->prepare("SELECT * FROM EstadoReporte");
+        $stmt = $this->db->prepare("
+         SELECT Id_EstadoReporte, Nombre 
+         FROM EstadoReporte
+        ");
 
         $stmt->execute();
 
@@ -26,7 +33,8 @@ class EstadoReporte
     public function buscarPorNombre($nombre)
     {
         $stmt = $this->db->prepare("
-            SELECT * FROM EstadoReporte
+            SELECT Id_EstadoReporte, Nombre
+            FROM EstadoReporte
             WHERE Nombre = :nombre
         ");
 

@@ -1,4 +1,8 @@
 <?php
+
+namespace App\Models;
+use PDO;
+use Exception;
 class Reporte
 {
     private $db;
@@ -49,7 +53,16 @@ class Reporte
     public function listarPendientes()
     {
         $stmt = $this->db->prepare("
-            SELECT * FROM Reporte
+            SELECT 
+                 Id_Reporte,
+                 Id_Usuario,
+                 Id_Publicacion,
+                 Id_Comentario,
+                 Id_EstadoReporte,
+                 Id_Moderador,
+                 Motivo,
+                 Fecha
+            FROM Reporte
             WHERE Id_EstadoReporte = 1
         ");
 

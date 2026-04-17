@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Models;
+use PDO;
 class Imagen
 {
     private $db;
@@ -30,7 +33,8 @@ class Imagen
     public function buscarPorId($id)
     {
         $stmt = $this->db->prepare("
-            SELECT * FROM Imagen
+            SELECT Id_Imagen, Url, Fecha_Creacion 
+            FROM Imagen
             WHERE Id_Imagen = :id AND Eliminado = 0
         ");
 

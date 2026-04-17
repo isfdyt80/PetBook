@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Models;
+use PDO;
 class MascotaImagen
 {
     private $db;
@@ -31,7 +34,11 @@ class MascotaImagen
     public function listarPorMascota($idMascota)
     {
         $stmt = $this->db->prepare("
-            SELECT mi.*, i.Url
+            SELECT 
+                mi.Id_MascotaImagen,
+                mi.Id_Mascota,
+                i.Id_Imagen,
+                i.Url
             FROM MascotaImagen mi
             INNER JOIN Imagen i ON i.Id_Imagen = mi.Id_Imagen
             WHERE mi.Id_Mascota = :id

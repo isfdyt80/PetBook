@@ -1,4 +1,8 @@
 <?php
+
+namespace App\Models;
+use PDO;
+
 class PublicacionImagen
 {
     private $db;
@@ -31,7 +35,11 @@ class PublicacionImagen
     public function listarPorPublicacion($idPublicacion)
     {
         $stmt = $this->db->prepare("
-            SELECT pi.*, i.Url
+            SELECT 
+                 pi.Id_PublicacionImagen,
+                 pi.Id_Publicacion,
+                 i.Id_Imagen,
+                 i.Url
             FROM PublicacionImagen pi
             INNER JOIN Imagen i ON i.Id_Imagen = pi.Id_Imagen
             WHERE pi.Id_Publicacion = :id
