@@ -11,14 +11,13 @@ class Ubicacion extends Model
                 (Direccion, Ciudad, Provincia, Pais, Latitud, Longitud)
                 VALUES (:direccion, :ciudad, :provincia, :pais, :latitud, :longitud)";
 
-        // Ejecuta el INSERT
         $this->execute($sql, $datos);
 
         // Devuelve el ID generado automaticamente
         return $this->lastInsertId();
     }
 
-    // Busca una ubicacion por ID
+    // Busca una ubicacion por su ID
     public function buscarPorId(int $id){
         $sql = "SELECT 
                     Id_Ubicacion,
@@ -30,7 +29,6 @@ class Ubicacion extends Model
                     Longitud
                 FROM Ubicacion
                 WHERE Id_Ubicacion = :id";
-
 
         return $this->queryOne($sql, ['id' => $id]);
     }

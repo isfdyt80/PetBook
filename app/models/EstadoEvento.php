@@ -5,9 +5,11 @@ use Core\Model;
 
 class EstadoEvento extends Model
 {
-    // Devuelve todos los estados posibles de un evento (ej: activo, resuelto, etc.)
+    // Devuelve todos los estados posibles de eventos
     public function listar(){
-        $sql = "SELECT Id_EstadoEvento, Nombre
+        $sql = "SELECT 
+                    Id_EstadoEvento,
+                    Nombre
                 FROM EstadoEvento";
 
         return $this->query($sql);
@@ -15,7 +17,9 @@ class EstadoEvento extends Model
 
     // Busca un estado especifico por su ID
     public function buscarPorId(int $id){
-        $sql = "SELECT Id_EstadoEvento, Nombre
+        $sql = "SELECT 
+                    Id_EstadoEvento,
+                    Nombre
                 FROM EstadoEvento
                 WHERE Id_EstadoEvento = :id";
 
