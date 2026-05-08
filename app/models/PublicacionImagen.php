@@ -1,53 +1,50 @@
 <?php
 
 namespace App\Models;
-use PDO;
 
-class PublicacionImagen
+use App\Core\Model;
+
+class PublicacionImagen extends Model
 {
-    private $db;
+    protected string $table = 'PublicacionImagen';
+    protected string $pk    = 'Id_PublicacionImagen';
 
-
-    private $id_publicacion_imagen;
-    private $id_publicacion;
-    private $id_imagen;
-
-    public function __construct($database)
+    /**
+     * Asocia una imagen a una publicación.
+     *
+     * @param  int  $idPublicacion  Id_Publicacion a asociar.
+     * @param  int  $idImagen       Id_Imagen a asociar.
+     * @return bool                 true si se insertó correctamente.
+     */
+    public function asociar(int $idPublicacion, int $idImagen): bool
     {
-        $this->db = $database;
+        $stmt = $this->execute(
+            'INSERT INTO PublicacionImagen (Id_Publicacion, Id_Imagen)
+             VALUES (:publicacion, :imagen)',
+            [
+                ':publicacion' => $idPublicacion,
+                ':imagen'      => $idImagen,
+            ]
+        );
+
+        return $stmt->rowCount() > 0;
     }
 
-    // asocia imagen a publicacion
-    public function asociar($idPublicacion, $idImagen)
+    /**
+     * Lista las imágenes activas de una publicación.
+     * Filtra Eliminado = 0 en Imagen para no traer imágenes dadas de baja.
+     *
+     * @param  int   $idPublicacion  Id_Publicacion a consultar.
+     * @return array
+     */
+    public function listarPorPublicacion(int $idPublicacion): array
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO PublicacionImagen (Id_Publicacion, Id_Imagen)
-            VALUES (:pub, :img)
-        ");
-
-        return $stmt->execute([
-            'pub' => $idPublicacion,
-            'img' => $idImagen
-        ]);
-    }
-
-    // lista imagenes de una publicacion
-    public function listarPorPublicacion($idPublicacion)
-    {
-        $stmt = $this->db->prepare("
-            SELECT 
-                 pi.Id_PublicacionImagen,
-                 pi.Id_Publicacion,
-                 i.Id_Imagen,
-                 i.Url
-            FROM PublicacionImagen pi
-            INNER JOIN Imagen i ON i.Id_Imagen = pi.Id_Imagen
-            WHERE pi.Id_Publicacion = :id
-            AND i.Eliminado = 0
-        ");
-
-        $stmt->execute(['id' => $idPublicacion]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->query(
+            'SELECT pi.Id_PublicacionImagen, pi.Id_Publicacion, i.Id_Imagen, i.Url
+             FROM PublicacionImagen pi
+             INNER JOIN Imagen i ON i.Id_Imagen = pi.Id_Imagen
+             WHERE pi.Id_Publicacion = :id AND i.Eliminado = 0',
+            [':id' => $idPublicacion]
+        );
     }
 }

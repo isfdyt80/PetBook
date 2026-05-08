@@ -1,57 +1,51 @@
 <?php
 
 namespace App\Models;
-use PDO;
-class Imagen
+
+use App\Core\Model;
+
+class Imagen extends Model
 {
-    private $db;
+    protected string $table = 'Imagen';
+    protected string $pk    = 'Id_Imagen';
 
-    private $id_imagen;
-    private $url;
-    private $fecha_creacion;
-    private $eliminado;
-
-    public function __construct($database)
+    /**
+     * Inserta una nueva imagen y devuelve el ID generado.
+     *
+     * @param  string $url  URL de la imagen.
+     * @return int          ID del registro recién insertado.
+     */
+    public function crear(string $url): int
     {
-        $this->db = $database;
+        return $this->insert(['Url' => $url]);
     }
 
-    // inserta una nueva imagen
-    public function crear($url)
+    /**
+     * Busca una imagen por su clave primaria.
+     * Devuelve null si no existe o está eliminada.
+     *
+     * @param  int        $id  Id_Imagen a buscar.
+     * @return array|null
+     */
+    public function buscarPorId(int $id): ?array
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO Imagen (Url)
-            VALUES (:url)
-        ");
-
-        $stmt->execute(['url' => $url]);
-
-        return $this->db->lastInsertId();
+        return $this->queryOne(
+            'SELECT Id_Imagen, Url, Fecha_Creacion
+             FROM Imagen
+             WHERE Id_Imagen = :id AND Eliminado = 0',
+            [':id' => $id]
+        ) ?: null;
     }
 
-    // busca una imagen por ID (solo si no está eliminada)
-    public function buscarPorId($id)
+    /**
+     * Marca la imagen como eliminada (soft delete).
+     * Nunca borra físicamente el registro de la BD.
+     *
+     * @param  int  $id  Id_Imagen a eliminar.
+     * @return bool      true si se modificó al menos una fila.
+     */
+    public function eliminar(int $id): bool
     {
-        $stmt = $this->db->prepare("
-            SELECT Id_Imagen, Url, Fecha_Creacion 
-            FROM Imagen
-            WHERE Id_Imagen = :id AND Eliminado = 0
-        ");
-
-        $stmt->execute(['id' => $id]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // soft delete
-    public function eliminar($id)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE Imagen
-            SET Eliminado = 1
-            WHERE Id_Imagen = :id
-        ");
-
-        return $stmt->execute(['id' => $id]);
+        return $this->softDelete($id);
     }
 }

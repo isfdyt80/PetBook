@@ -1,52 +1,50 @@
 <?php
 
 namespace App\Models;
-use PDO;
-class MascotaImagen
+
+use App\Core\Model;
+
+class MascotaImagen extends Model
 {
-    private $db;
+    protected string $table = 'MascotaImagen';
+    protected string $pk    = 'Id_MascotaImagen';
 
-  
-    private $id_mascota_imagen;
-    private $id_mascota;
-    private $id_imagen;
-
-    public function __construct($database)
+    /**
+     * Asocia una imagen a una mascota.
+     *
+     * @param  int  $idMascota  Id_Mascota a asociar.
+     * @param  int  $idImagen   Id_Imagen a asociar.
+     * @return bool             true si se insertó correctamente.
+     */
+    public function asociar(int $idMascota, int $idImagen): bool
     {
-        $this->db = $database;
+        $stmt = $this->execute(
+            'INSERT INTO MascotaImagen (Id_Mascota, Id_Imagen)
+             VALUES (:mascota, :imagen)',
+            [
+                ':mascota' => $idMascota,
+                ':imagen'  => $idImagen,
+            ]
+        );
+
+        return $stmt->rowCount() > 0;
     }
 
-    // relaciona mascota con imagen
-    public function asociar($idMascota, $idImagen)
+    /**
+     * Lista las imágenes activas de una mascota.
+     * Filtra Eliminado = 0 en Imagen para no traer imágenes dadas de baja.
+     *
+     * @param  int   $idMascota  Id_Mascota a consultar.
+     * @return array
+     */
+    public function listarPorMascota(int $idMascota): array
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO MascotaImagen (Id_Mascota, Id_Imagen)
-            VALUES (:mascota, :imagen)
-        ");
-
-        return $stmt->execute([
-            'mascota' => $idMascota,
-            'imagen' => $idImagen
-        ]);
-    }
-
-    // lista imagenes de una mascota
-    public function listarPorMascota($idMascota)
-    {
-        $stmt = $this->db->prepare("
-            SELECT 
-                mi.Id_MascotaImagen,
-                mi.Id_Mascota,
-                i.Id_Imagen,
-                i.Url
-            FROM MascotaImagen mi
-            INNER JOIN Imagen i ON i.Id_Imagen = mi.Id_Imagen
-            WHERE mi.Id_Mascota = :id
-            AND i.Eliminado = 0
-        ");
-
-        $stmt->execute(['id' => $idMascota]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->query(
+            'SELECT mi.Id_MascotaImagen, mi.Id_Mascota, i.Id_Imagen, i.Url
+             FROM MascotaImagen mi
+             INNER JOIN Imagen i ON i.Id_Imagen = mi.Id_Imagen
+             WHERE mi.Id_Mascota = :id AND i.Eliminado = 0',
+            [':id' => $idMascota]
+        );
     }
 }

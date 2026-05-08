@@ -1,45 +1,42 @@
 <?php
 
 namespace App\Models;
-use PDO;
 
-class EstadoReporte
+use App\Core\Model;
+
+class EstadoReporte extends Model
 {
-    private $db;
+    protected string $table = 'EstadoReporte';
+    protected string $pk    = 'Id_EstadoReporte';
 
-    
-    private $id_estado_reporte;
-    private $nombre;
-
-    public function __construct($database)
+    /**
+     * Devuelve todos los estados de reporte.
+     * EstadoReporte es una tabla de catálogo, no tiene soft delete.
+     *
+     * @return array
+     */
+    public function listar(): array
     {
-        $this->db = $database;
+        return $this->query(
+            'SELECT Id_EstadoReporte, Nombre
+             FROM EstadoReporte'
+        );
     }
 
-    // lista todos los estados
-    public function listar()
+    /**
+     * Busca un estado de reporte por su nombre.
+     * Devuelve null si no existe.
+     *
+     * @param  string     $nombre  Nombre del estado a buscar.
+     * @return array|null
+     */
+    public function buscarPorNombre(string $nombre): ?array
     {
-        $stmt = $this->db->prepare("
-         SELECT Id_EstadoReporte, Nombre 
-         FROM EstadoReporte
-        ");
-
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // busca un estado por nombre
-    public function buscarPorNombre($nombre)
-    {
-        $stmt = $this->db->prepare("
-            SELECT Id_EstadoReporte, Nombre
-            FROM EstadoReporte
-            WHERE Nombre = :nombre
-        ");
-
-        $stmt->execute(['nombre' => $nombre]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->queryOne(
+            'SELECT Id_EstadoReporte, Nombre
+             FROM EstadoReporte
+             WHERE Nombre = :nombre',
+            [':nombre' => $nombre]
+        ) ?: null;
     }
 }
