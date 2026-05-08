@@ -2,29 +2,33 @@
 
 namespace App\Models;
 
-use PDO;
-use App\Core\Database;
+use App\Core\Model;
 
-class Reaccion
+class Reaccion extends Model
 {
+    protected string $table = 'Reaccion';
+    protected string $pk    = 'Id_Usuario';
+
     /**
      * Crea una reacción.
+     * Si ya existe, actualiza el tipo de reacción.
      */
-    public static function crear(int $idUsuario, int $idPublicacion, int $idTipoReaccion): bool
-    {
-        $db = Database::getConnection();
-
-        $sql = "INSERT INTO Reaccion 
+    public function crear(
+        int $idUsuario,
+        int $idPublicacion,
+        int $idTipoReaccion
+    ): bool {
+        $sql = "INSERT INTO Reaccion
                 (Id_Usuario, Id_Publicacion, Id_TipoReaccion)
                 VALUES (:idUsuario, :idPublicacion, :idTipoReaccion)
-                ON DUPLICATE KEY UPDATE 
+                ON DUPLICATE KEY UPDATE
                 Id_TipoReaccion = VALUES(Id_TipoReaccion)";
 
-        $stmt = $db->prepare($sql);
+        $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
-            ':idUsuario' => $idUsuario,
-            ':idPublicacion' => $idPublicacion,
+            ':idUsuario'      => $idUsuario,
+            ':idPublicacion'  => $idPublicacion,
             ':idTipoReaccion' => $idTipoReaccion
         ]);
     }
@@ -32,62 +36,58 @@ class Reaccion
     /**
      * Actualiza una reacción existente.
      */
-    public static function actualizar(int $idUsuario, int $idPublicacion, int $idTipoReaccion): bool
-    {
-        $db = Database::getConnection();
-
+    public function actualizar(
+        int $idUsuario,
+        int $idPublicacion,
+        int $idTipoReaccion
+    ): bool {
         $sql = "UPDATE Reaccion
                 SET Id_TipoReaccion = :idTipoReaccion
                 WHERE Id_Usuario = :idUsuario
                 AND Id_Publicacion = :idPublicacion";
 
-        $stmt = $db->prepare($sql);
+        $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
             ':idTipoReaccion' => $idTipoReaccion,
-            ':idUsuario' => $idUsuario,
-            ':idPublicacion' => $idPublicacion
+            ':idUsuario'      => $idUsuario,
+            ':idPublicacion'  => $idPublicacion
         ]);
     }
 
     /**
-     * Elimina una reacción (no requiere soft delete).
+     * Elimina una reacción.
      */
-    public static function eliminar(int $idUsuario, int $idPublicacion): bool
-    {
-        $db = Database::getConnection();
-
+    public function eliminar(
+        int $idUsuario,
+        int $idPublicacion
+    ): bool {
         $sql = "DELETE FROM Reaccion
                 WHERE Id_Usuario = :idUsuario
                 AND Id_Publicacion = :idPublicacion";
 
-        $stmt = $db->prepare($sql);
+        $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
-            ':idUsuario' => $idUsuario,
+            ':idUsuario'     => $idUsuario,
             ':idPublicacion' => $idPublicacion
         ]);
     }
 
     /**
-     * Cuenta reacciones por tipo en una publicación.
+     * Cuenta reacciones agrupadas por tipo.
      */
-    public static function contarPorPublicacion(int $idPublicacion): array
+    public function contarPorPublicacion(int $idPublicacion): array
     {
-        $db = Database::getConnection();
-
         $sql = "SELECT tr.Nombre, COUNT(*) as cantidad
                 FROM Reaccion r
-                JOIN TipoReaccion tr ON r.Id_TipoReaccion = tr.Id_TipoReaccion
+                JOIN TipoReaccion tr
+                    ON r.Id_TipoReaccion = tr.Id_TipoReaccion
                 WHERE r.Id_Publicacion = :idPublicacion
                 GROUP BY tr.Nombre";
 
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        return $this->query($sql, [
             ':idPublicacion' => $idPublicacion
         ]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

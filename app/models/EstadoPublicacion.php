@@ -2,44 +2,33 @@
 
 namespace App\Models;
 
-use PDO;
-use App\Core\Database;
+use App\Core\Model;
 
-class EstadoPublicacion
+class EstadoPublicacion extends Model
 {
+    protected string $table = 'EstadoPublicacion';
+    protected string $pk    = 'Id_EstadoPublicacion';
+
     /**
-     * lista todos los estados posibles de publicacion
+     * Lista todos los estados de publicación.
      */
-    public static function listar(): array
+    public function listar(): array
     {
-        $db = Database::getConnection();
-
-        $sql = "SELECT * FROM EstadoPublicacion";
-
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->all();
     }
 
     /**
-     * Busca un estado por su nombre 
+     * Busca un estado por nombre.
      */
-    public static function buscarPorNombre(string $nombre): ?array
+    public function buscarPorNombre(string $nombre): array|false
     {
-        $db = Database::getConnection();
-
         $sql = "SELECT * FROM EstadoPublicacion
                 WHERE Nombre = :nombre";
 
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        $resultado = $this->query($sql, [
             ':nombre' => $nombre
         ]);
 
-        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $resultado ?: null;
+        return $resultado[0] ?? false;
     }
 }

@@ -2,23 +2,18 @@
 
 namespace App\Models;
 
-use PDO;
-use App\Core\Database;
+use App\Core\Model;
 
-class TipoReaccion
+class TipoReaccion extends Model
 {
+    protected string $table = 'TipoReaccion';
+    protected string $pk    = 'Id_TipoReaccion';
+
     /**
-     * Lista todos los tipos de reacción disponibles .
+     * Lista todos los tipos de reacción.
      */
-    public static function listar(): array
+    public function listar(): array
     {
-        $db = Database::getConnection();
-
-        $sql = "SELECT * FROM TipoReaccion";
-
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->all();
     }
 }
