@@ -2,47 +2,41 @@
 
 namespace App\Models;
 
-use PDO;
+use App\Core\Model;
 
-class Especie
+class Especie extends Model
 {
-    private $db;
+    protected string $table = 'Especie';
+    protected string $pk    = 'Id_Especie';
 
-    private $id_especie;
-    private $nombre;
-
-    public function __construct($database)
+    /**
+     * Devuelve todas las especies activas.
+     *
+     * @return array
+     */
+    public function listar(): array
     {
-        $this->db = $database;
+        return $this->query(
+            'SELECT Id_Especie, Nombre
+             FROM Especie
+             WHERE Eliminado = 0'
+        );
     }
 
-    // devuelve todas las especies activas 
-    public function listar()
+    /**
+     * Busca una especie por su clave primaria.
+     * Devuelve null si no existe o está eliminada.
+     *
+     * @param  int        $id  Id_Especie a buscar.
+     * @return array|null
+     */
+    public function buscarPorId(int $id): ?array
     {
-        $stmt = $this->db->prepare("
-            SELECT Id_Especie, Nombre
-            FROM Especie
-            WHERE Eliminado = 0
-        ");
-
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // busca una especie por su ID
-    public function buscarPorId($id)
-    {
-        $stmt = $this->db->prepare("
-            SELECT Id_Especie, Nombre
-            FROM Especie
-            WHERE Id_Especie = :id AND Eliminado = 0
-        ");
-
-        // ejecuta la consulta con parametro seguro
-        $stmt->execute(['id' => $id]);
-
-        // devuelve una sola fila o false si no existe
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->queryOne(
+            'SELECT Id_Especie, Nombre
+             FROM Especie
+             WHERE Id_Especie = :id AND Eliminado = 0',
+            [':id' => $id]
+        ) ?: null;
     }
 }

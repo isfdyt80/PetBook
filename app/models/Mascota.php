@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Core\Model;
 
-
 class Mascota extends Model
 {
     protected string $table = 'Mascota';
@@ -25,7 +24,7 @@ class Mascota extends Model
      * Crea una nueva mascota y devuelve el ID generado.
      *
      * Valida que, si se informa Id_Raza, esta pertenezca a la misma
-     * especie que Id_Especie. Lanza InvalidArgumentException si no.
+     * especie que Id_Especie. Lanza \InvalidArgumentException si no.
      *
      * @param  array $datos  Campos de la mascota (Id_Especie requerido).
      * @return int           ID del registro recién insertado.
@@ -50,16 +49,20 @@ class Mascota extends Model
 
     /**
      * Busca una mascota por su clave primaria.
-     * Devuelve null si no existe o está eliminada (el core filtra Eliminado = 0).
+     * Devuelve null si no existe o está eliminada.
      *
      * @param  int        $id  Id_Mascota a buscar.
-     * @return array|null      Fila de la BD o null si no se encontró.
+     * @return array|null
      */
     public function buscarPorId(int $id): ?array
     {
-        // find() del core ya filtra Eliminado = 0 y devuelve false si no existe;
-        // convertimos false a null para respetar la firma ?array de la issue.
-        return $this->find($id) ?: null;
+        return $this->queryOne(
+            'SELECT Id_Mascota, Nombre, Id_Especie, Id_Raza, Color, Tamaño,
+                    Sexo, Fecha_Nacimiento, Edad_Aproximada, Descripcion_Fisica
+             FROM Mascota
+             WHERE Id_Mascota = :id AND Eliminado = 0',
+            [':id' => $id]
+        ) ?: null;
     }
 
     /**
@@ -109,14 +112,14 @@ class Mascota extends Model
      */
     private function validarRazaEspecie(array $datos): void
     {
-        // Si no se informó raza no hay nada que validar.
         if (empty($datos['Id_Raza'])) {
             return;
         }
 
-        // Buscamos la raza filtrando Eliminado = 0 para no aceptar razas dadas de baja.
         $raza = $this->queryOne(
-            'SELECT Id_Especie FROM Raza WHERE Id_Raza = :raza AND Eliminado = 0',
+            'SELECT Id_Especie
+             FROM Raza
+             WHERE Id_Raza = :raza AND Eliminado = 0',
             [':raza' => $datos['Id_Raza']]
         );
 

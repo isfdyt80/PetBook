@@ -2,68 +2,57 @@
 
 namespace App\Models;
 
-use PDO;
+use App\Core\Model;
 
-class Raza
+class Raza extends Model
 {
-    private $db;
+    protected string $table = 'Raza';
+    protected string $pk    = 'Id_Raza';
 
-    private $id_raza;
-    private $nombre;
-    private $id_especie;
-
-    public function __construct($database)
+    /**
+     * Devuelve todas las razas activas.
+     *
+     * @return array
+     */
+    public function listar(): array
     {
-        $this->db = $database;
+        return $this->query(
+            'SELECT Id_Raza, Nombre, Id_Especie
+             FROM Raza
+             WHERE Eliminado = 0'
+        );
     }
 
-    // lista todas las razas activas
-    public function listar()
+    /**
+     * Devuelve las razas activas de una especie.
+     *
+     * @param  int   $idEspecie  Id_Especie a filtrar.
+     * @return array
+     */
+    public function listarPorEspecie(int $idEspecie): array
     {
-        $stmt = $this->db->prepare("
-            SELECT 
-                Id_Raza, 
-                Nombre, 
-                Id_Especie 
-            FROM Raza
-            WHERE Eliminado = 0
-        ");
-
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->query(
+            'SELECT Id_Raza, Nombre
+             FROM Raza
+             WHERE Id_Especie = :id AND Eliminado = 0',
+            [':id' => $idEspecie]
+        );
     }
 
-    // lista razas filtradas por especie
-    public function listarPorEspecie($idEspecie)
+    /**
+     * Busca una raza por su clave primaria.
+     * Devuelve null si no existe o está eliminada.
+     *
+     * @param  int        $id  Id_Raza a buscar.
+     * @return array|null
+     */
+    public function buscarPorId(int $id): ?array
     {
-        $stmt = $this->db->prepare("
-            SELECT 
-                Id_Raza, 
-                Nombre
-            FROM Raza
-            WHERE Id_Especie = :id AND Eliminado = 0
-        ");
-
-        $stmt->execute(['id' => $idEspecie]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // busca una raza por ID
-    public function buscarPorId($id)
-    {
-        $stmt = $this->db->prepare("
-            SELECT 
-                Id_Raza, 
-                Nombre, 
-                Id_Especie 
-            FROM Raza
-            WHERE Id_Raza = :id AND Eliminado = 0
-        ");
-
-        $stmt->execute(['id' => $id]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->queryOne(
+            'SELECT Id_Raza, Nombre, Id_Especie
+             FROM Raza
+             WHERE Id_Raza = :id AND Eliminado = 0',
+            [':id' => $id]
+        ) ?: null;
     }
 }

@@ -2,100 +2,86 @@
 
 namespace App\Models;
 
-use PDO;
+use App\Core\Model;
 
-class MascotaUsuario
+class MascotaUsuario extends Model
 {
-    private $db;
+    protected string $table = 'MascotaUsuario';
+    protected string $pk    = 'Id_MascotaUsuario';
 
-    private $id_mascota_usuario;
-    private $id_mascota;
-    private $id_usuario;
-    private $esDueno; 
-    private $fecha_desde;
-    private $fecha_hasta;
-
-    public function __construct($database)
+    /**
+     * Asocia una mascota a un usuario.
+     * Fecha_Desde se setea con NOW() en la query.
+     *
+     * @param  array $datos  Debe contener Id_Mascota, Id_Usuario, EsDueno.
+     * @return bool          true si se insertó correctamente.
+     */
+    public function asociar(array $datos): bool
     {
-        $this->db = $database;
+        $stmt = $this->execute(
+            'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde)
+             VALUES (:mascota, :usuario, :esDueno, NOW())',
+            [
+                ':mascota' => $datos['Id_Mascota'],
+                ':usuario' => $datos['Id_Usuario'],
+                ':esDueno' => $datos['EsDueno'],
+            ]
+        );
+
+        return $stmt->rowCount() > 0;
     }
 
-    // asocia una mascota a un usuario
-    public function asociar($datos)
+    /**
+     * Lista todas las relaciones activas de una mascota.
+     *
+     * @param  int   $idMascota  Id_Mascota a consultar.
+     * @return array
+     */
+    public function listarPorMascota(int $idMascota): array
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO MascotaUsuario 
-            (
-            Id_Mascota,
-            Id_Usuario, 
-            EsDueno, 
-            Fecha_Desde
-            )
-            VALUES 
-            (:mascota, 
-            :usuario, 
-            :esDueno, 
-            NOW()
-            )
-        ");
-
-        return $stmt->execute([
-            'mascota' => $datos['Id_Mascota'],
-            'usuario' => $datos['Id_Usuario'],
-            'esDueno' => $datos['EsDueno']
-        ]);
+        return $this->query(
+            'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde, Fecha_Hasta
+             FROM MascotaUsuario
+             WHERE Id_Mascota = :id AND Eliminado = 0',
+            [':id' => $idMascota]
+        );
     }
 
-    // lista usuarios de una mascota
-    public function listarPorMascota($idMascota)
+    /**
+     * Lista todas las relaciones activas de un usuario.
+     *
+     * @param  int   $idUsuario  Id_Usuario a consultar.
+     * @return array
+     */
+    public function listarPorUsuario(int $idUsuario): array
     {
-        $stmt = $this->db->prepare("
-            SELECT 
-                Id_MascotaUsuario, 
-                Id_Usuario, 
-                EsDueno,
-                Fecha_Desde, 
-                Fecha_Hasta
-            FROM MascotaUsuario
-            WHERE Id_Mascota = :id
-        ");
-
-        $stmt->execute(['id' => $idMascota]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->query(
+            'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde, Fecha_Hasta
+             FROM MascotaUsuario
+             WHERE Id_Usuario = :id AND Eliminado = 0',
+            [':id' => $idUsuario]
+        );
     }
 
-    // lista mascotas de un usuario
-    public function listarPorUsuario($idUsuario)
+    /**
+     * Cierra la relación mascota-usuario seteando Fecha_Hasta.
+     *
+     * @param  int    $id         Id_MascotaUsuario a cerrar.
+     * @param  string $fechaHasta Fecha de cierre (formato Y-m-d).
+     * @return bool               true si se modificó al menos una fila.
+     */
+    public function cerrarRelacion(int $id, string $fechaHasta): bool
     {
-        $stmt = $this->db->prepare("
-            SELECT 
-                Id_MascotaUsuario, 
-                Id_Mascota, 
-                EsDueno,
-                Fecha_Desde, 
-                Fecha_Hasta
-            FROM MascotaUsuario
-            WHERE Id_Usuario = :id
-        ");
+        $stmt = $this->execute(
+            'UPDATE MascotaUsuario
+             SET Fecha_Hasta = :fecha
+             WHERE Id_MascotaUsuario = :id',
+            [
+                ':fecha' => $fechaHasta,
+                ':id'    => $id,
+            ]
+        );
 
-        $stmt->execute(['id' => $idUsuario]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // cierra la relacion (deja de ser dueño)
-    public function cerrarRelacion($id, $fechaHasta)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE MascotaUsuario
-            SET Fecha_Hasta = :fecha
-            WHERE Id_MascotaUsuario = :id
-        ");
-
-        return $stmt->execute([
-            'fecha' => $fechaHasta,
-            'id' => $id
-        ]);
+        return $stmt->rowCount() > 0;
     }
 }

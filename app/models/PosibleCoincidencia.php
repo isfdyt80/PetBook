@@ -2,81 +2,69 @@
 
 namespace App\Models;
 
-use PDO;
+use App\Core\Model;
 
-class PosibleCoincidencia
+class PosibleCoincidencia extends Model
 {
-    private $db;
+    protected string $table = 'PosibleCoincidencia';
+    protected string $pk    = 'Id_PosibleCoincidencia';
 
-    private $id;
-    private $id_mascotaA;
-    private $id_mascotaB;
-    private $nivel_confianza;
-    private $revisado;
-    private $resultado;
-    private $id_usuario;
-
-    public function __construct($database)
+    /**
+     * Registra una posible coincidencia entre dos mascotas.
+     *
+     * @param  array $datos  Debe contener Id_MascotaA, Id_MascotaB, Nivel_Confianza.
+     * @return bool          true si se insertó correctamente.
+     */
+    public function crear(array $datos): bool
     {
-        $this->db = $database;
+        $stmt = $this->execute(
+            'INSERT INTO PosibleCoincidencia (Id_MascotaA, Id_MascotaB, Nivel_Confianza)
+             VALUES (:a, :b, :nivel)',
+            [
+                ':a'     => $datos['Id_MascotaA'],
+                ':b'     => $datos['Id_MascotaB'],
+                ':nivel' => $datos['Nivel_Confianza'],
+            ]
+        );
+
+        return $stmt->rowCount() > 0;
     }
 
-    // crea una coincidencia (ej: mascota encontrada vs perdida)
-    public function crear($datos)
+    /**
+     * Lista las coincidencias pendientes de revisión.
+     *
+     * @return array
+     */
+    public function listarPendientes(): array
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO PosibleCoincidencia 
-            (
-            Id_MascotaA, 
-            Id_MascotaB, 
-            Nivel_Confianza
-            )
-            VALUES 
-            (
-            :a, 
-            :b, 
-            :nivel)
-        ");
-
-        return $stmt->execute([
-            'mascota' => $datos['Id_Mascota']
-        ]);
+        return $this->query(
+            "SELECT Id_PosibleCoincidencia, Id_MascotaA, Id_MascotaB, Nivel_Confianza, Resultado, Id_Usuario
+             FROM PosibleCoincidencia
+             WHERE Resultado = 'pendiente'"
+        );
     }
 
-    // lista coincidencias pendientes
-    public function listarPendientes()
+    /**
+     * Actualiza el resultado de una coincidencia y registra qué usuario la revisó.
+     *
+     * @param  int    $id         Id_PosibleCoincidencia a actualizar.
+     * @param  string $resultado  Valor del resultado (ej: 'aceptado', 'rechazado').
+     * @param  int    $idUsuario  Id_Usuario que revisó la coincidencia.
+     * @return bool               true si se modificó al menos una fila.
+     */
+    public function actualizar(int $id, string $resultado, int $idUsuario): bool
     {
-        $stmt = $this->db->prepare("
-            SELECT 
-                Id,
-                Id_MascotaA,
-                Id_MascotaB,
-                Nivel_Confianza,
-                Resultado,
-                Revisado
-            FROM PosibleCoincidencia
-            WHERE Resultado = 'pendiente'
-        ");
+        $stmt = $this->execute(
+            'UPDATE PosibleCoincidencia
+             SET Resultado = :resultado, Id_Usuario = :usuario
+             WHERE Id_PosibleCoincidencia = :id',
+            [
+                ':resultado' => $resultado,
+                ':usuario'   => $idUsuario,
+                ':id'        => $id,
+            ]
+        );
 
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // actualiza el resultado (aceptado / rechazado)
-    public function actualizar($id, $resultado, $idUsuario)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE PosibleCoincidencia
-            SET Resultado = :resultado,
-                Id_Usuario = :usuario
-            WHERE Id_PosibleCoincidencia = :id
-        ");
-
-        return $stmt->execute([
-            'resultado' => $resultado,
-            'usuario' => $idUsuario,
-            'id' => $id
-        ]);
+        return $stmt->rowCount() > 0;
     }
 }
