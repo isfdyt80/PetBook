@@ -2,108 +2,91 @@
 
 namespace App\Models;
 
-use App\Core\Database;
-use PDO;
+use App\Core\Model;
 
-class Usuario 
+class Usuario extends Model
 {
+    protected string $table = 'Usuario';
+    protected string $pk    = 'Id_Usuario';
 
-    public static function crear(array $datos): int 
+    /**
+     * Crea un nuevo usuario.
+     */
+    public function crear(array $datos): int
     {
-        $db = Database::getConnection();
-
-        $passwordHash = password_hash($datos['password'], PASSWORD_DEFAULT);
-
-        $sql = "INSERT INTO usuario (email, password, eliminado)
-                VALUES (:email, :password, 0)";
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
-            ':email' => $datos['email'],
-            ':password' => $passwordHash
+        return $this->insert([
+            'Id_Persona'    => $datos['Id_Persona'],
+            'Email'         => $datos['Email'],
+            'Password_Hash' => $datos['Password_Hash'],
+            'Activo'        => 1,
+            'Eliminado'     => 0
         ]);
-
-        return (int)$db->lastInsertId();
     }
 
-    public static function buscarPorEmail(string $email): ?array 
+    /**
+     * Busca un usuario por email.
+     */
+    public function buscarPorEmail(string $email): array|false
     {
-        $db = Database::getConnection();
+        $sql = "SELECT * FROM Usuario
+                WHERE Email = :email
+                AND Eliminado = 0";
 
-        $sql = "SELECT * FROM usuario 
-                WHERE email = :email AND eliminado = 0";
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        $resultado = $this->query($sql, [
             ':email' => $email
         ]);
 
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $usuario ?: null;
+        return $resultado[0] ?? false;
     }
 
-    public static function buscarPorId(int $id): ?array 
+    /**
+     * Busca un usuario por ID.
+     */
+    public function buscarPorId(int $id): array|false
     {
-        $db = Database::getConnection();
-
-        $sql = "SELECT * FROM usuario 
-                WHERE id = :id AND eliminado = 0";
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
-            ':id' => $id
-        ]);
-
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $usuario ?: null;
+        return $this->find($id);
     }
 
-    public static function autenticar(string $email, string $password): ?array 
-    {
-        $usuario = self::buscarPorEmail($email);
+    /**
+     * Verifica credenciales.
+     */
+    public function autenticar(
+        string $email,
+        string $password
+    ): array|false {
+        $usuario = $this->buscarPorEmail($email);
 
         if (!$usuario) {
-            return null;
+            return false;
         }
 
-        if (password_verify($password, $usuario['password'])) {
+        if (
+            password_verify(
+                $password,
+                $usuario['Password_Hash']
+            )
+        ) {
             return $usuario;
         }
 
-        return null;
+        return false;
     }
 
-    public static function desactivar(int $id): bool 
+    /**
+     * Desactiva un usuario.
+     */
+    public function desactivar(int $id): bool
     {
-        $db = Database::getConnection();
-
-        $sql = "UPDATE usuario 
-                SET eliminado = 1 
-                WHERE id = :id";
-
-        $stmt = $db->prepare($sql);
-
-        return $stmt->execute([
-            ':id' => $id
+        return $this->update($id, [
+            'Activo' => 0
         ]);
     }
 
-    public static function eliminar(int $id): bool 
+    /**
+     * Soft delete.
+     */
+    public function eliminar(int $id): bool
     {
-        $db = Database::getConnection();
-
-        $sql = "DELETE FROM usuario 
-                WHERE id = :id";
-
-        $stmt = $db->prepare($sql);
-
-        return $stmt->execute([
-            ':id' => $id
-        ]);
+        return $this->softDelete($id);
     }
 }

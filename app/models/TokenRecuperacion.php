@@ -2,79 +2,74 @@
 
 namespace App\Models;
 
-use App\Core\Database;
-use PDO;
+use App\Core\Model;
 
-class TokenRecuperacion 
+class TokenRecuperacion extends Model
 {
+    protected string $table = 'TokenRecuperacion';
+    protected string $pk    = 'Id_TokenRecuperacion';
 
-    public static function crear(int $idUsuario, string $token, string $fechaExpiracion): bool 
-    {
-        $db = Database::getConnection();
-
-        $sql = "INSERT INTO token_recuperacion (id_usuario, token, fecha_expiracion, usado)
-                VALUES (:idUsuario, :token, :fechaExpiracion, 0)";
-
-        $stmt = $db->prepare($sql);
-
-        return $stmt->execute([
-            ':idUsuario' => $idUsuario,
-            ':token' => $token,
-            ':fechaExpiracion' => $fechaExpiracion
+    /**
+     * Crea un token de recuperación.
+     */
+    public function crear(
+        int $idUsuario,
+        string $token,
+        string $fechaExpiracion
+    ): int {
+        return $this->insert([
+            'Id_Usuario'       => $idUsuario,
+            'Token'            => $token,
+            'Fecha_Expiracion' => $fechaExpiracion,
+            'Usado'            => 0,
+            'Eliminado'        => 0
         ]);
     }
 
-    public static function buscarPorToken(string $token): ?array 
+    /**
+     * Busca token.
+     */
+    public function buscarPorToken(string $token): array|false
     {
-        $db = Database::getConnection();
+        $sql = "SELECT * FROM TokenRecuperacion
+                WHERE Token = :token
+                AND Eliminado = 0";
 
-        $sql = "SELECT * FROM token_recuperacion 
-                WHERE token = :token AND eliminado = 0";
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        $resultado = $this->query($sql, [
             ':token' => $token
         ]);
 
-        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $resultado ?: null;
+        return $resultado[0] ?? false;
     }
 
-    public static function validar(string $token): bool 
+    /**
+     * Valida token.
+     */
+    public function validar(string $token): bool
     {
-        $db = Database::getConnection();
+        $sql = "SELECT * FROM TokenRecuperacion
+                WHERE Token = :token
+                AND Usado = 0
+                AND Fecha_Expiracion > NOW()
+                AND Eliminado = 0";
 
-        $sql = "SELECT * FROM token_recuperacion 
-                WHERE token = :token 
-                AND usado = 0 
-                AND fecha_expiracion > NOW()
-                AND eliminado = 0";
-                //necesito ver si la columna eliminado existe en la bd
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        $resultado = $this->query($sql, [
             ':token' => $token
         ]);
 
-        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $resultado ? true : false;
+        return !empty($resultado);
     }
 
-    public static function marcarUsado(string $token): bool 
+    /**
+     * Marca token como usado.
+     */
+    public function marcarUsado(string $token): bool
     {
-        $db = Database::getConnection();
+        $sql = "UPDATE TokenRecuperacion
+                SET Usado = 1
+                WHERE Token = :token";
 
-        $sql = "UPDATE token_recuperacion 
-                SET usado = 1 
-                WHERE token = :token";
-
-        $stmt = $db->prepare($sql);
-
-        return $stmt->execute([
+        return $this->execute($sql, [
             ':token' => $token
         ]);
     }

@@ -2,39 +2,34 @@
 
 namespace App\Models;
 
-use App\Core\Database;
-use PDO;
+use App\Core\Model;
 
-class Rol 
+class Rol extends Model
 {
+    protected string $table = 'Rol';
+    protected string $pk    = 'Id_Rol';
 
-    public static function listar(): array 
+    /**
+     * Lista todos los roles.
+     */
+    public function listar(): array
     {
-        $db = Database::getConnection();
-
-        $sql = "SELECT * FROM rol WHERE eliminado = 0";
-
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->all();
     }
 
-    public static function buscarPorNombre(string $nombre): ?array 
+    /**
+     * Busca un rol por nombre.
+     */
+    public function buscarPorNombre(string $nombre): array|false
     {
-        $db = Database::getConnection();
+        $sql = "SELECT * FROM Rol
+                WHERE Nombre = :nombre
+                AND Eliminado = 0";
 
-        $sql = "SELECT * FROM rol 
-                WHERE nombre = :nombre AND eliminado = 0";
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        $resultado = $this->query($sql, [
             ':nombre' => $nombre
         ]);
 
-        $rol = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $rol ?: null;
+        return $resultado[0] ?? false;
     }
 }

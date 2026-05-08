@@ -6,18 +6,22 @@ use PDO;
 
 class Database
 {
-    private static $conn = null;
+    private static ?PDO $conn = null;
 
     public static function getConnection(): PDO
     {
         if (self::$conn === null) {
+
             self::$conn = new PDO(
-                "mysql:host=localhost;dbname=mascotas;charset=utf8mb4",
+                "mysql:host=localhost;dbname=petbook;charset=utf8mb4",
                 "root",
                 ""
             );
 
-            self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            self::$conn->setAttribute(
+                PDO::ATTR_ERRMODE,
+                PDO::ERRMODE_EXCEPTION
+            );
         }
 
         return self::$conn;

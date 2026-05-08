@@ -2,56 +2,46 @@
 
 namespace App\Models;
 
-use App\Core\Database;
-use PDO;
+use App\Core\Model;
 
-class UsuarioRol 
+class UsuarioRol extends Model
 {
+    protected string $table = 'UsuarioRol';
+    protected string $pk    = 'Id_UsuarioRol';
 
-    public static function asignar(int $idUsuario, int $idRol): bool 
-    {
-        $db = Database::getConnection();
-
-        $sql = "INSERT INTO usuario_rol (id_usuario, id_rol, eliminado)
-                VALUES (:idUsuario, :idRol, 0)";
-                //tengo que chequear que exista eliminado en la bd 
-
-        $stmt = $db->prepare($sql);
-
-        return $stmt->execute([
-            ':idUsuario' => $idUsuario,
-            ':idRol' => $idRol
+    /**
+     * Asigna un rol a un usuario.
+     */
+    public function asignar(
+        int $idUsuario,
+        int $idRol
+    ): int {
+        return $this->insert([
+            'Id_Usuario' => $idUsuario,
+            'Id_Rol'     => $idRol,
+            'Eliminado'  => 0
         ]);
     }
 
-    public static function listarPorUsuario(int $idUsuario): array 
+    /**
+     * Lista roles de un usuario.
+     */
+    public function listarPorUsuario(int $idUsuario): array
     {
-        $db = Database::getConnection();
+        $sql = "SELECT * FROM UsuarioRol
+                WHERE Id_Usuario = :idUsuario
+                AND Eliminado = 0";
 
-        $sql = "SELECT * FROM usuario_rol 
-                WHERE id_usuario = :idUsuario AND eliminado = 0";
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->execute([
+        return $this->query($sql, [
             ':idUsuario' => $idUsuario
         ]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function revocar(int $id): bool 
+    /**
+     * Revoca un rol.
+     */
+    public function revocar(int $id): bool
     {
-        $db = Database::getConnection();
-
-        $sql = "DELETE FROM usuario_rol 
-                WHERE id = :id";
-
-        $stmt = $db->prepare($sql);
-
-        return $stmt->execute([
-            ':id' => $id
-         
-        ]);
+        return $this->softDelete($id);
     }
 }
