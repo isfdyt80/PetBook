@@ -10,10 +10,16 @@ class TipoReaccion extends Model
     protected string $pk    = 'Id_TipoReaccion';
 
     /**
-     * Lista todos los tipos de reacción.
+     * Lista todos los tipos de reacción activos.
      */
     public function listar(): array
     {
-        return $this->all();
+        $sql = "SELECT
+                    Id_TipoReaccion,
+                    Nombre
+                FROM TipoReaccion
+                WHERE Eliminado = 0";
+
+        return $this->query($sql);
     }
 }

@@ -15,9 +15,9 @@ class Comentario extends Model
     public function crear(array $datos): int
     {
         return $this->insert([
-            'Id_Publicacion' => $datos['id_publicacion'],
-            'Id_Usuario'     => $datos['id_usuario'],
-            'Contenido'      => $datos['contenido'],
+            'Id_Publicacion' => $datos['Id_Publicacion'],
+            'Id_Usuario'     => $datos['Id_Usuario'],
+            'Contenido'      => $datos['Contenido'],
             'Eliminado'      => 0
         ]);
     }
@@ -30,12 +30,19 @@ class Comentario extends Model
         int $pagina,
         int $porPagina
     ): array {
+
         $pagina = max(1, $pagina);
         $porPagina = max(1, $porPagina);
 
         $offset = ($pagina - 1) * $porPagina;
 
-        $sql = "SELECT * FROM Comentario
+        $sql = "SELECT
+                    Id_Comentario,
+                    Id_Publicacion,
+                    Id_Usuario,
+                    Contenido,
+                    Fecha
+                FROM Comentario
                 WHERE Id_Publicacion = :idPublicacion
                 AND Eliminado = 0
                 ORDER BY Fecha ASC
@@ -43,9 +50,23 @@ class Comentario extends Model
 
         $stmt = $this->db->prepare($sql);
 
-        $stmt->bindValue(':idPublicacion', $idPublicacion, \PDO::PARAM_INT);
-        $stmt->bindValue(':limit', $porPagina, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->bindValue(
+            ':idPublicacion',
+            $idPublicacion,
+            \PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':limit',
+            $porPagina,
+            \PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':offset',
+            $offset,
+            \PDO::PARAM_INT
+        );
 
         $stmt->execute();
 

@@ -10,20 +10,32 @@ class EstadoPublicacion extends Model
     protected string $pk    = 'Id_EstadoPublicacion';
 
     /**
-     * Lista todos los estados de publicación.
+     * Lista todos los estados activos.
      */
     public function listar(): array
     {
-        return $this->all();
+        $sql = "SELECT
+                    Id_EstadoPublicacion,
+                    Nombre
+                FROM EstadoPublicacion
+                WHERE Eliminado = 0";
+
+        return $this->query($sql);
     }
 
     /**
      * Busca un estado por nombre.
      */
-    public function buscarPorNombre(string $nombre): array|false
-    {
-        $sql = "SELECT * FROM EstadoPublicacion
-                WHERE Nombre = :nombre";
+    public function buscarPorNombre(
+        string $nombre
+    ): array|false {
+
+        $sql = "SELECT
+                    Id_EstadoPublicacion,
+                    Nombre
+                FROM EstadoPublicacion
+                WHERE Nombre = :nombre
+                AND Eliminado = 0";
 
         $resultado = $this->query($sql, [
             ':nombre' => $nombre
