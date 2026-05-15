@@ -28,13 +28,17 @@ class UsuarioRol extends Model
      */
     public function listarPorUsuario(int $idUsuario): array
     {
-        $sql = "SELECT * FROM UsuarioRol
-                WHERE Id_Usuario = :idUsuario
-                AND Eliminado = 0";
+    $sql = "SELECT
+                Id_UsuarioRol,
+                Id_Usuario,
+                Id_Rol
+            FROM UsuarioRol
+            WHERE Id_Usuario = :idUsuario
+            AND Eliminado = 0";
 
-        return $this->query($sql, [
-            ':idUsuario' => $idUsuario
-        ]);
+    return $this->query($sql, [
+        ':idUsuario' => $idUsuario
+    ]);
     }
 
     /**

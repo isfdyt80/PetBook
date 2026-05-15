@@ -26,7 +26,19 @@ class Persona extends Model
      */
     public function buscarPorId(int $id): array|false
     {
-        return $this->find($id);
+    $sql = "SELECT
+                Id_Persona,
+                Nombre,
+                Apellido
+            FROM Persona
+            WHERE Id_Persona = :id
+            AND Eliminado = 0";
+
+    $resultado = $this->query($sql, [
+        ':id' => $id
+    ]);
+
+    return $resultado[0] ?? false;
     }
 
     /**

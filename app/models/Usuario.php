@@ -27,16 +27,22 @@ class Usuario extends Model
      * Busca un usuario por email.
      */
     public function buscarPorEmail(string $email): array|false
-    {
-        $sql = "SELECT * FROM Usuario
-                WHERE Email = :email
-                AND Eliminado = 0";
+{
+    $sql = "SELECT
+                Id_Usuario,
+                Id_Persona,
+                Email,
+                Password_Hash,
+                Activo
+            FROM Usuario
+            WHERE Email = :email
+            AND Eliminado = 0";
 
-        $resultado = $this->query($sql, [
-            ':email' => $email
-        ]);
+    $resultado = $this->query($sql, [
+        ':email' => $email
+    ]);
 
-        return $resultado[0] ?? false;
+    return $resultado[0] ?? false;
     }
 
     /**
@@ -44,32 +50,59 @@ class Usuario extends Model
      */
     public function buscarPorId(int $id): array|false
     {
-        return $this->find($id);
+    $sql = "SELECT
+                Id_Usuario,
+                Id_Persona,
+                Email,
+                Activo
+            FROM Usuario
+            WHERE Id_Usuario = :id
+            AND Eliminado = 0";
+
+    $resultado = $this->query($sql, [
+        ':id' => $id
+    ]);
+
+    return $resultado[0] ?? false;
     }
 
     /**
      * Verifica credenciales.
      */
-    public function autenticar(
-        string $email,
-        string $password
-    ): array|false {
-        $usuario = $this->buscarPorEmail($email);
+    public function autenticar(string $email,string $password): array|false 
+    {
 
-        if (!$usuario) {
-            return false;
-        }
+    $sql = "SELECT
+                Id_Usuario,
+                Id_Persona,
+                Email,
+                Password_Hash,
+                Activo
+            FROM Usuario
+            WHERE Email = :email
+            AND Activo = 1
+            AND Eliminado = 0";
 
-        if (
-            password_verify(
-                $password,
-                $usuario['Password_Hash']
-            )
-        ) {
-            return $usuario;
-        }
+    $resultado = $this->query($sql, [
+        ':email' => $email
+    ]);
 
+    $usuario = $resultado[0] ?? false;
+
+    if (!$usuario) {
         return false;
+    }
+
+    if (
+        password_verify(
+            $password,
+            $usuario['Password_Hash']
+        )
+    ) {
+        return $usuario;
+    }
+
+    return false;
     }
 
     /**

@@ -14,22 +14,30 @@ class Rol extends Model
      */
     public function listar(): array
     {
-        return $this->all();
-    }
+    $sql = "SELECT
+                Id_Rol,
+                Nombre
+            FROM Rol
+            WHERE Eliminado = 0";
 
+    return $this->query($sql);
+    }
     /**
      * Busca un rol por nombre.
      */
     public function buscarPorNombre(string $nombre): array|false
     {
-        $sql = "SELECT * FROM Rol
-                WHERE Nombre = :nombre
-                AND Eliminado = 0";
+    $sql = "SELECT
+                Id_Rol,
+                Nombre
+            FROM Rol
+            WHERE Nombre = :nombre
+            AND Eliminado = 0";
 
-        $resultado = $this->query($sql, [
-            ':nombre' => $nombre
-        ]);
+    $resultado = $this->query($sql, [
+        ':nombre' => $nombre
+    ]);
 
-        return $resultado[0] ?? false;
+    return $resultado[0] ?? false;
     }
 }

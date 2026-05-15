@@ -31,15 +31,21 @@ class TokenRecuperacion extends Model
      */
     public function buscarPorToken(string $token): array|false
     {
-        $sql = "SELECT * FROM TokenRecuperacion
-                WHERE Token = :token
-                AND Eliminado = 0";
+    $sql = "SELECT
+                Id_TokenRecuperacion,
+                Id_Usuario,
+                Token,
+                Fecha_Expiracion,
+                Usado
+            FROM TokenRecuperacion
+            WHERE Token = :token
+            AND Eliminado = 0";
 
-        $resultado = $this->query($sql, [
-            ':token' => $token
-        ]);
+    $resultado = $this->query($sql, [
+        ':token' => $token
+    ]);
 
-        return $resultado[0] ?? false;
+    return $resultado[0] ?? false;
     }
 
     /**
@@ -47,17 +53,19 @@ class TokenRecuperacion extends Model
      */
     public function validar(string $token): bool
     {
-        $sql = "SELECT * FROM TokenRecuperacion
-                WHERE Token = :token
-                AND Usado = 0
-                AND Fecha_Expiracion > NOW()
-                AND Eliminado = 0";
+    $sql = "SELECT
+                Id_TokenRecuperacion
+            FROM TokenRecuperacion
+            WHERE Token = :token
+            AND Usado = 0
+            AND Fecha_Expiracion > NOW()
+            AND Eliminado = 0";
 
-        $resultado = $this->query($sql, [
-            ':token' => $token
-        ]);
+    $resultado = $this->query($sql, [
+        ':token' => $token
+    ]);
 
-        return !empty($resultado);
+    return !empty($resultado);
     }
 
     /**
