@@ -143,7 +143,6 @@ ob_start();
             <line x1="98" y1="107" x2="132" y2="107" stroke="#B0A8CC" stroke-width="1" stroke-linecap="round"/>
             <line x1="98" y1="111" x2="132" y2="116" stroke="#B0A8CC" stroke-width="1" stroke-linecap="round"/>
         </svg>
-        <p style="font-size:0.78rem; color:var(--pb-muted); margin-top:0.5rem;">Te estoy mirando 👀</p>
     </div>
 
     <!-- Formulario -->

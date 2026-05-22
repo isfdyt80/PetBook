@@ -116,7 +116,7 @@
 
     <footer class="pb-footer">
         <div class="container text-center">
-            Petbook &copy; <?= date('Y') ?> — Encontrá y reuní mascotas perdidas
+              — Petbook &copy; <?= date('Y') ?> — 
         </div>
     </footer>
 
