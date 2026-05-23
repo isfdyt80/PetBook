@@ -10,109 +10,130 @@ class Usuario extends Model
     protected string $pk    = 'Id_Usuario';
 
     /**
-     * Crea un nuevo usuario.
-     */
-    public function crear(array $datos): int
-    {
-        return $this->insert([
-            'Id_Persona'    => $datos['Id_Persona'],
-            'Email'         => $datos['Email'],
-            'Password_Hash' => $datos['Password_Hash'],
-            'Activo'        => 1,
-            'Eliminado'     => 0
-        ]);
-    }
-
-    /**
      * Busca un usuario por email.
+     * Trae Nombre desde Persona y rol desde Rol para poblar Session::login().
+     * No filtra por Activo ni Eliminado: esa validación la hace el controlador.
      */
     public function buscarPorEmail(string $email): array|false
-{
-    $sql = "SELECT
-                Id_Usuario,
-                Id_Persona,
-                Email,
-                Password_Hash,
-                Activo
-            FROM Usuario
-            WHERE Email = :email
-            AND Eliminado = 0";
+    {
+        $sql = "SELECT
+                    u.Id_Usuario,
+                    u.Id_Persona,
+                    p.Nombre,
+                    p.Apellido,
+                    u.Email,
+                    u.Password_Hash,
+                    u.Activo,
+                    u.Eliminado,
+                    r.Nombre AS rol
+                FROM Usuario u
+                JOIN Persona    p  ON p.Id_Persona = u.Id_Persona
+                JOIN UsuarioRol ur ON ur.Id_Usuario = u.Id_Usuario AND ur.Eliminado = 0
+                JOIN Rol        r  ON r.Id_Rol      = ur.Id_Rol
+                WHERE u.Email = :email
+                LIMIT 1";
 
-    $resultado = $this->query($sql, [
-        ':email' => $email
-    ]);
-
-    return $resultado[0] ?? false;
+        return $this->queryOne($sql, [':email' => $email]);
     }
 
     /**
      * Busca un usuario por ID.
+     * Trae Nombre desde Persona y rol desde Rol.
      */
     public function buscarPorId(int $id): array|false
     {
-    $sql = "SELECT
-                Id_Usuario,
-                Id_Persona,
-                Email,
-                Activo
-            FROM Usuario
-            WHERE Id_Usuario = :id
-            AND Eliminado = 0";
+        $sql = "SELECT
+                    u.Id_Usuario,
+                    u.Id_Persona,
+                    p.Nombre,
+                    p.Apellido,
+                    u.Email,
+                    u.Activo,
+                    u.Eliminado,
+                    r.Nombre AS rol
+                FROM Usuario u
+                JOIN Persona    p  ON p.Id_Persona = u.Id_Persona
+                JOIN UsuarioRol ur ON ur.Id_Usuario = u.Id_Usuario AND ur.Eliminado = 0
+                JOIN Rol        r  ON r.Id_Rol      = ur.Id_Rol
+                WHERE u.Id_Usuario = :id
+                AND u.Eliminado = 0
+                LIMIT 1";
 
-    $resultado = $this->query($sql, [
-        ':id' => $id
-    ]);
-
-    return $resultado[0] ?? false;
+        return $this->queryOne($sql, [':id' => $id]);
     }
 
     /**
-     * Verifica credenciales.
+     * Registra un nuevo usuario en una transacción atómica.
+     * Crea Persona + Usuario + UsuarioRol en un solo bloque.
+     * El hash de contraseña debe llegar ya procesado desde el controlador.
+     * Devuelve el Id_Usuario generado.
+     *
+     * @throws \RuntimeException Si la transacción falla.
      */
-    public function autenticar(string $email,string $password): array|false 
+    public function registrar(array $datos): int
     {
+        $this->db->beginTransaction();
 
-    $sql = "SELECT
-                Id_Usuario,
-                Id_Persona,
-                Email,
-                Password_Hash,
-                Activo
-            FROM Usuario
-            WHERE Email = :email
-            AND Activo = 1
-            AND Eliminado = 0";
+        try {
+            // 1. Persona
+            $stmtPersona = $this->db->prepare("
+                INSERT INTO Persona (Nombre, Apellido)
+                VALUES (:nombre, :apellido)
+            ");
+            $stmtPersona->execute([
+                ':nombre'   => $datos['Nombre'],
+                ':apellido' => $datos['Apellido'],
+            ]);
+            $idPersona = (int) $this->db->lastInsertId();
 
-    $resultado = $this->query($sql, [
-        ':email' => $email
-    ]);
+            // 2. Usuario
+            $stmtUsuario = $this->db->prepare("
+                INSERT INTO Usuario (Id_Persona, Email, Password_Hash, Activo, Eliminado)
+                VALUES (:id_persona, :email, :password_hash, 1, 0)
+            ");
+            $stmtUsuario->execute([
+                ':id_persona'    => $idPersona,
+                ':email'         => $datos['Email'],
+                ':password_hash' => $datos['Password_Hash'],
+            ]);
+            $idUsuario = (int) $this->db->lastInsertId();
 
-    $usuario = $resultado[0] ?? false;
+            // 3. Rol USUARIO (se busca por nombre, no se hardcodea el ID)
+            $stmtRol = $this->db->prepare("
+                SELECT Id_Rol FROM Rol WHERE Nombre = 'USUARIO' LIMIT 1
+            ");
+            $stmtRol->execute();
+            $idRol = (int) $stmtRol->fetchColumn();
 
-    if (!$usuario) {
-        return false;
-    }
+            if (!$idRol) {
+                throw new \RuntimeException("El rol 'USUARIO' no existe en la tabla Rol.");
+            }
 
-    if (
-        password_verify(
-            $password,
-            $usuario['Password_Hash']
-        )
-    ) {
-        return $usuario;
-    }
+            $stmtUsuarioRol = $this->db->prepare("
+                INSERT INTO UsuarioRol (Id_Usuario, Id_Rol, Eliminado)
+                VALUES (:id_usuario, :id_rol, 0)
+            ");
+            $stmtUsuarioRol->execute([
+                ':id_usuario' => $idUsuario,
+                ':id_rol'     => $idRol,
+            ]);
 
-    return false;
+            $this->db->commit();
+
+            return $idUsuario;
+
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            throw new \RuntimeException('Error al registrar usuario: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     /**
-     * Desactiva un usuario.
+     * Desactiva un usuario (Activo = 0). No elimina.
      */
     public function desactivar(int $id): bool
     {
-        return $this->update($id, [
-            'Activo' => 0
-        ]);
+        return $this->update($id, ['Activo' => 0]);
     }
 
     /**
