@@ -10,37 +10,33 @@ class EstadoPublicacion extends Model
     protected string $pk    = 'Id_EstadoPublicacion';
 
     /**
-     * Lista todos los estados activos.
+     * Lista todos los estados de publicación.
+     * EstadoPublicacion es una tabla de catálogo sin campo Eliminado.
+     *
+     * @return array
      */
     public function listar(): array
     {
-        $sql = "SELECT
-                    Id_EstadoPublicacion,
-                    Nombre
-                FROM EstadoPublicacion
-                WHERE Eliminado = 0";
-
-        return $this->query($sql);
+        return $this->query(
+            'SELECT Id_EstadoPublicacion, Nombre
+             FROM EstadoPublicacion'
+        );
     }
 
     /**
      * Busca un estado por nombre.
+     * Devuelve false si no existe.
+     *
+     * @param  string      $nombre  Nombre del estado a buscar.
+     * @return array|false
      */
-    public function buscarPorNombre(
-        string $nombre
-    ): array|false {
-
-        $sql = "SELECT
-                    Id_EstadoPublicacion,
-                    Nombre
-                FROM EstadoPublicacion
-                WHERE Nombre = :nombre
-                AND Eliminado = 0";
-
-        $resultado = $this->query($sql, [
-            ':nombre' => $nombre
-        ]);
-
-        return $resultado[0] ?? false;
+    public function buscarPorNombre(string $nombre): array|false
+    {
+        return $this->queryOne(
+            'SELECT Id_EstadoPublicacion, Nombre
+             FROM EstadoPublicacion
+             WHERE Nombre = :nombre',
+            [':nombre' => $nombre]
+        ) ?: false;
     }
 }
