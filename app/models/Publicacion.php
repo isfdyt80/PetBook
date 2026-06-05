@@ -92,6 +92,25 @@ class Publicacion extends Model
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+
+    /**
+     * Obtiene las publicaciones que se mostrarán en el feed principal.
+     * @return array
+     */
+    public function obtenerFeed(): array
+    {
+        return $this->query(
+            'SELECT
+                Id_Publicacion,
+                Id_Evento,
+                Id_Usuario,
+                Contenido,
+                Fecha_Publicacion
+            FROM Publicacion
+            WHERE Eliminado = 0
+            ORDER BY Fecha_Publicacion DESC'
+        );
+    }
     /**
      * Actualiza el contenido de una publicación y marca Editado = 1.
      *
