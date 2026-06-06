@@ -40,7 +40,7 @@ class PosibleCoincidencia extends Model
         return $this->query(
             "SELECT Id_PosibleCoincidencia, Id_MascotaA, Id_MascotaB, Nivel_Confianza, Resultado, Id_Usuario
              FROM PosibleCoincidencia
-             WHERE Resultado = 'pendiente'"
+             WHERE Resultado = 'PENDIENTE'"
         );
     }
 
@@ -56,7 +56,7 @@ class PosibleCoincidencia extends Model
     {
         $stmt = $this->execute(
             'UPDATE PosibleCoincidencia
-             SET Resultado = :resultado, Id_Usuario = :usuario
+             SET Resultado = :resultado, Id_Usuario = :usuario, Revisado = 1
              WHERE Id_PosibleCoincidencia = :id',
             [
                 ':resultado' => $resultado,

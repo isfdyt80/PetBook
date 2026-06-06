@@ -42,7 +42,7 @@ class MascotaUsuario extends Model
         return $this->query(
             'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde, Fecha_Hasta
              FROM MascotaUsuario
-             WHERE Id_Mascota = :id AND Eliminado = 0',
+             WHERE Id_Mascota = :id AND FechaHasta IS NULL',
             [':id' => $idMascota]
         );
     }
@@ -58,7 +58,7 @@ class MascotaUsuario extends Model
         return $this->query(
             'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde, Fecha_Hasta
              FROM MascotaUsuario
-             WHERE Id_Usuario = :id AND Eliminado = 0',
+             WHERE Id_Usuario = :id AND FechaHasta IS NULL',
             [':id' => $idUsuario]
         );
     }

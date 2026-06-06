@@ -34,7 +34,7 @@ class Raza extends Model
         return $this->query(
             'SELECT Id_Raza, Nombre
              FROM Raza
-             WHERE Id_Especie = :id AND Eliminado = 0',
+             WHERE Id_Especie = :id',
             [':id' => $idEspecie]
         );
     }
@@ -51,7 +51,7 @@ class Raza extends Model
         return $this->queryOne(
             'SELECT Id_Raza, Nombre, Id_Especie
              FROM Raza
-             WHERE Id_Raza = :id AND Eliminado = 0',
+             WHERE Id_Raza = :id',
             [':id' => $id]
         ) ?: null;
     }

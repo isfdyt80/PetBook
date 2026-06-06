@@ -35,7 +35,7 @@ class Especie extends Model
         return $this->queryOne(
             'SELECT Id_Especie, Nombre
              FROM Especie
-             WHERE Id_Especie = :id AND Eliminado = 0',
+             WHERE Id_Especie = :id',
             [':id' => $id]
         ) ?: null;
     }
