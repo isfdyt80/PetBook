@@ -130,6 +130,6 @@ ob_start();
 
 <?php
 $content = ob_get_clean();
-$titulo  = 'Feed';
+$titulo  = $titulo ?? 'Feed';
 require_once APP_PATH . '/views/layouts/main.php';
 ?>
