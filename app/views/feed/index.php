@@ -84,3 +84,9 @@ ob_start();
     </div>
 
 </div>
+
+<?php
+$content = ob_get_clean();
+$titulo  = 'Feed principal';
+require_once APP_PATH . '/views/layouts/main.php';
+?>
