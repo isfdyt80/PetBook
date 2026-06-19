@@ -111,7 +111,7 @@ ob_start();
                 </div>
 
                 <div class="post-meta">
-                    📅 <?= htmlspecialchars($publicacion['fecha'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                    📅 <?= htmlspecialchars($publicacion['fecha'] ?? $publicacion['Fecha_Publicacion'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                 </div>
 
                 <div class="post-meta mt-2">
