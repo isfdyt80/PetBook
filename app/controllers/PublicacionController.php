@@ -11,7 +11,7 @@ class PublicacionController extends Controller
     /**
      * GET /feed
      */
-    public function feed(): void
+    public function index(): void
     {
         Auth::requireAuth();
 
