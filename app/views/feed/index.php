@@ -35,6 +35,7 @@ ob_start();
 
             </div>
 
+            <?php if (defined('APP_DEBUG') && APP_DEBUG): ?>
             <!-- Ejemplo visual de publicación futura -->
             <div class="card mt-4 border-0 shadow-sm opacity-50">
 
