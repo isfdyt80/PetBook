@@ -79,6 +79,8 @@ ob_start();
 
             </div>
 
+            <?php endif; ?>
+
         </div>
 
     </div>
