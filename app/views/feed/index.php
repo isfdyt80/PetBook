@@ -14,12 +14,11 @@
                 <div class="card-body text-center py-5">
 
                     <div class="display-1 mb-3">
-                        🐾
+                        <span role="img" aria-label="Huella de mascota">🐾</span>
                     </div>
 
-                    <h3 class="mb-3">
-                        Todavía no hay publicaciones
-                    </h3>
+                     <h2 class="h3 mb-3">                        Todavía no hay publicaciones
+                    </h2>
 
                     <p class="text-muted mb-0">
                         Cuando los usuarios compartan eventos,
@@ -51,21 +50,20 @@
                     </h5>
 
                     <p class="mb-2">
-                        🐶 Firulais
-                    </p>
+                        
+                        <span role="img" aria-label="Mascota">🐶</span> Firulais                    </p>
 
                     <p class="text-muted mb-3">
-                        📍 Plaza San Martín
-                    </p>
+                    
+                        <span role="img" aria-label="Ubicación">📍</span> Plaza San Martín                    </p>
 
                     <div class="d-flex gap-3">
 
                         <span>
-                            ❤️ 12 reacciones
-                        </span>
+                           <span role="img" aria-label="Reacciones">❤️</span> 12 reacciones                        </span>
 
                         <span>
-                            💬 4 comentarios
+                            <span role="img" aria-label="Comentarios">💬</span> 4 comentarios
                         </span>
 
                     </div>
