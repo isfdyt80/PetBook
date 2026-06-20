@@ -111,13 +111,12 @@ ob_start();
                 </div>
 
                 <div class="post-meta">
-                    📅 <?= htmlspecialchars($publicacion['fecha'] ?? $publicacion['Fecha_Publicacion'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                </div>
+                     <span role="img" aria-label="Fecha">📅</span> <?= htmlspecialchars($publicacion['Fecha_Publicacion'] ?? '', ENT_QUOTES, 'UTF-8') ?>                </div>
 
                 <div class="post-meta mt-2">
-                    ❤️ <?= htmlspecialchars($publicacion['reacciones'] ?? '0', ENT_QUOTES, 'UTF-8') ?>
+                    <span role="img" aria-label="Reacciones">❤️</span> <?= htmlspecialchars($publicacion['reacciones'] ?? '0', ENT_QUOTES, 'UTF-8') ?>
                     ·
-                    💬 <?= htmlspecialchars($publicacion['comentarios'] ?? '0', ENT_QUOTES, 'UTF-8') ?>
+                    <span role="img" aria-label="Comentarios">💬</span> <?= htmlspecialchars($publicacion['comentarios'] ?? '0', ENT_QUOTES, 'UTF-8') ?>
                 </div>
 
             </div>
