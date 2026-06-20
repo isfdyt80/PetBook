@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Models;
-use Core\Model;
+use App\Core\Model;
 
 class TipoEvento extends Model
 {
+    protected $table = 'TipoEvento';
+    protected $pk = 'Id_TipoEvento';
+    
     // Lista todos los tipos de eventos (ej: perdido, adopcion, etc.)
     public function listar(){
         $sql = "SELECT 

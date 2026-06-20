@@ -1,20 +1,30 @@
 <?php
 
 namespace App\Models;
-use Core\Model;
+use App\Core\Model;
 
 class Ubicacion extends Model
 {
+    protected $table = 'Ubicacion';
+    protected $pk = 'Id_Ubicacion';
+
     // Inserta una nueva ubicacion en la base de datos
     public function crear(array $datos): int{
         $sql = "INSERT INTO Ubicacion 
                 (Direccion, Ciudad, Provincia, Pais, Latitud, Longitud)
                 VALUES (:direccion, :ciudad, :provincia, :pais, :latitud, :longitud)";
 
-        $this->execute($sql, $datos);
+        $this->execute($sql, [
+            ':direccion' => $datos['direccion'],
+            ':ciudad'    => $datos['ciudad'],
+            ':provincia' => $datos['provincia'],
+            ':pais'      => $datos['pais'],
+            ':latitud'   => $datos['latitud'] ?? null,
+            ':longitud'  => $datos['longitud'] ?? null,
+        ]);
 
         // Devuelve el ID generado automaticamente
-        return $this->lastInsertId();
+        return (int) $this->db->lastInsertId();
     }
 
     // Busca una ubicacion por su ID

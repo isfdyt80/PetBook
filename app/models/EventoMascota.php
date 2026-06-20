@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Models;
-use Core\Model;
+use App\Core\Model;
 
 class EventoMascota extends Model
 {
+    protected $table = 'EventoMascota';
+    protected $pk = 'Id_Evento';
+
     // Crea un nuevo evento asociado a una mascota
     public function crear(array $datos): int{
         $sql = "INSERT INTO EventoMascota
@@ -14,9 +17,17 @@ class EventoMascota extends Model
                 (:mascota, :usuario, :tipo, :estado, 
                  :descripcion, :ubicacion, :recompensa)";
 
-        $this->execute($sql, $datos);
+        $this->execute($sql, [
+            ':mascota'     => $datos['mascota'],
+            ':usuario'     => $datos['usuario'],
+            ':tipo'        => $datos['tipo'],
+            ':estado'      => $datos['estado'],
+            ':descripcion' => $datos['descripcion'],
+            ':ubicacion'   => $datos['ubicacion'] ?? null,
+            ':recompensa'  => $datos['recompensa'] ?? null,
+        ]);
 
-        return $this->lastInsertId();
+        return (int)$this->db->lastInsertId();
     }
 
     // Busca un evento por su ID
@@ -34,7 +45,8 @@ class EventoMascota extends Model
                     Fecha_UltimaVista,
                     Recompensa
                 FROM EventoMascota
-                WHERE Id_Evento = :id";
+                WHERE Id_Evento = :id
+                AND Eliminado = 0";
 
         return $this->queryOne($sql, ['id' => $id]);
     }
@@ -49,7 +61,8 @@ class EventoMascota extends Model
                     Fecha_Creacion,
                     Recompensa
                 FROM EventoMascota
-                WHERE Id_Mascota = :id";
+                WHERE Id_Mascota = :id
+                AND Eliminado = 0";
 
         return $this->query($sql, ['id' => $idMascota]);
     }
@@ -65,38 +78,41 @@ class EventoMascota extends Model
                     Fecha_Creacion,
                     Recompensa
                 FROM EventoMascota
-                WHERE Id_EstadoEvento != 3"; // 3 = resuelto (según lógica asumida)
+                WHERE Id_EstadoEvento = 1
+                AND Eliminado = 0";
 
         return $this->query($sql);
     }
 
     // Cambia el estado del evento y registra el cambio en el historial
-    public function cambiarEstado(int $id, int $idEstado, int $idUsuario): bool{
+    public function cambiarEstado(int $id, int $idEstado): bool
+    {
         $sql = "UPDATE EventoMascota
-                SET Id_EstadoEvento = :estado,
-                    Fecha_UltimaVista = NOW()
-                WHERE Id_Evento = :id";
+                SET Id_EstadoEvento = :estado";
 
-        $ok = $this->execute($sql, [
-            'estado' => $idEstado,
-            'id' => $id
-        ]);
 
-        // Si el cambio fue exitoso, se guarda en el historial
-        if($ok){
-            $historial = new HistorialEstadoEvento();
-            $historial->crear($id, $idEstado, $idUsuario);
+       //RESUELTO=2
+       //CANCELADO=3    
+
+        if($idEstado == 2 || $idEstado == 3){
+          $sql .= ", Fecha_Resolucion = NOW()";
         }
 
-        return $ok;
+        $sql .= " WHERE Id_Evento = :id
+                  AND Eliminado = 0";
+
+        $stmt = $this->execute($sql, [
+        ':estado' => $idEstado,
+        ':id'     => $id
+        ]);
+        
+        return $stmt->rowCount() > 0;
     }
 
     // Soft delete: marca el evento como eliminado
-    public function eliminar(int $id): bool{
-        $sql = "UPDATE EventoMascota
-                SET Eliminado = 1
-                WHERE Id_Evento = :id";
-
-        return $this->execute($sql, ['id' => $id]);
+    public function eliminar(int $id): bool
+    {
+       
+        return $this->softDelete($id);
     }
 }

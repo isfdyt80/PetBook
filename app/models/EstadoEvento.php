@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Models;
-use Core\Model;
+use App\Core\Model;
 
 class EstadoEvento extends Model
 {
+    protected $table = 'EstadoEvento';
+    protected $pk = 'Id_EstadoEvento';
+    
     // Devuelve todos los estados posibles de eventos
     public function listar(){
         $sql = "SELECT 

@@ -1,21 +1,25 @@
 <?php
 
 namespace App\Models;
-use Core\Model;
+use App\Core\Model;
 
 class HistorialEstadoEvento extends Model
 {
+    protected $table = 'HistorialEstadoEvento';
+    protected $pk = 'Id_Historial';
+
     // Registra un cambio de estado de un evento
     public function crear(int $idEvento, int $idEstado, int $idUsuario): bool{
         $sql = "INSERT INTO HistorialEstadoEvento
-                (Id_Evento, Id_EstadoEvento, Id_Usuario)
-                VALUES (:evento, :estado, :usuario)";
+                    (Id_Evento, Id_EstadoEvento, Id_Usuario, Fecha)
+                VALUES
+                    (:idEvento, :idEstado, :idUsuario, NOW())";
 
         return $this->execute($sql, [
-            'evento' => $idEvento,
-            'estado' => $idEstado,
-            'usuario' => $idUsuario
-        ]);
+            ':idEvento' => $idEvento,
+            ':idEstado' => $idEstado,
+            ':idUsuario' => $idUsuario
+        ])->rowCount() > 0;
     }
 
     // Lista el historial de cambios de estado de un evento
@@ -30,6 +34,6 @@ class HistorialEstadoEvento extends Model
                 WHERE Id_Evento = :idEvento
                 ORDER BY Fecha DESC";
 
-        return $this->query($sql, ['idEvento' => $idEvento]);
+        return $this->query($sql, [':idEvento' => $idEvento]);
     }
 }
