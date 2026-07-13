@@ -25,10 +25,12 @@ $dotenv->required([
     'DB_PORT',
     'DB_DATABASE',
     'DB_USERNAME',
-    'DB_PASSWORD',
     'SESSION_NAME',
     'SESSION_LIFETIME',
 ])->notEmpty();
+
+// DB_PASSWORD se requiere pero puede estar vacía
+$dotenv->required(['DB_PASSWORD']);
 
 // ── Helper para leer variables de entorno con valor por defecto ───────────
 function env(string $key, mixed $default = null): mixed
