@@ -129,7 +129,7 @@ CREATE TABLE MascotaUsuario (
 ) ENGINE=InnoDB;
 
 CREATE TABLE PosibleCoincidencia (
-    Id_PosibleCoincidencia INT            NOT NULL AUTO_INCREMENT,
+    Id              INT            NOT NULL AUTO_INCREMENT,
     Id_MascotaA     INT            NOT NULL,
     Id_MascotaB     INT            NOT NULL,
     Nivel_Confianza DECIMAL(5, 2)  NOT NULL DEFAULT 0.00,
