@@ -3,6 +3,7 @@
 namespace App\Models;
 use App\Core\Model;
 
+
 class EstadoEvento extends Model
 {
     protected $table = 'EstadoEvento';
@@ -26,6 +27,6 @@ class EstadoEvento extends Model
                 FROM EstadoEvento
                 WHERE Id_EstadoEvento = :id";
 
-        return $this->queryOne($sql, ['id' => $id]);
+        return $this->queryOne($sql, [':id' => $id]);
     }
 }
