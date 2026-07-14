@@ -18,8 +18,7 @@ class Especie extends Model
     {
         return $this->query(
             'SELECT Id_Especie, Nombre
-             FROM Especie
-             WHERE Eliminado = 0'
+             FROM Especie'
         );
     }
 

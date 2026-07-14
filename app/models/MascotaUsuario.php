@@ -19,7 +19,7 @@ class MascotaUsuario extends Model
     public function asociar(array $datos): bool
     {
         $stmt = $this->execute(
-            'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde)
+            'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, FechaDesde)
              VALUES (:mascota, :usuario, :esDueno, NOW())',
             [
                 ':mascota' => $datos['Id_Mascota'],
@@ -40,7 +40,7 @@ class MascotaUsuario extends Model
     public function listarPorMascota(int $idMascota): array
     {
         return $this->query(
-            'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde, Fecha_Hasta
+            'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, FechaDesde, FechaHasta
              FROM MascotaUsuario
              WHERE Id_Mascota = :id AND FechaHasta IS NULL',
             [':id' => $idMascota]
@@ -56,7 +56,7 @@ class MascotaUsuario extends Model
     public function listarPorUsuario(int $idUsuario): array
     {
         return $this->query(
-            'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, Fecha_Desde, Fecha_Hasta
+            'SELECT Id_MascotaUsuario, Id_Mascota, Id_Usuario, EsDueno, FechaDesde, FechaHasta
              FROM MascotaUsuario
              WHERE Id_Usuario = :id AND FechaHasta IS NULL',
             [':id' => $idUsuario]
@@ -74,7 +74,7 @@ class MascotaUsuario extends Model
     {
         $stmt = $this->execute(
             'UPDATE MascotaUsuario
-             SET Fecha_Hasta = :fecha
+             SET FechaHasta = :fecha
              WHERE Id_MascotaUsuario = :id',
             [
                 ':fecha' => $fechaHasta,

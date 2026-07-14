@@ -7,7 +7,7 @@ use App\Core\Model;
 class PosibleCoincidencia extends Model
 {
     protected string $table = 'PosibleCoincidencia';
-    protected string $pk    = 'Id_PosibleCoincidencia';
+    protected string $pk    = 'Id';
 
     /**
      * Registra una posible coincidencia entre dos mascotas.

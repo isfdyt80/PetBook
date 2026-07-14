@@ -18,8 +18,7 @@ class Raza extends Model
     {
         return $this->query(
             'SELECT Id_Raza, Nombre, Id_Especie
-             FROM Raza
-             WHERE Eliminado = 0'
+             FROM Raza'
         );
     }
 
