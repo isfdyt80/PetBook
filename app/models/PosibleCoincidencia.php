@@ -57,7 +57,7 @@ class PosibleCoincidencia extends Model
         $stmt = $this->execute(
             'UPDATE PosibleCoincidencia
              SET Resultado = :resultado, Id_Usuario = :usuario, Revisado = 1
-             WHERE Id_PosibleCoincidencia = :id',
+             WHERE Id = :id',
             [
                 ':resultado' => $resultado,
                 ':usuario'   => $idUsuario,
