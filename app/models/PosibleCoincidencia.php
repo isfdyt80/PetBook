@@ -48,20 +48,32 @@ class PosibleCoincidencia extends Model
      * Actualiza el resultado de una coincidencia y registra qué usuario la revisó.
      *
      * @param  int    $id         Id_PosibleCoincidencia a actualizar.
-     * @param  string $resultado  Valor del resultado (ej: 'aceptado', 'rechazado').
+     * @param  string $resultado  Valor del resultado (ej: 'CONFIRMADO', 'DESCARTADO').
      * @param  int    $idUsuario  Id_Usuario que revisó la coincidencia.
      * @return bool               true si se modificó al menos una fila.
      */
+
     public function actualizar(int $id, string $resultado, int $idUsuario): bool
     {
+        $resultado  = strtoupper($resultado);
+        $permitidos = ['PENDIENTE', 'CONFIRMADO', 'DESCARTADO'];
+
+        if (!in_array($resultado, $permitidos, true)) {
+            throw new \InvalidArgumentException(
+                'Resultado inválido. Valores permitidos: PENDIENTE, CONFIRMADO, DESCARTADO.'
+            );
+        }
+
         $stmt = $this->execute(
             'UPDATE PosibleCoincidencia
-             SET Resultado = :resultado, Id_Usuario = :usuario, Revisado = 1
-             WHERE Id = :id',
+            SET Resultado = :resultado,
+                Id_Usuario = :usuario,
+                Revisado = 1
+            WHERE Id_PosibleCoincidencia = :id',
             [
                 ':resultado' => $resultado,
                 ':usuario'   => $idUsuario,
-                ':id'        => $id,
+                ':id'        => $id
             ]
         );
 

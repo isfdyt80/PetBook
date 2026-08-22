@@ -10,7 +10,7 @@ class Especie extends Model
     protected string $pk    = 'Id_Especie';
 
     /**
-     * Devuelve todas las especies activas.
+     * Devuelve todas las especies .
      *
      * @return array
      */
@@ -24,7 +24,7 @@ class Especie extends Model
 
     /**
      * Busca una especie por su clave primaria.
-     * Devuelve null si no existe o está eliminada.
+     * Devuelve null si no existe .
      *
      * @param  int        $id  Id_Especie a buscar.
      * @return array|null
