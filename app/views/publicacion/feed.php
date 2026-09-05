@@ -1,8 +1,10 @@
-<?php ob_start(); ?>
+<?php
+ob_start();
+?>
 
 <style>
     .feed-wrap {
-        max-width: 680px;
+        max-width: 760px;
         margin: 2rem auto;
         padding: 0 1rem;
     }

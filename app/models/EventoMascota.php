@@ -48,7 +48,7 @@ class EventoMascota extends Model
                 WHERE Id_Evento = :id
                 AND Eliminado = 0";
 
-        return $this->queryOne($sql, ['id' => $id]);
+        return $this->queryOne($sql, [':id' => $id]);
     }
 
     // Lista todos los eventos de una mascota
@@ -85,7 +85,7 @@ class EventoMascota extends Model
     }
 
     // Cambia el estado del evento y registra el cambio en el historial
-    public function cambiarEstado(int $id, int $idEstado): bool
+    public function cambiarEstado(int $id, int $idEstado, int $idUsuario): bool
     {
         $sql = "UPDATE EventoMascota
                 SET Id_EstadoEvento = :estado";
@@ -101,12 +101,18 @@ class EventoMascota extends Model
         $sql .= " WHERE Id_Evento = :id
                   AND Eliminado = 0";
 
-        $stmt = $this->execute($sql, [
-        ':estado' => $idEstado,
-        ':id'     => $id
-        ]);
+       $resultado = $this->execute($sql, [
+            ':estado' => $idEstado,
+            ':id'     => $id
+        ])->rowCount() > 0;
+
+         // Registrar en historial
+        if($resultado) {
+            $historial = new HistorialEstadoEvento();
+            $historial->crear($id, $idEstado, $idUsuario);
+        }
         
-        return $stmt->rowCount() > 0;
+        return $resultado;
     }
 
     // Soft delete: marca el evento como eliminado

@@ -26,6 +26,6 @@ class TipoEvento extends Model
                 FROM TipoEvento
                 WHERE Id_TipoEvento = :id";
 
-        return $this->queryOne($sql, ['id' => $id]);
+        return $this->queryOne($sql, [':id' => $id]);
     }
 }
