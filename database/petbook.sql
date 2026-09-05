@@ -131,12 +131,12 @@ CREATE TABLE MascotaUsuario (
 CREATE TABLE PosibleCoincidencia (
     Id              INT            NOT NULL AUTO_INCREMENT,
     Id_MascotaA     INT            NOT NULL,
-    Id_MascotaB     INT            NOT NULL,
+    Id_MascotaB     INT            NOT NULL,git add .
     Nivel_Confianza DECIMAL(5, 2)  NOT NULL DEFAULT 0.00,
     Revisado        BOOLEAN        NOT NULL DEFAULT FALSE,
     Resultado       VARCHAR(20)    NOT NULL DEFAULT 'PENDIENTE',
     Id_Usuario      INT            NULL,
-    CONSTRAINT pk_posiblecoincidencia PRIMARY KEY (Id),
+    CONSTRAINT Id_posiblecoincidencia PRIMARY KEY (Id_PosibleCoincidencia),
     CONSTRAINT chk_coincidencia_resultado
         CHECK (Resultado IN ('PENDIENTE', 'CONFIRMADO', 'DESCARTADO')),
     CONSTRAINT chk_coincidencia_mascotas_distintas
