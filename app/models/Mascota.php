@@ -119,7 +119,7 @@ class Mascota extends Model
         $raza = $this->queryOne(
             'SELECT Id_Especie
              FROM Raza
-             WHERE Id_Raza = :raza AND Eliminado = 0',
+             WHERE Id_Raza = :raza',
             [':raza' => $datos['Id_Raza']]
         );
 

@@ -129,14 +129,14 @@ CREATE TABLE MascotaUsuario (
 ) ENGINE=InnoDB;
 
 CREATE TABLE PosibleCoincidencia (
-    Id              INT            NOT NULL AUTO_INCREMENT,
-    Id_MascotaA     INT            NOT NULL,
-    Id_MascotaB     INT            NOT NULL,git add .
-    Nivel_Confianza DECIMAL(5, 2)  NOT NULL DEFAULT 0.00,
-    Revisado        BOOLEAN        NOT NULL DEFAULT FALSE,
-    Resultado       VARCHAR(20)    NOT NULL DEFAULT 'PENDIENTE',
-    Id_Usuario      INT            NULL,
-    CONSTRAINT Id_posiblecoincidencia PRIMARY KEY (Id_PosibleCoincidencia),
+    Id_PosibleCoincidencia INT            NOT NULL AUTO_INCREMENT,
+    Id_MascotaA            INT            NOT NULL,
+    Id_MascotaB            INT            NOT NULL,
+    Nivel_Confianza        DECIMAL(5, 2)  NOT NULL DEFAULT 0.00,
+    Revisado               BOOLEAN        NOT NULL DEFAULT FALSE,
+    Resultado              VARCHAR(20)    NOT NULL DEFAULT 'PENDIENTE',
+    Id_Usuario             INT            NULL,
+    CONSTRAINT pk_posiblecoincidencia PRIMARY KEY (Id_PosibleCoincidencia),
     CONSTRAINT chk_coincidencia_resultado
         CHECK (Resultado IN ('PENDIENTE', 'CONFIRMADO', 'DESCARTADO')),
     CONSTRAINT chk_coincidencia_mascotas_distintas

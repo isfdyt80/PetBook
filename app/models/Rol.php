@@ -17,8 +17,7 @@ class Rol extends Model
     $sql = "SELECT
                 Id_Rol,
                 Nombre
-            FROM Rol
-            WHERE Eliminado = 0";
+            FROM Rol";
 
     return $this->query($sql);
     }
@@ -31,8 +30,7 @@ class Rol extends Model
                 Id_Rol,
                 Nombre
             FROM Rol
-            WHERE Nombre = :nombre
-            AND Eliminado = 0";
+            WHERE Nombre = :nombre";
 
     $resultado = $this->query($sql, [
         ':nombre' => $nombre
