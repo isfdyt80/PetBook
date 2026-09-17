@@ -67,9 +67,15 @@ class EventoMascota extends Model
         return $this->query($sql, ['id' => $idMascota]);
     }
 
-    // Lista eventos considerados "activos" (no resueltos)
-    public function listarActivos(){
-        $sql = "SELECT 
+    /**
+     * Lista eventos considerados "activos" (no resueltos).
+     * Resuelve el ID del estado ACTIVO por nombre para evitar números mágicos.
+     *
+     * @return array
+     */
+    public function listarActivos(): array
+    {
+        $sql = "SELECT
                     Id_Evento,
                     Id_Mascota,
                     Id_TipoEvento,
@@ -78,8 +84,12 @@ class EventoMascota extends Model
                     Fecha_Creacion,
                     Recompensa
                 FROM EventoMascota
-                WHERE Id_EstadoEvento = 1
-                AND Eliminado = 0";
+                WHERE Eliminado = 0
+                  AND Id_EstadoEvento = (
+                      SELECT Id_EstadoEvento
+                      FROM EstadoEvento
+                      WHERE Nombre = 'ACTIVO'
+                  )";
 
         return $this->query($sql);
     }
