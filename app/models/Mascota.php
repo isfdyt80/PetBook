@@ -48,6 +48,79 @@ class Mascota extends Model
     }
 
     /**
+     * Registra una nueva mascota y la asocia a un usuario.
+     *
+     * Escribe en Mascota y en MascotaUsuario dentro de la misma transacción,
+     * dejando la relación activa (FechaHasta NULL) con EsDueno = 1, porque
+     * quien registra es el propietario. Valida antes de guardar que la raza
+     * pertenezca a la especie indicada.
+     *
+     * @param  array $datos  Debe contener Id_Usuario (propietario) e Id_Especie.
+     *                       Opcionales: Id_Raza, Nombre, Fecha_Nacimiento.
+     * @return int           ID de la mascota recién registrada.
+     * @throws \InvalidArgumentException Si la raza no corresponde a la especie.
+     * @throws \RuntimeException         Si la transacción falla.
+     */
+    public function registrar(array $datos): int
+    {
+        $this->validarRazaEspecie($datos);
+
+        $this->db->beginTransaction();
+
+        try {
+            $idMascota = $this->insert([
+                'Nombre'            => $datos['Nombre']            ?? null,
+                'Id_Especie'        => $datos['Id_Especie'],
+                'Id_Raza'           => $datos['Id_Raza']           ?? null,
+                'Fecha_Nacimiento'  => $datos['Fecha_Nacimiento']  ?? null,
+                'Eliminado'         => 0,
+            ]);
+
+            $this->execute(
+                'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, FechaDesde)
+                 VALUES (:mascota, :usuario, 1, NOW())',
+                [
+                    ':mascota' => $idMascota,
+                    ':usuario' => $datos['Id_Usuario'],
+                ]
+            );
+
+            $this->db->commit();
+
+            return $idMascota;
+
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            throw new \RuntimeException('Error al registrar la mascota: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Lista las mascotas activas asociadas a un usuario, ordenadas por nombre.
+     *
+     * Solo considera relaciones vigentes (FechaHasta IS NULL) y mascotas no
+     * eliminadas (Eliminado = 0). Resuelve los nombres de especie y raza.
+     *
+     * @param  int   $idUsuario  Id_Usuario del propietario.
+     * @return array
+     */
+    public function listarPorUsuario(int $idUsuario): array
+    {
+        return $this->query(
+            'SELECT m.Id_Mascota, m.Nombre, e.Nombre AS Especie, r.Nombre AS Raza, m.Fecha_Nacimiento
+             FROM Mascota m
+             JOIN MascotaUsuario mu ON mu.Id_Mascota = m.Id_Mascota
+             JOIN Especie e         ON e.Id_Especie = m.Id_Especie
+             LEFT JOIN Raza r       ON r.Id_Raza = m.Id_Raza
+             WHERE mu.Id_Usuario = :id
+               AND mu.FechaHasta IS NULL
+               AND m.Eliminado = 0
+             ORDER BY m.Nombre ASC',
+            [':id' => $idUsuario]
+        );
+    }
+
+    /**
      * Busca una mascota por su clave primaria.
      * Devuelve null si no existe o está eliminada.
      *

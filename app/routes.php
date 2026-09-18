@@ -30,8 +30,9 @@ $router->post('/evento/:id/estado',  'EventoController', 'cambiarEstado');
 $router->post('/evento/:id/eliminar','EventoController', 'eliminar');
 
 // ── Mascotas ──────────────────────────────────────────────────────────────
+$router->get( '/mascota',            'MascotaController', 'index');
 $router->get( '/mascota/crear',      'MascotaController', 'crear');
-$router->post('/mascota/crear',      'MascotaController', 'store');
+$router->post('/mascota/crear',      'MascotaController', 'guardar');
 $router->get( '/mascota/:id',        'MascotaController', 'ver');
 $router->post('/mascota/:id/editar', 'MascotaController', 'actualizar');
 
