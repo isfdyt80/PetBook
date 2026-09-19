@@ -54,6 +54,8 @@ class Publicacion extends Model
     /**
      * Lista publicaciones activas con paginación.
      * Resuelve el ID del estado ACTIVA por nombre para evitar números mágicos.
+     * Trae los datos de la tarjeta del feed: tipo y estado de evento, mascota,
+     * especie, ubicación y conteos de reacciones y comentarios.
      * Usa bindValue con PDO::PARAM_INT para LIMIT y OFFSET.
      *
      * @param  int   $pagina     Número de página (mínimo 1).
@@ -67,21 +69,43 @@ class Publicacion extends Model
         $offset    = ($pagina - 1) * $porPagina;
 
         $sql = "SELECT
-                    Id_Publicacion,
-                    Id_Evento,
-                    Id_Usuario,
-                    Id_EstadoPublicacion,
-                    Contenido,
-                    Fecha_Publicacion,
-                    Editado
-                FROM Publicacion
-                WHERE Eliminado = 0
-                  AND Id_EstadoPublicacion = (
+                    p.Id_Publicacion,
+                    p.Contenido,
+                    p.Fecha_Publicacion,
+                    p.Editado,
+                    te.Nombre AS Tipo_Evento,
+                    ee.Nombre AS Estado_Evento,
+                    m.Nombre  AS Nombre_Mascota,
+                    sp.Nombre AS Nombre_Especie,
+                    COALESCE(
+                        NULLIF(CONCAT_WS(', ', u.Ciudad, u.Provincia), ''),
+                        NULL
+                    ) AS Ubicacion_Texto,
+                    (
+                        SELECT COUNT(*)
+                        FROM Reaccion r
+                        WHERE r.Id_Publicacion = p.Id_Publicacion
+                    ) AS Num_Reacciones,
+                    (
+                        SELECT COUNT(*)
+                        FROM Comentario c
+                        WHERE c.Id_Publicacion = p.Id_Publicacion
+                          AND c.Eliminado = 0
+                    ) AS Num_Comentarios
+                FROM Publicacion p
+                JOIN EventoMascota ev ON ev.Id_Evento = p.Id_Evento AND ev.Eliminado = 0
+                JOIN TipoEvento   te ON te.Id_TipoEvento   = ev.Id_TipoEvento
+                JOIN EstadoEvento ee ON ee.Id_EstadoEvento = ev.Id_EstadoEvento
+                LEFT JOIN Mascota  m  ON m.Id_Mascota  = ev.Id_Mascota  AND m.Eliminado = 0
+                LEFT JOIN Especie  sp ON sp.Id_Especie = m.Id_Especie
+                LEFT JOIN Ubicacion u ON u.Id_Ubicacion = ev.Id_Ubicacion
+                WHERE p.Eliminado = 0
+                  AND p.Id_EstadoPublicacion = (
                       SELECT Id_EstadoPublicacion
                       FROM EstadoPublicacion
                       WHERE Nombre = 'ACTIVA'
                   )
-                ORDER BY Fecha_Publicacion DESC
+                ORDER BY p.Fecha_Publicacion DESC
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->db->prepare($sql);
