@@ -7,7 +7,6 @@ use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Especie;
 use App\Models\Mascota;
-use App\Models\Raza;
 
 class MascotaController extends Controller
 {
@@ -173,7 +172,11 @@ class MascotaController extends Controller
         $nombre          = $this->input('nombre');
         $idEspecie       = (int) $this->input('especie');
         $idRaza          = (int) $this->input('raza');
+        $color           = $this->input('color');
+        $tamaño          = $this->input('tamaño');
+        $sexo            = $this->input('sexo');
         $fechaNacimiento = $this->input('fecha_nacimiento');
+        $edadAproximada  = $this->input('edad_aproximada');
 
         if ($idEspecie <= 0) {
             Session::flash('error', 'La especie es obligatoria.');
@@ -200,7 +203,11 @@ class MascotaController extends Controller
             'Nombre'           => $nombre,
             'Id_Especie'       => $idEspecie,
             'Id_Raza'          => $idRaza > 0 ? $idRaza : null,
+            'Color'            => $color !== null && $color !== '' ? $color : null,
+            'Tamaño'           => $tamaño !== null && $tamaño !== '' ? $tamaño : null,
+            'Sexo'             => $sexo !== null && $sexo !== '' ? $sexo : null,
             'Fecha_Nacimiento' => $fechaNacimiento,
+            'Edad_Aproximada'  => $edadAproximada !== null && $edadAproximada !== '' ? $edadAproximada : null,
         ];
     }
 
@@ -217,7 +224,6 @@ class MascotaController extends Controller
         $this->view('mascota.crear', [
             'titulo'   => 'Registrar mascota',
             'especies' => (new Especie())->listar(),
-            'razas'    => (new Raza())->listar(),
             'old'      => $_POST,
         ]);
     }

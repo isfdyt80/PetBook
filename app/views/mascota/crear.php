@@ -1,5 +1,7 @@
 <?php
+
 use App\Core\Session;
+
 ob_start();
 
 
@@ -97,7 +99,7 @@ $old = $old ?? [];
                                 Seleccioná una especie
                             </option>
 
-                            <?php foreach ($especies as $especie): ?>
+                            <?php foreach ($especies as $especie) : ?>
                                 <option value="<?= (int) $especie['Id_Especie'] ?>"
                                     <?= (string) ($old['especie'] ?? '') === (string) $especie['Id_Especie'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($especie['Nombre'], ENT_QUOTES, 'UTF-8') ?>
@@ -108,30 +110,73 @@ $old = $old ?? [];
 
                     <div class="mb-3">
                         <label class="pb-label" for="raza">Raza</label>
-                        <select class="pb-input" id="raza" name="raza">
+                        <select class="pb-input" id="raza" name="raza"
+                            data-raza-old="<?= htmlspecialchars((string) ($old['raza'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             <option value="">Raza (opcional)</option>
-
-                            <?php foreach ($razas as $raza): ?>
-                                <option value="<?= (int) $raza['Id_Raza'] ?>"
-                                    data-especie="<?= (int) $raza['Id_Especie'] ?>"
-                                    <?= (string) ($old['raza'] ?? '') === (string) $raza['Id_Raza'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($raza['Nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                </option>
-                            <?php endforeach; ?>
                         </select>
-                        <div class="pb-hint">Se muestran las razas de la especie seleccionada.</div>
+                        <div class="pb-hint">Se cargan las razas de la especie seleccionada.</div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="pb-label" for="fecha_nacimiento">Fecha de nacimiento</label>
-                        <input class="pb-input" type="date" id="fecha_nacimiento" name="fecha_nacimiento"
-                            value="<?= htmlspecialchars($old['fecha_nacimiento'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="mb-3">
+                        <label class="pb-label" for="color">Color</label>
+                        <input class="pb-input" type="text" id="color" name="color"
+                            value="<?= htmlspecialchars($old['color'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            placeholder="Ej: Negro con manchas blancas" autocomplete="off">
                         <div class="pb-hint">Opcional</div>
                     </div>
 
-                    <button type="submit" class="pb-btn">
-                        <i class="bi bi-paw me-1"></i>Registrar mascota
-                    </button>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="tamaño">Tamaño</label>
+                            <select class="pb-input" id="tamaño" name="tamaño">
+                                <option value="">Sin especificar</option>
+                                <?php foreach (['Pequeño', 'Mediano', 'Grande'] as $tamaño) : ?>
+                                    <option value="<?= $tamaño ?>"
+                                        <?= (string) ($old['tamaño'] ?? '') === $tamaño ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($tamaño, ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="sexo">Sexo</label>
+                            <select class="pb-input" id="sexo" name="sexo">
+                                <option value="">Sin especificar</option>
+                                <?php foreach (['Macho', 'Hembra'] as $sexo) : ?>
+                                    <option value="<?= $sexo ?>"
+                                        <?= (string) ($old['sexo'] ?? '') === $sexo ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($sexo, ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="fecha_nacimiento">Fecha de nacimiento</label>
+                            <input class="pb-input" type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                                value="<?= htmlspecialchars($old['fecha_nacimiento'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="edad_aproximada">Edad aproximada</label>
+                            <input class="pb-input" type="text" id="edad_aproximada" name="edad_aproximada"
+                                value="<?= htmlspecialchars($old['edad_aproximada'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                placeholder="Ej: 2 años" autocomplete="off">
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="submit" class="pb-btn">
+                            <i class="bi bi-paw me-1"></i>Registrar mascota
+                        </button>
+                    </div>
                 </form>
 
                 <div class="text-center mt-3">
@@ -149,31 +194,42 @@ $old = $old ?? [];
 </div>
 
 <script>
-(function () {
-    const especieSelect = document.getElementById('especie');
-    const razaSelect    = document.getElementById('raza');
+(function ($) {
+    const $especie = $('#especie');
+    const $raza    = $('#raza');
 
-    function filtrarRazas() {
-        const especie = especieSelect.value;
+    function limpiarRazas() {
+        $raza.empty().append($('<option>').val('').text('Raza (opcional)'));
+    }
 
-        Array.from(razaSelect.options).forEach(function (opt) {
-            if (opt.value === '') {
-                return;
-            }
+    function cargarRazas(idEspecie, razaSeleccionada) {
+        limpiarRazas();
 
-            const coincide = opt.dataset.especie === especie;
-            opt.hidden = !coincide;
+        if (!idEspecie) {
+            return;
+        }
 
-            if (!coincide && opt.selected) {
-                opt.selected = false;
-                razaSelect.value = '';
+        $.getJSON('<?= APP_URL ?>' + '/raza/por-especie/' + idEspecie, function (razas) {
+            $.each(razas, function (_, raza) {
+                $raza.append($('<option>').val(raza.Id_Raza).text(raza.Nombre));
+            });
+
+            if (razaSeleccionada) {
+                $raza.val(String(razaSeleccionada));
             }
         });
     }
 
-    especieSelect.addEventListener('change', filtrarRazas);
-    filtrarRazas();
-})();
+    // Al re-renderizar tras un error de validación, la especie viene precargada.
+    // Cargamos sus razas y restauramos la raza enviada.
+    if ($especie.val()) {
+        cargarRazas($especie.val(), $raza.data('razaOld'));
+    }
+
+    $especie.on('change', function () {
+        cargarRazas(this.value, null);
+    });
+})(jQuery);
 </script>
 
 <?php

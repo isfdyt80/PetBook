@@ -56,7 +56,8 @@ class Mascota extends Model
      * pertenezca a la especie indicada.
      *
      * @param  array $datos  Debe contener Id_Usuario (propietario) e Id_Especie.
-     *                       Opcionales: Id_Raza, Nombre, Fecha_Nacimiento.
+     *                       Opcionales: Id_Raza, Nombre, Color, Tamaño, Sexo,
+     *                       Fecha_Nacimiento, Edad_Aproximada.
      * @return int           ID de la mascota recién registrada.
      * @throws \InvalidArgumentException Si la raza no corresponde a la especie.
      * @throws \RuntimeException         Si la transacción falla.
@@ -72,7 +73,11 @@ class Mascota extends Model
                 'Nombre'            => $datos['Nombre']            ?? null,
                 'Id_Especie'        => $datos['Id_Especie'],
                 'Id_Raza'           => $datos['Id_Raza']           ?? null,
+                'Color'             => $datos['Color']             ?? null,
+                'Tamaño'            => $datos['Tamaño']            ?? null,
+                'Sexo'              => $datos['Sexo']              ?? null,
                 'Fecha_Nacimiento'  => $datos['Fecha_Nacimiento']  ?? null,
+                'Edad_Aproximada'   => $datos['Edad_Aproximada']   ?? null,
                 'Eliminado'         => 0,
             ]);
 
@@ -88,7 +93,6 @@ class Mascota extends Model
             $this->db->commit();
 
             return $idMascota;
-
         } catch (\Throwable $e) {
             $this->db->rollBack();
             throw new \RuntimeException('Error al registrar la mascota: ' . $e->getMessage(), 0, $e);
