@@ -110,6 +110,43 @@ class MascotaController extends Controller
         ]);
     }
 
+    // ── GET /mascota/:id/editar ───────────────────────────────────────────
+
+    /**
+     * Muestra el formulario de edición con los datos actuales de la mascota.
+     *
+     * Responde 404 si no existe. La vista recibe 'old' mapeado a los nombres
+     * de campo del formulario para reutilizar la misma plantilla de crear.
+     */
+    public function editar(string $id): void
+    {
+        Auth::requireAuth();
+
+        $mascota = (new Mascota())->buscarPorId((int) $id);
+
+        if ($mascota === null) {
+            http_response_code(404);
+            $this->view('errors.404');
+            return;
+        }
+
+        $this->view('mascota.editar', [
+            'titulo'   => 'Editar mascota',
+            'mascota'  => $mascota,
+            'especies' => (new Especie())->listar(),
+            'old'      => [
+                'nombre'           => $mascota['Nombre'] ?? '',
+                'especie'          => $mascota['Id_Especie'] ?? '',
+                'raza'             => $mascota['Id_Raza'] ?? '',
+                'color'            => $mascota['Color'] ?? '',
+                'tamaño'           => $mascota['Tamaño'] ?? '',
+                'sexo'             => $mascota['Sexo'] ?? '',
+                'fecha_nacimiento' => $mascota['Fecha_Nacimiento'] ?? '',
+                'edad_aproximada'  => $mascota['Edad_Aproximada'] ?? '',
+            ],
+        ]);
+    }
+
     // ── POST /mascota/:id/editar ──────────────────────────────────────────
 
     /**
