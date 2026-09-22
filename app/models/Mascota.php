@@ -134,10 +134,13 @@ class Mascota extends Model
     public function buscarPorId(int $id): ?array
     {
         return $this->queryOne(
-            'SELECT Id_Mascota, Nombre, Id_Especie, Id_Raza, Color, Tamaño,
-                    Sexo, Fecha_Nacimiento, Edad_Aproximada, Descripcion_Fisica
-             FROM Mascota
-             WHERE Id_Mascota = :id AND Eliminado = 0',
+            'SELECT m.Id_Mascota, m.Nombre, m.Id_Especie, e.Nombre AS Especie,
+                    m.Id_Raza, r.Nombre AS Raza, m.Color, m.Tamaño, m.Sexo,
+                    m.Fecha_Nacimiento, m.Edad_Aproximada, m.Descripcion_Fisica
+             FROM Mascota m
+             JOIN Especie e ON e.Id_Especie = m.Id_Especie
+             LEFT JOIN Raza r ON r.Id_Raza = m.Id_Raza
+             WHERE m.Id_Mascota = :id AND m.Eliminado = 0',
             [':id' => $id]
         ) ?: null;
     }

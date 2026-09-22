@@ -1,5 +1,7 @@
 <?php
+
 use App\Core\Session;
+
 ob_start();
 ?>
 
@@ -43,8 +45,7 @@ ob_start();
         </a>
     </div>
 
-    <?php if (empty($mascotas)): ?>
-
+    <?php if (empty($mascotas)) : ?>
         <!-- Estado vacío -->
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
@@ -68,53 +69,63 @@ ob_start();
             </div>
         </div>
 
-    <?php else: ?>
-
+    <?php else : ?>
         <div class="row g-4">
 
-            <?php foreach ($mascotas as $mascota): ?>
+            <?php foreach ($mascotas as $mascota) : ?>
                 <?php
                     $fechaNacimiento = $mascota['Fecha_Nacimiento'] ?? null;
                     $fechaFormateada = !empty($fechaNacimiento)
                         ? date('d/m/Y', strtotime($fechaNacimiento))
                         : null;
+                    $idMascota         = (int) $mascota['Id_Mascota'];
                 ?>
 
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm pb-card-mascota">
-                        <div class="card-body">
+                    <a href="<?= APP_URL ?>/mascota/<?= $idMascota ?>"
+                       class="d-block h-100 text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm pb-card-mascota">
 
-                            <div class="d-flex align-items-start justify-content-between mb-2">
-                                <h5 class="card-title mb-0">
-                                    <?= htmlspecialchars($mascota['Nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                                </h5>
-
-                                <span class="badge ms-2"
-                                      style="background: var(--pb-violet); color: #fff;">
-                                    <?= htmlspecialchars($mascota['Especie'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                                </span>
+                            <div class="text-center py-3"
+                                 style="background:#F3F1FE; border-radius: var(--pb-radius) var(--pb-radius) 0 0;">
+                                <i class="bi bi-paw" style="font-size: 2.25rem; color: var(--pb-violet);"></i>
                             </div>
 
-                            <div class="mt-3">
-                                <div class="pb-list-label">Raza</div>
-                                <p class="pb-list-value">
-                                    <?= !empty($mascota['Raza'])
-                                        ? htmlspecialchars($mascota['Raza'], ENT_QUOTES, 'UTF-8')
-                                        : '<span class="text-muted">Sin raza</span>' ?>
-                                </p>
-                            </div>
+                            <div class="card-body">
 
-                            <div>
-                                <div class="pb-list-label">Fecha de nacimiento</div>
-                                <p class="pb-list-value">
-                                    <?= $fechaFormateada
-                                        ? htmlspecialchars($fechaFormateada, ENT_QUOTES, 'UTF-8')
-                                        : '<span class="text-muted">—</span>' ?>
-                                </p>
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <h5 class="card-title mb-0">
+                                        <?= htmlspecialchars($mascota['Nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                    </h5>
+
+                                    <span class="badge ms-2"
+                                          style="background: var(--pb-violet); color: #fff;">
+                                        <?= htmlspecialchars($mascota['Especie'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
+                                </div>
+
+                                <div class="mt-3">
+                                    <div class="pb-list-label">Raza</div>
+                                    <p class="pb-list-value">
+                                        <?= !empty($mascota['Raza'])
+                                            ? htmlspecialchars($mascota['Raza'], ENT_QUOTES, 'UTF-8')
+                                            : '<span class="text-muted">Sin raza</span>' ?>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="pb-list-label">Fecha de nacimiento</div>
+                                    <p class="pb-list-value">
+                                        <?= $fechaFormateada
+                                            ? htmlspecialchars($fechaFormateada, ENT_QUOTES, 'UTF-8')
+                                            : '<span class="text-muted">—</span>' ?>
+                                    </p>
+                                </div>
+
                             </div>
 
                         </div>
-                    </div>
+                    </a>
                 </div>
             <?php endforeach; ?>
 
