@@ -146,6 +146,33 @@ class Mascota extends Model
     }
 
     /**
+     * Verifica si una mascota está vigente y vinculada al usuario indicado.
+     *
+     * Considera solo relaciones activas (FechaHasta IS NULL) y mascotas no
+     * eliminadas (Eliminado = 0). Sirve para impedir que un usuario vea o
+     * edite mascotas que no le pertenecen.
+     *
+     * @param  int  $idMascota  Id_Mascota a verificar.
+     * @param  int  $idUsuario  Id_Usuario vinculado.
+     * @return bool
+     */
+    public function perteneceAUsuario(int $idMascota, int $idUsuario): bool
+    {
+        $row = $this->queryOne(
+            'SELECT 1
+             FROM MascotaUsuario mu
+             JOIN Mascota m ON m.Id_Mascota = mu.Id_Mascota
+             WHERE mu.Id_Mascota = :mascota
+               AND mu.Id_Usuario = :usuario
+               AND mu.FechaHasta IS NULL
+               AND m.Eliminado = 0',
+            [':mascota' => $idMascota, ':usuario' => $idUsuario]
+        );
+
+        return $row !== null;
+    }
+
+    /**
      * Actualiza solo los campos presentes en $datos para la mascota indicada.
      * Ignora claves que no estén en CAMPOS_PERMITIDOS (evita mass-assignment).
      * Si se informa Id_Raza valida que pertenezca a la especie.

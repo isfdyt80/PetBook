@@ -90,16 +90,22 @@ class MascotaController extends Controller
     /**
      * Muestra el detalle de una mascota.
      *
-     * Responde 404 si no existe o está eliminada (soft delete). La vista no
-     * recibe el ID a través de un modelo, solo los datos ya resueltos.
+     * Responde 404 si no existe, está eliminada (soft delete) o no pertenece
+     * al usuario autenticado. La vista no recibe el ID a través de un modelo,
+     * solo los datos ya resueltos.
      */
     public function ver(string $id): void
     {
         Auth::requireAuth();
 
-        $mascota = (new Mascota())->buscarPorId((int) $id);
+        $idMascota = (int) $id;
+        $modelo    = new Mascota();
+        $mascota   = $modelo->buscarPorId($idMascota);
 
-        if ($mascota === null) {
+        if (
+            $mascota === null
+            || !$modelo->perteneceAUsuario($idMascota, (int) Session::user()['id'])
+        ) {
             http_response_code(404);
             $this->view('errors.404');
             return;
@@ -115,16 +121,22 @@ class MascotaController extends Controller
     /**
      * Muestra el formulario de edición con los datos actuales de la mascota.
      *
-     * Responde 404 si no existe. La vista recibe 'old' mapeado a los nombres
-     * de campo del formulario para reutilizar la misma plantilla de crear.
+     * Responde 404 si no existe o si la mascota no pertenece al usuario
+     * autenticado. La vista recibe 'old' mapeado a los nombres de campo del
+     * formulario para reutilizar la misma plantilla de crear.
      */
     public function editar(string $id): void
     {
         Auth::requireAuth();
 
-        $mascota = (new Mascota())->buscarPorId((int) $id);
+        $idMascota = (int) $id;
+        $modelo    = new Mascota();
+        $mascota   = $modelo->buscarPorId($idMascota);
 
-        if ($mascota === null) {
+        if (
+            $mascota === null
+            || !$modelo->perteneceAUsuario($idMascota, (int) Session::user()['id'])
+        ) {
             http_response_code(404);
             $this->view('errors.404');
             return;
@@ -152,9 +164,10 @@ class MascotaController extends Controller
     /**
      * Procesa el formulario de edición de mascota.
      *
-     * Consulta primero que la mascota exista (404 si no), lee y valida los
-     * datos con el mismo criterio que guardar() y delega la actualización y
-     * la coherencia especie-raza al modelo Mascota.
+     * Consulta primero que la mascota exista y pertenezca al usuario
+     * autenticado (404 si no), lee y valida los datos con el mismo criterio
+     * que guardar() y delega la actualización y la coherencia especie-raza
+     * al modelo Mascota.
      */
     public function actualizar(string $id): void
     {
@@ -162,8 +175,12 @@ class MascotaController extends Controller
         Session::validateCsrf();
 
         $idMascota = (int) $id;
+        $modelo    = new Mascota();
 
-        if ((new Mascota())->buscarPorId($idMascota) === null) {
+        if (
+            $modelo->buscarPorId($idMascota) === null
+            || !$modelo->perteneceAUsuario($idMascota, (int) Session::user()['id'])
+        ) {
             http_response_code(404);
             $this->view('errors.404');
             return;
