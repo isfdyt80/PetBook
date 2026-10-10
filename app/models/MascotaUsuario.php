@@ -7,6 +7,13 @@ use App\Core\Model;
 class MascotaUsuario extends Model
 {
     protected string $table = 'MascotaUsuario';
+
+    /**
+     * PK surrogate. La identidad real del vínculo no es este ID sino el par
+     * (Id_Mascota, Id_Usuario, período): un misma mascota puede asociarse a un
+     * mismo usuario en períodos distintos (FechaDesde/FechaHasta). Por eso tiene
+     * $pk simple a diferencia de Reaccion (PK compuesta pura) — ver guía sección 6.2.
+     */
     protected string $pk    = 'Id_MascotaUsuario';
 
     /**

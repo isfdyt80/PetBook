@@ -56,7 +56,8 @@ class Mascota extends Model
      * pertenezca a la especie indicada.
      *
      * @param  array $datos  Debe contener Id_Usuario (propietario) e Id_Especie.
-     *                       Opcionales: Id_Raza, Nombre, Fecha_Nacimiento.
+     *                       Opcionales: Id_Raza, Nombre, Color, Tamaño, Sexo,
+     *                       Fecha_Nacimiento, Edad_Aproximada.
      * @return int           ID de la mascota recién registrada.
      * @throws \InvalidArgumentException Si la raza no corresponde a la especie.
      * @throws \RuntimeException         Si la transacción falla.
@@ -72,7 +73,11 @@ class Mascota extends Model
                 'Nombre'            => $datos['Nombre']            ?? null,
                 'Id_Especie'        => $datos['Id_Especie'],
                 'Id_Raza'           => $datos['Id_Raza']           ?? null,
+                'Color'             => $datos['Color']             ?? null,
+                'Tamaño'            => $datos['Tamaño']            ?? null,
+                'Sexo'              => $datos['Sexo']              ?? null,
                 'Fecha_Nacimiento'  => $datos['Fecha_Nacimiento']  ?? null,
+                'Edad_Aproximada'   => $datos['Edad_Aproximada']   ?? null,
                 'Eliminado'         => 0,
             ]);
 
@@ -88,7 +93,6 @@ class Mascota extends Model
             $this->db->commit();
 
             return $idMascota;
-
         } catch (\Throwable $e) {
             $this->db->rollBack();
             throw new \RuntimeException('Error al registrar la mascota: ' . $e->getMessage(), 0, $e);
@@ -130,12 +134,42 @@ class Mascota extends Model
     public function buscarPorId(int $id): ?array
     {
         return $this->queryOne(
-            'SELECT Id_Mascota, Nombre, Id_Especie, Id_Raza, Color, Tamaño,
-                    Sexo, Fecha_Nacimiento, Edad_Aproximada, Descripcion_Fisica
-             FROM Mascota
-             WHERE Id_Mascota = :id AND Eliminado = 0',
+            'SELECT m.Id_Mascota, m.Nombre, m.Id_Especie, e.Nombre AS Especie,
+                    m.Id_Raza, r.Nombre AS Raza, m.Color, m.Tamaño, m.Sexo,
+                    m.Fecha_Nacimiento, m.Edad_Aproximada, m.Descripcion_Fisica
+             FROM Mascota m
+             JOIN Especie e ON e.Id_Especie = m.Id_Especie
+             LEFT JOIN Raza r ON r.Id_Raza = m.Id_Raza
+             WHERE m.Id_Mascota = :id AND m.Eliminado = 0',
             [':id' => $id]
         ) ?: null;
+    }
+
+    /**
+     * Verifica si una mascota está vigente y vinculada al usuario indicado.
+     *
+     * Considera solo relaciones activas (FechaHasta IS NULL) y mascotas no
+     * eliminadas (Eliminado = 0). Sirve para impedir que un usuario vea o
+     * edite mascotas que no le pertenecen.
+     *
+     * @param  int  $idMascota  Id_Mascota a verificar.
+     * @param  int  $idUsuario  Id_Usuario vinculado.
+     * @return bool
+     */
+    public function perteneceAUsuario(int $idMascota, int $idUsuario): bool
+    {
+        $row = $this->queryOne(
+            'SELECT 1
+             FROM MascotaUsuario mu
+             JOIN Mascota m ON m.Id_Mascota = mu.Id_Mascota
+             WHERE mu.Id_Mascota = :mascota
+               AND mu.Id_Usuario = :usuario
+               AND mu.FechaHasta IS NULL
+               AND m.Eliminado = 0',
+            [':mascota' => $idMascota, ':usuario' => $idUsuario]
+        );
+
+        return $row !== null;
     }
 
     /**

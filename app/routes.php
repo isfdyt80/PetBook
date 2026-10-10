@@ -34,7 +34,11 @@ $router->get( '/mascota',            'MascotaController', 'index');
 $router->get( '/mascota/crear',      'MascotaController', 'crear');
 $router->post('/mascota/crear',      'MascotaController', 'guardar');
 $router->get( '/mascota/:id',        'MascotaController', 'ver');
+$router->get( '/mascota/:id/editar', 'MascotaController', 'editar');
 $router->post('/mascota/:id/editar', 'MascotaController', 'actualizar');
+
+// ── Razas (catálogo auxiliar, AJAX) ───────────────────────────────────────
+$router->get( '/raza/por-especie/:id', 'RazaController', 'porEspecie');
 
 // ── Publicaciones ─────────────────────────────────────────────────────────
 $router->get( '/publicacion/:id',          'PublicacionController', 'ver');
