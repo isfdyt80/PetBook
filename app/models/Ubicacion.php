@@ -9,19 +9,20 @@ class Ubicacion extends Model
     protected $table = 'Ubicacion';
     protected $pk = 'Id_Ubicacion';
 
-    // Inserta una nueva ubicacion en la base de datos
+
+    // Inserta una nueva ubicacion en la base de datos (todos los campos son opcionales)
     public function crear(array $datos): int{
         $sql = "INSERT INTO Ubicacion 
                 (Direccion, Ciudad, Provincia, Pais, Latitud, Longitud)
                 VALUES (:direccion, :ciudad, :provincia, :pais, :latitud, :longitud)";
 
         $this->execute($sql, [
-            ':direccion' => $datos['direccion'],
-            ':ciudad'    => $datos['ciudad'],
-            ':provincia' => $datos['provincia'],
-            ':pais'      => $datos['pais'],
-            ':latitud'   => $datos['latitud'] ?? null,
-            ':longitud'  => $datos['longitud'] ?? null,
+            ':direccion' => $datos['direccion'] ?? null,
+            ':ciudad'    => $datos['ciudad']    ?? null,
+            ':provincia' => $datos['provincia'] ?? null,
+            ':pais'      => $datos['pais']      ?? null,
+            ':latitud'   => $datos['latitud']   ?? null,
+            ':longitud'  => $datos['longitud']  ?? null,
         ]);
 
         // Devuelve el ID generado automaticamente
