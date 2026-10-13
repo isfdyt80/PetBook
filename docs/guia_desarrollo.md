@@ -173,6 +173,7 @@ private function idTipoPorNombre(string $nombre): int
 ### 2.4 Prohibido: instanciar otro modelo dentro de un método de modelo
 
 Si `Notificacion::crearPorComentario()` necesitara validar que el usuario existe, **no** hace `(new Usuario())->find($idUsuario)`. Esa validación es responsabilidad del controlador (que sí puede instanciar ambos modelos) antes de llamar a `crearPorComentario()`. La razón de esta regla no es estilística: dos modelos instanciándose entre sí abre la puerta a dependencias circulares y hace imposible testear un modelo de forma aislada. Si dos modelos necesitan compartir una consulta con frecuencia, la señal es que falta una capa de servicio (ver sección 0) — mientras esa capa no exista, la lógica que junta dos entidades vive en el controlador.
+**Excepción:** `EventoMascota::crear()` instancia `Mascota` y `Ubicacion`. Crear un evento es una operación atómica (mascota si no existe, ubicación, evento, historial y publicación) y la regla de negocio "todo evento genera una publicación" tiene que cumplirse sin importar desde dónde se llame. No hay capa de servicio, así que la orquestación vive en el modelo del evento.
 
 ### 2.5 Transacciones multi-tabla
 
@@ -225,6 +226,21 @@ public function crear(array $datos): int
 
 Cualquier método de modelo que escriba en más de una tabla debe seguir este patrón — `beginTransaction()` / `commit()` / `rollBack()` en `catch`. No hacerlo deja abierta la posibilidad de un `EventoMascota` sin `Publicacion`, que la sección 4.4 de la documentación técnica prohíbe explícitamente ("no puede existir un evento visible sin publicación").
 
+#### Patrón recomendado: `Database::transactional()`
+
+Para no depender de que cada dev recuerde el `try/catch` con `rollBack()`, usar el wrapper:
+
+```php
+return (int) Database::transactional(function () use ($datos): int {
+    // inserts en varias tablas
+    return $idEvento;
+});
+```
+
+- Abre la transacción, hace `commit` si todo sale bien y `rollBack` ante cualquier excepción, que relanza.
+- Si ya hay una transacción abierta se une a ella, porque PDO no soporta transacciones anidadas.
+- El modelo que orquesta (`EventoMascota`) es quien lo llama. El controlador solo captura la excepción y muestra un error genérico, sin el mensaje técnico de PDO.
+- Los métodos anteriores con `beginTransaction()` a mano (`Mascota::registrar()`, `EventoMascota::cambiarEstado()`) siguen siendo válidos.
 ### 2.6 Dónde va el archivo
 
 `app/models/NombreClase.php`, namespace `App\Models`, autoload PSR-4 vía Composer — no requiere `require` manual una vez que el archivo está commiteado (recordar: el error de Copilot marcando `use App\Core\Model` como inválido fue, en un caso anterior, simplemente el archivo del modelo sin commitear, no un problema de namespace).
