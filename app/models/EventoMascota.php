@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use App\Core\Model;
+use App\Core\Database;
 
 class EventoMascota extends Model
 {
@@ -9,25 +10,78 @@ class EventoMascota extends Model
     protected $pk = 'Id_Evento';
 
     // Crea un nuevo evento asociado a una mascota
-    public function crear(array $datos): int{
-        $sql = "INSERT INTO EventoMascota
-                (Id_Mascota, Id_Usuario, Id_TipoEvento, Id_EstadoEvento, 
-                 Descripcion, Id_Ubicacion, Recompensa)
+   /**
+ * Crea mascota (si no existe), ubicación, evento, historial y publicación
+ * en una sola transacción. Si cualquier paso falla, rollback completo.
+ *
+ * @param  array  $datos  id_mascota_existente (opcional), mascota (datos para
+ *                        Mascota::crear), ubicacion (datos para Ubicacion::crear),
+ *                        id_usuario y descripcion.
+ * @param  string $tipo   PERDIDA, ENCONTRADA o ADOPCION.
+ * @return int            Id_Evento creado.
+ */
+    public function crear(array $datos, string $tipo): int
+    {
+        return (int) Database::transactional(function () use ($datos, $tipo): int {
+            // 1. Mascota existente o nueva (sin deduplicar: eso es de PosibleCoincidencia)
+            $idMascota = $datos['id_mascota_existente'] ?? null;
+
+            if ($idMascota === null) {
+                $idMascota = (new Mascota())->crear($datos['mascota']);
+            }
+
+            // 2. Ubicación
+            $idUbicacion = (new Ubicacion())->crear($datos['ubicacion']);
+
+            // 3. Evento con el tipo recibido y estado ACTIVO
+            $idEstado = $this->idEstadoPorNombre('ACTIVO');
+
+            $this->execute(
+                'INSERT INTO EventoMascota
+                    (Id_Mascota, Id_Usuario, Id_TipoEvento, Id_EstadoEvento, Descripcion, Id_Ubicacion)
                 VALUES
-                (:mascota, :usuario, :tipo, :estado, 
-                 :descripcion, :ubicacion, :recompensa)";
+                    (:mascota, :usuario,
+                    (SELECT Id_TipoEvento FROM TipoEvento WHERE Nombre = :tipo),
+                    :estado, :descripcion, :ubicacion)',
+                [
+                    ':mascota'     => $idMascota,
+                    ':usuario'     => $datos['id_usuario'],
+                    ':tipo'        => strtoupper($tipo),
+                    ':estado'      => $idEstado,
+                    ':descripcion' => $datos['descripcion'] ?? null,
+                    ':ubicacion'   => $idUbicacion,
+                ]
+            );
 
-        $this->execute($sql, [
-            ':mascota'     => $datos['mascota'],
-            ':usuario'     => $datos['usuario'],
-            ':tipo'        => $datos['tipo'],
-            ':estado'      => $datos['estado'],
-            ':descripcion' => $datos['descripcion'],
-            ':ubicacion'   => $datos['ubicacion'] ?? null,
-            ':recompensa'  => $datos['recompensa'] ?? null,
-        ]);
+            // Se captura acá, antes de los otros inserts, que cambian lastInsertId().
+            $idEvento = (int) $this->db->lastInsertId();
 
-        return (int)$this->db->lastInsertId();
+            // 4. Historial con el estado inicial y el usuario creador
+            $this->execute(
+                'INSERT INTO HistorialEstadoEvento (Id_Evento, Id_EstadoEvento, Id_Usuario)
+                VALUES (:evento, :estado, :usuario)',
+                [
+                    ':evento'  => $idEvento,
+                    ':estado'  => $idEstado,
+                    ':usuario' => $datos['id_usuario'],
+                ]
+            );
+
+            // 5. Publicación ACTIVA referenciando el evento (contenido = descripción)
+            $this->execute(
+                "INSERT INTO Publicacion (Id_Evento, Id_Usuario, Id_EstadoPublicacion, Contenido)
+                VALUES (:evento, :usuario,
+                        (SELECT Id_EstadoPublicacion FROM EstadoPublicacion WHERE Nombre = 'ACTIVA'),
+                        :contenido)",
+                [
+                    ':evento'    => $idEvento,
+                    ':usuario'   => $datos['id_usuario'],
+                    ':contenido' => $datos['descripcion'] ?? null,
+                ]
+            );
+
+            return $idEvento;
+        });
     }
 
     // Busca un evento por su ID
@@ -50,6 +104,30 @@ class EventoMascota extends Model
 
         return $this->queryOne($sql, [':id' => $id]);
     }
+
+    // Trae el evento con tipo, estado, mascota, ubicación y publicador (para la vista de detalle)
+public function detalle(int $id): array|false
+{
+    return $this->queryOne(
+        "SELECT ev.Id_Evento, ev.Id_Usuario, ev.Descripcion, ev.Fecha_Creacion,
+                te.Nombre AS Tipo_Evento, ee.Nombre AS Estado_Evento,
+                m.Nombre AS Nombre_Mascota, m.Color, m.Descripcion_Fisica,
+                sp.Nombre AS Nombre_Especie, r.Nombre AS Nombre_Raza,
+                u.Direccion, u.Ciudad, u.Provincia, u.Pais, u.Latitud, u.Longitud,
+                pe.Nombre AS Nombre_Publicador
+         FROM EventoMascota ev
+         JOIN TipoEvento   te ON te.Id_TipoEvento   = ev.Id_TipoEvento
+         JOIN EstadoEvento ee ON ee.Id_EstadoEvento = ev.Id_EstadoEvento
+         JOIN Usuario      us ON us.Id_Usuario      = ev.Id_Usuario
+         JOIN Persona      pe ON pe.Id_Persona      = us.Id_Persona
+         LEFT JOIN Mascota   m  ON m.Id_Mascota  = ev.Id_Mascota AND m.Eliminado = 0
+         LEFT JOIN Especie   sp ON sp.Id_Especie = m.Id_Especie
+         LEFT JOIN Raza      r  ON r.Id_Raza     = m.Id_Raza
+         LEFT JOIN Ubicacion u  ON u.Id_Ubicacion = ev.Id_Ubicacion
+         WHERE ev.Id_Evento = :id AND ev.Eliminado = 0",
+        [':id' => $id]
+    ) ?: false;
+}
 
     // Lista todos los eventos de una mascota
     public function listarPorMascota(int $idMascota){

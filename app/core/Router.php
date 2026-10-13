@@ -103,6 +103,9 @@ class Router
             $uri = substr($uri, strlen($base));
         }
 
+        
+
+        
         return '/' . trim($uri, '/') ?: '/';
     }
 

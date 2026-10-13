@@ -69,6 +69,31 @@ class Database
     }
 
     /**
+ * Ejecuta $fn dentro de una transacción.
+ * Si $fn lanza una excepción, hace rollback y la relanza.
+ * Si ya hay una transacción abierta, se une a ella (PDO no soporta anidadas).
+ */
+    public static function transactional(callable $fn): mixed
+    {
+        $pdo = self::getInstance();
+
+        if ($pdo->inTransaction()) {
+            return $fn();
+        }
+
+        $pdo->beginTransaction();
+
+        try {
+            $resultado = $fn();
+            $pdo->commit();
+            return $resultado;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Cierra la conexión explícitamente.
      */
     public static function close(): void
