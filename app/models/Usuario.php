@@ -64,7 +64,8 @@ class Usuario extends Model
 
     /**
      * Registra un nuevo usuario en una transacción atómica.
-     * Crea Persona + Usuario + UsuarioRol en un solo bloque.
+     * Crea Persona + Usuario + UsuarioRol en un solo bloque,
+     * vía el wrapper transaccional de la clase base (Model::transactional).
      * El hash de contraseña debe llegar ya procesado desde el controlador.
      * Devuelve el Id_Usuario generado.
      *
@@ -72,58 +73,56 @@ class Usuario extends Model
      */
     public function registrar(array $datos): int
     {
-        $this->db->beginTransaction();
-
         try {
-            // 1. Persona
-            $stmtPersona = $this->db->prepare("
-                INSERT INTO Persona (Nombre, Apellido)
-                VALUES (:nombre, :apellido)
-            ");
-            $stmtPersona->execute([
-                ':nombre'   => $datos['Nombre'],
-                ':apellido' => $datos['Apellido'],
-            ]);
-            $idPersona = (int) $this->db->lastInsertId();
+            return $this->transactional(function () use ($datos) {
+                // 1. Persona
+                $stmtPersona = $this->db->prepare("
+                    INSERT INTO Persona (Nombre, Apellido)
+                    VALUES (:nombre, :apellido)
+                ");
+                $stmtPersona->execute([
+                    ':nombre'   => $datos['Nombre'],
+                    ':apellido' => $datos['Apellido'],
+                ]);
+                $idPersona = (int) $this->db->lastInsertId();
 
-            // 2. Usuario
-            $stmtUsuario = $this->db->prepare("
-                INSERT INTO Usuario (Id_Persona, Email, Password_Hash, Activo, Eliminado)
-                VALUES (:id_persona, :email, :password_hash, 1, 0)
-            ");
-            $stmtUsuario->execute([
-                ':id_persona'    => $idPersona,
-                ':email'         => $datos['Email'],
-                ':password_hash' => $datos['Password_Hash'],
-            ]);
-            $idUsuario = (int) $this->db->lastInsertId();
+                // 2. Usuario
+                $stmtUsuario = $this->db->prepare("
+                    INSERT INTO Usuario (Id_Persona, Email, Password_Hash, Activo, Eliminado)
+                    VALUES (:id_persona, :email, :password_hash, 1, 0)
+                ");
+                $stmtUsuario->execute([
+                    ':id_persona'    => $idPersona,
+                    ':email'         => $datos['Email'],
+                    ':password_hash' => $datos['Password_Hash'],
+                ]);
+                $idUsuario = (int) $this->db->lastInsertId();
 
-            // 3. Rol USUARIO (se busca por nombre, no se hardcodea el ID)
-            $stmtRol = $this->db->prepare("
-                SELECT Id_Rol FROM Rol WHERE Nombre = 'USUARIO' LIMIT 1
-            ");
-            $stmtRol->execute();
-            $idRol = (int) $stmtRol->fetchColumn();
+                // 3. Rol USUARIO (se busca por nombre, no se hardcodea el ID)
+                $stmtRol = $this->db->prepare("
+                    SELECT Id_Rol FROM Rol WHERE Nombre = 'USUARIO' LIMIT 1
+                ");
+                $stmtRol->execute();
+                $idRol = (int) $stmtRol->fetchColumn();
 
-            if (!$idRol) {
-                throw new \RuntimeException("El rol 'USUARIO' no existe en la tabla Rol.");
-            }
+                if (!$idRol) {
+                    throw new \RuntimeException("El rol 'USUARIO' no existe en la tabla Rol.");
+                }
 
-            $stmtUsuarioRol = $this->db->prepare("
-                INSERT INTO UsuarioRol (Id_Usuario, Id_Rol, Eliminado)
-                VALUES (:id_usuario, :id_rol, 0)
-            ");
-            $stmtUsuarioRol->execute([
-                ':id_usuario' => $idUsuario,
-                ':id_rol'     => $idRol,
-            ]);
+                $stmtUsuarioRol = $this->db->prepare("
+                    INSERT INTO UsuarioRol (Id_Usuario, Id_Rol, Eliminado)
+                    VALUES (:id_usuario, :id_rol, 0)
+                ");
+                $stmtUsuarioRol->execute([
+                    ':id_usuario' => $idUsuario,
+                    ':id_rol'     => $idRol,
+                ]);
 
-            $this->db->commit();
-
-            return $idUsuario;
-
+                return $idUsuario;
+            });
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            // El rollback lo hace transactional(); acá solo se preserva el
+            // contrato de RuntimeException que consume AuthController.
             throw new \RuntimeException('Error al registrar usuario: ' . $e->getMessage(), 0, $e);
         }
     }
