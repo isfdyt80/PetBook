@@ -75,4 +75,87 @@ class Database
     {
         self::$instance = null;
     }
+
+    // ── Transacciones ────────────────────────────────────────────────────
+
+    /**
+     * Ejecuta $fn dentro de una transacción con commit automático
+     * y rollback ante cualquier excepción.
+     *
+     * Es el mecanismo obligatorio para escrituras multi-tabla
+     * (ver docs/conventions.md — decisión "Transacciones").
+     * No usar beginTransaction()/commit()/rollBack() a mano en código nuevo:
+     * el wrapper no depende de que cada dev se acuerde del rollBack().
+     *
+     * Semántica de anidamiento: si ya hay una transacción activa
+     * (inTransaction() === true), $fn se ejecuta dentro de ella sin abrir
+     * otra — "join", sin savepoints. Un fallo dentro revierte la
+     * transacción entera, que es el comportamiento deseado en Petbook.
+     *
+     * Uso (desde un modelo, se lee más natural con $this->transactional()):
+     *   $id = $this->transactional(function () use ($datos) {
+     *       $idEvento = $this->insert([...]);
+     *       $this->execute('INSERT INTO Publicacion ...', [...]);
+     *       return $idEvento;
+     *   });
+     *
+     * Uso (desde un controlador orquestando varios modelos):
+     *   $idEvento = Database::transactional(function () use (...) {
+     *       (new Mascota())->registrar(...);
+     *       (new Ubicacion())->crear(...);
+     *       return (new EventoMascota())->crear(...);
+     *   });
+     *
+     * @param  callable $fn  Bloque de escritura. Su valor de retorno se
+     *                       devuelve desde commit(); si lanza, se revierte.
+     * @return mixed        Lo que devuelva $fn.
+     * @throws \Throwable   Re-lanza la excepción original tras el rollBack().
+     */
+    public static function transactional(callable $fn): mixed
+    {
+        $pdo = self::getInstance();
+
+        // Transacción ya activa: sumarse a ella en vez de anidar.
+        if ($pdo->inTransaction()) {
+            return $fn();
+        }
+
+        $pdo->beginTransaction();
+
+        try {
+            $result = $fn();
+            $pdo->commit();
+            return $result;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Abre una transacción a mano. Prefiere Database::transactional():
+     * estos métodos existen para los casos excepcionales que no encajan
+     * en un callable, y obligan a que el llamador gestione commit y
+     * rollBack() correctamente por su cuenta.
+     */
+    public static function beginTransaction(): void
+    {
+        self::getInstance()->beginTransaction();
+    }
+
+    /**
+     * Confirma la transacción activa. Ver beginTransaction().
+     */
+    public static function commit(): void
+    {
+        self::getInstance()->commit();
+    }
+
+    /**
+     * Revierte la transacción activa. Ver beginTransaction().
+     */
+    public static function rollBack(): void
+    {
+        self::getInstance()->rollBack();
+    }
 }

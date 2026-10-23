@@ -97,7 +97,7 @@ class EventoMascota extends Model
     /**
      * Cambia el estado de un evento y registra el cambio en el historial.
      * El UPDATE y el historial se escriben dentro de la misma transacción
-     * (convención de la guía de desarrollo, sección 8).
+     * (wrapper Model::transactional — ver docs/conventions.md).
      *
      * Un evento en estado terminal (RESUELTO/CANCELADO) no puede volver a ACTIVO.
      * El estado destino se resuelve por nombre de catálogo, nunca con IDs hardcodeados.
@@ -131,9 +131,8 @@ class EventoMascota extends Model
         $estadoDestino = strtoupper($nuevoEstadoNombre);
         $idNuevoEstado = $this->idEstadoPorNombre($estadoDestino);
 
-        $this->db->beginTransaction();
-
-        try {
+        // transactional() hace el rollback y re-lanza la excepción tal cual.
+        return $this->transactional(function () use ($idEvento, $idNuevoEstado, $estadoDestino, $idUsuarioResponsable) {
             $this->update($idEvento, ['Id_EstadoEvento' => $idNuevoEstado]);
 
             if (in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true)) {
@@ -155,12 +154,8 @@ class EventoMascota extends Model
                 ]
             );
 
-            $this->db->commit();
             return true;
-        } catch (\Throwable $e) {
-            $this->db->rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**

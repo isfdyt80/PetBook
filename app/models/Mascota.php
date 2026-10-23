@@ -50,10 +50,11 @@ class Mascota extends Model
     /**
      * Registra una nueva mascota y la asocia a un usuario.
      *
-     * Escribe en Mascota y en MascotaUsuario dentro de la misma transacción,
-     * dejando la relación activa (FechaHasta NULL) con EsDueno = 1, porque
-     * quien registra es el propietario. Valida antes de guardar que la raza
-     * pertenezca a la especie indicada.
+     * Escribe en Mascota y en MascotaUsuario dentro de la misma transacción
+     * (wrapper Model::transactional), dejando la relación activa
+     * (FechaHasta NULL) con EsDueno = 1, porque quien registra es el
+     * propietario. Valida antes de guardar que la raza pertenezca a la
+     * especie indicada.
      *
      * @param  array $datos  Debe contener Id_Usuario (propietario) e Id_Especie.
      *                       Opcionales: Id_Raza, Nombre, Color, Tamaño, Sexo,
@@ -66,35 +67,34 @@ class Mascota extends Model
     {
         $this->validarRazaEspecie($datos);
 
-        $this->db->beginTransaction();
-
         try {
-            $idMascota = $this->insert([
-                'Nombre'            => $datos['Nombre']            ?? null,
-                'Id_Especie'        => $datos['Id_Especie'],
-                'Id_Raza'           => $datos['Id_Raza']           ?? null,
-                'Color'             => $datos['Color']             ?? null,
-                'Tamaño'            => $datos['Tamaño']            ?? null,
-                'Sexo'              => $datos['Sexo']              ?? null,
-                'Fecha_Nacimiento'  => $datos['Fecha_Nacimiento']  ?? null,
-                'Edad_Aproximada'   => $datos['Edad_Aproximada']   ?? null,
-                'Eliminado'         => 0,
-            ]);
+            return $this->transactional(function () use ($datos) {
+                $idMascota = $this->insert([
+                    'Nombre'            => $datos['Nombre']            ?? null,
+                    'Id_Especie'        => $datos['Id_Especie'],
+                    'Id_Raza'           => $datos['Id_Raza']           ?? null,
+                    'Color'             => $datos['Color']             ?? null,
+                    'Tamaño'            => $datos['Tamaño']            ?? null,
+                    'Sexo'              => $datos['Sexo']              ?? null,
+                    'Fecha_Nacimiento'  => $datos['Fecha_Nacimiento']  ?? null,
+                    'Edad_Aproximada'   => $datos['Edad_Aproximada']   ?? null,
+                    'Eliminado'         => 0,
+                ]);
 
-            $this->execute(
-                'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, FechaDesde)
-                 VALUES (:mascota, :usuario, 1, NOW())',
-                [
-                    ':mascota' => $idMascota,
-                    ':usuario' => $datos['Id_Usuario'],
-                ]
-            );
+                $this->execute(
+                    'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, FechaDesde)
+                     VALUES (:mascota, :usuario, 1, NOW())',
+                    [
+                        ':mascota' => $idMascota,
+                        ':usuario' => $datos['Id_Usuario'],
+                    ]
+                );
 
-            $this->db->commit();
-
-            return $idMascota;
+                return $idMascota;
+            });
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            // El rollback lo hace transactional(); acá solo se preserva el
+            // contrato de RuntimeException que consume MascotaController.
             throw new \RuntimeException('Error al registrar la mascota: ' . $e->getMessage(), 0, $e);
         }
     }

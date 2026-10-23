@@ -143,6 +143,34 @@ abstract class Model
     // ── Helpers de consulta ──────────────────────────────────────────────
 
     /**
+     * Ejecuta $fn dentro de una transacción con commit automático
+     * y rollback ante cualquier excepción.
+     *
+     * Alias protegido de Database::transactional() para lectura natural
+     * dentro de los modelos: $this->transactional(...).
+     * Es el mecanismo obligatorio para escrituras multi-tabla — ver
+     * docs/conventions.md. No escribir begin/commit/rollBack a mano.
+     *
+     * Semántica de anidamiento: si ya hay una transacción activa, $fn se
+     * ejecuta dentro de ella sin abrir otra (join, sin savepoints).
+     *
+     * Uso:
+     *   $id = $this->transactional(function () use ($datos) {
+     *       $idEvento = $this->insert([...]);
+     *       $this->execute('INSERT INTO Publicacion ...', [...]);
+     *       return $idEvento;
+     *   });
+     *
+     * @param  callable $fn  Bloque de escritura; su retorno se devuelve.
+     * @return mixed        Lo que devuelva $fn.
+     * @throws \Throwable   Re-lanza la excepción original tras el rollBack().
+     */
+    protected function transactional(callable $fn): mixed
+    {
+        return Database::transactional($fn);
+    }
+
+    /**
      * Ejecuta una consulta preparada y devuelve todos los resultados.
      *
      * Uso:

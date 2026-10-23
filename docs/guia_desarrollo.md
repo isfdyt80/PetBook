@@ -176,14 +176,12 @@ Si `Notificacion::crearPorComentario()` necesitara validar que el usuario existe
 
 ### 2.5 Transacciones multi-tabla
 
-El caso central del dominio (sección 4.3 de la documentación técnica: crear evento → crea `EventoMascota` + `HistorialEstadoEvento` + `Publicacion`) requiere atomicidad que `Model.php` no da por defecto. El modelo que orquesta esa escritura usa `$this->db` directamente (heredado como `protected PDO $db`) para envolver la operación:
+El caso central del dominio (sección 4.3 de la documentación técnica: crear evento → crea `EventoMascota` + `HistorialEstadoEvento` + `Publicacion`) requiere atomicidad que `Model.php` no da por defecto. La decisión de diseño está registrada en `docs/conventions.md` ("Transacciones en la capa de acceso a datos"): toda escritura multi-tabla se envuelve en el wrapper **`$this->transactional(callable $fn)`** (alias protegido que delega en `Database::transactional()`), que hace `beginTransaction()` → `$fn` → `commit()` y, ante cualquier excepción, `rollBack()` y re-lanza. **Nunca** se escriben `beginTransaction()` / `commit()` / `rollBack()` a mano en código nuevo — el wrapper no depende de que cada dev se acuerde del `rollBack()`.
 
 ```php
 public function crear(array $datos): int
 {
-    $this->db->beginTransaction();
-
-    try {
+    return $this->transactional(function () use ($datos) {
         $idEvento = $this->insert([
             'Id_Mascota'      => $datos['idMascota'],
             'Id_Usuario'      => $datos['idUsuario'],
@@ -213,17 +211,20 @@ public function crear(array $datos): int
             ]
         );
 
-        $this->db->commit();
         return $idEvento;
-
-    } catch (\Throwable $e) {
-        $this->db->rollBack();
-        throw $e;
-    }
+    });
 }
 ```
 
-Cualquier método de modelo que escriba en más de una tabla debe seguir este patrón — `beginTransaction()` / `commit()` / `rollBack()` en `catch`. No hacerlo deja abierta la posibilidad de un `EventoMascota` sin `Publicacion`, que la sección 4.4 de la documentación técnica prohíbe explícitamente ("no puede existir un evento visible sin publicación").
+Puntos de la regla que aparecen en este ejemplo:
+
+- El `return` del método va **dentro** del closure — el valor que devuelve `$fn` es lo que devuelve `transactional()` (tipado `mixed`, castear en el caller si hace falta).
+- Las validaciones de negocio (ej. resolver el estado del catálogo con `idEstadoPorNombre()`, que lanza si no existe) pueden correr dentro o antes del closure; si lanzan, el rollback se hace igual — solo tienen que estar **antes de la primera escritura** si no debe quedar nada escrito.
+- No hace falta `try`/`catch` alrededor de `transactional()`: relanza la excepción original tal cual. Solo se agrega si hay contrato de excepción que preservar (ej. `Usuario::registrar()` envuelve en `RuntimeException` porque `AuthController` catchea ese tipo).
+
+Cualquier método de modelo que escriba en más de una tabla debe seguir este patrón. No hacerlo deja abierta la posibilidad de un `EventoMascota` sin `Publicacion`, que la sección 4.4 de la documentación técnica prohíbe explícitamente ("no puede existir un evento visible sin publicación").
+
+**Composición**: si `transactional()` se llama con una transacción ya activa, el callable se ejecuta dentro de ella sin abrir otra (join, sin savepoints). Esto permite que un método transaccional existente (ej. `Mascota::registrar()`) sea invocado desde otro bloque transaccional (ej. el flujo de evento que crea la mascota si no existe) sin errores. Para orquestar varios modelos desde un controlador, usar `Database::transactional()` que es público y estático — todos los modelos comparten el PDO singleton, así que todas las escrituras quedan dentro de la misma transacción.
 
 ### 2.6 Dónde va el archivo
 
@@ -531,7 +532,7 @@ public function vinculoActivo(int $idMascota, int $idUsuario): array|false
 Toda entidad con ciclo de vida de estados (actualmente solo `EventoMascota`, pero el patrón es reutilizable para, por ejemplo, un futuro historial de cambios de rol de usuario) sigue esta estructura:
 
 - Tabla `Historial{Entidad}` con FK a la entidad, FK al nuevo estado, FK al usuario responsable del cambio, y `Fecha DATETIME DEFAULT CURRENT_TIMESTAMP`. Sin `Eliminado` — un historial de auditoría no se soft-deletea, es inmutable por definición.
-- El modelo de la entidad principal es responsable de escribir en la tabla de historial **dentro de la misma transacción** que el cambio de estado (sección 2.5) — nunca queda a cargo del controlador insertar el historial por separado, porque eso permite que un bug en el controlador cambie el estado sin dejar rastro.
+- El modelo de la entidad principal es responsable de escribir en la tabla de historial **dentro de la misma transacción** que el cambio de estado (sección 2.5, wrapper `transactional()`) — nunca queda a cargo del controlador insertar el historial por separado, porque eso permite que un bug en el controlador cambie el estado sin dejar rastro.
 - Regla de negocio de "estados terminales no revierten" (`RESUELTO`/`CANCELADO` → `ACTIVO` prohibido) se valida **dentro del método `cambiarEstado()` del modelo**, no en el controlador, antes de escribir nada:
 
 ```php
@@ -554,8 +555,8 @@ public function cambiarEstado(int $idEvento, string $nuevoEstadoNombre, int $idU
 
     $idNuevoEstado = $this->idEstadoPorNombre($nuevoEstadoNombre);
 
-    $this->db->beginTransaction();
-    try {
+    // transactional() hace el rollback y re-lanza la excepción tal cual.
+    return $this->transactional(function () use ($idEvento, $idNuevoEstado, $idUsuarioResponsable) {
         $this->update($idEvento, ['Id_EstadoEvento' => $idNuevoEstado]);
 
         $this->execute(
@@ -564,12 +565,8 @@ public function cambiarEstado(int $idEvento, string $nuevoEstadoNombre, int $idU
             [':evento' => $idEvento, ':estado' => $idNuevoEstado, ':usuario' => $idUsuarioResponsable]
         );
 
-        $this->db->commit();
         return true;
-    } catch (\Throwable $e) {
-        $this->db->rollBack();
-        throw $e;
-    }
+    });
 }
 ```
 
