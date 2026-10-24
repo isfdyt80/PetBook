@@ -1,0 +1,240 @@
+<?php
+
+use App\Core\Session;
+
+ob_start();
+
+
+$old = $old ?? [];
+?>
+
+<style>
+    .pb-page-title {
+        font-family: 'Fraunces', serif;
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: var(--pb-text);
+        margin-bottom: 0.2rem;
+        letter-spacing: -0.5px;
+    }
+
+    .pb-page-subtitle {
+        font-size: 0.88rem;
+        color: var(--pb-muted);
+        margin-bottom: 1.75rem;
+    }
+
+    .pb-label {
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: var(--pb-text);
+        margin-bottom: 0.3rem;
+    }
+
+    .pb-input {
+        border: 1.5px solid var(--pb-border);
+        border-radius: 8px;
+        padding: 0.6rem 0.85rem;
+        font-size: 0.95rem;
+        width: 100%;
+        background: var(--pb-bg);
+        color: var(--pb-text);
+        transition: border-color 0.15s;
+        outline: none;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .pb-input:focus { border-color: var(--pb-violet); background: #fff; }
+
+    .pb-btn {
+        background: var(--pb-violet);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.68rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: background 0.15s;
+    }
+
+    .pb-btn:hover { background: var(--pb-violet-d); }
+
+    .pb-hint {
+        font-size: 0.78rem;
+        color: var(--pb-muted);
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+
+        <div class="col-md-8 col-lg-6">
+
+            <div class="auth-card"
+                 style="background: var(--pb-surface); border: 1px solid var(--pb-border); border-radius: var(--pb-radius); padding: 2.25rem 2rem;">
+
+                <h1 class="pb-page-title">Editar mascota</h1>
+                <div class="pb-page-subtitle">Modificá los datos de tu mascota</div>
+
+                <form action="<?= APP_URL ?>/mascota/<?= (int) $mascota['Id_Mascota'] ?>/editar"
+                      method="POST" novalidate>
+                    <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
+
+                    <div class="mb-3">
+                        <label class="pb-label" for="nombre">Nombre</label>
+                        <input class="pb-input" type="text" id="nombre" name="nombre"
+                            value="<?= htmlspecialchars($old['nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            placeholder="Ej: Firulais" autocomplete="off" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pb-label" for="especie">Especie</label>
+                        <select class="pb-input" id="especie" name="especie" required>
+                            <option value="" disabled
+                                <?= empty($old['especie']) ? 'selected' : '' ?>>
+                                Seleccioná una especie
+                            </option>
+
+                            <?php foreach ($especies as $especie) : ?>
+                                <option value="<?= (int) $especie['Id_Especie'] ?>"
+                                    <?= (string) ($old['especie'] ?? '') === (string) $especie['Id_Especie'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($especie['Nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pb-label" for="raza">Raza</label>
+                        <select class="pb-input" id="raza" name="raza"
+                            data-raza-old="<?= htmlspecialchars((string) ($old['raza'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                            <option value="">Raza (opcional)</option>
+                        </select>
+                        <div class="pb-hint">Se cargan las razas de la especie seleccionada.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pb-label" for="color">Color</label>
+                        <input class="pb-input" type="text" id="color" name="color"
+                            value="<?= htmlspecialchars($old['color'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            placeholder="Ej: Negro con manchas blancas" autocomplete="off">
+                        <div class="pb-hint">Opcional</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="tamaño">Tamaño</label>
+                            <select class="pb-input" id="tamaño" name="tamaño">
+                                <option value="">Sin especificar</option>
+                                <?php foreach (['Pequeño', 'Mediano', 'Grande'] as $tamaño) : ?>
+                                    <option value="<?= $tamaño ?>"
+                                        <?= (string) ($old['tamaño'] ?? '') === $tamaño ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($tamaño, ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="sexo">Sexo</label>
+                            <select class="pb-input" id="sexo" name="sexo">
+                                <option value="">Sin especificar</option>
+                                <?php foreach (['Macho', 'Hembra'] as $sexo) : ?>
+                                    <option value="<?= $sexo ?>"
+                                        <?= (string) ($old['sexo'] ?? '') === $sexo ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($sexo, ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="fecha_nacimiento">Fecha de nacimiento</label>
+                            <input class="pb-input" type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                                value="<?= htmlspecialchars($old['fecha_nacimiento'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="pb-label" for="edad_aproximada">Edad aproximada</label>
+                            <input class="pb-input" type="text" id="edad_aproximada" name="edad_aproximada"
+                                value="<?= htmlspecialchars($old['edad_aproximada'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                placeholder="Ej: 2 años" autocomplete="off">
+                            <div class="pb-hint">Opcional</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="submit" class="pb-btn">
+                            <i class="bi bi-pencil me-1"></i>Guardar cambios
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href="<?= APP_URL ?>/mascota/<?= (int) $mascota['Id_Mascota'] ?>"
+                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                        Volver al detalle
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function ($) {
+    const $especie = $('#especie');
+    const $raza    = $('#raza');
+
+    function limpiarRazas() {
+        $raza.empty().append($('<option>').val('').text('Raza (opcional)'));
+    }
+
+    function cargarRazas(idEspecie, razaSeleccionada) {
+        limpiarRazas();
+
+        if (!idEspecie) {
+            return;
+        }
+
+        $.getJSON('<?= APP_URL ?>' + '/raza/por-especie/' + idEspecie, function (razas) {
+            $.each(razas, function (_, raza) {
+                $raza.append($('<option>').val(raza.Id_Raza).text(raza.Nombre));
+            });
+
+            if (razaSeleccionada) {
+                $raza.val(String(razaSeleccionada));
+            }
+        });
+    }
+
+    // La mascota ya tiene especie asignada: cargamos sus razas y
+    // restauramos la raza guardada.
+    if ($especie.val()) {
+        cargarRazas($especie.val(), $raza.data('razaOld'));
+    }
+
+    $especie.on('change', function () {
+        cargarRazas(this.value, null);
+    });
+})(jQuery);
+</script>
+
+<?php
+$content = ob_get_clean();
+$titulo  = 'Editar mascota';
+require_once APP_PATH . '/views/layouts/main.php';
+?>
