@@ -252,6 +252,11 @@ ob_start();
                         <i class="bi bi-chat"></i>
                         <?= (int) ($pub['Num_Comentarios'] ?? 0) ?> comentarios
                     </span>
+
+                    <a href="<?= APP_URL ?>/evento/<?= (int) ($pub['Id_Evento'] ?? 0) ?>"
+                       style="margin-left:auto; font-size:0.82rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                        Ver evento <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
 
             </article>
