@@ -5,8 +5,8 @@ use App\Core\Model;
 
 class HistorialEstadoEvento extends Model
 {
-    protected $table = 'HistorialEstadoEvento';
-    protected $pk = 'Id_Historial';
+    protected string $table = 'HistorialEstadoEvento';
+    protected string $pk = 'Id_Historial';
 
     // Registra un cambio de estado de un evento
     public function crear(int $idEvento, int $idEstado, int $idUsuario): bool{

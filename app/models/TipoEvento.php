@@ -5,8 +5,8 @@ use App\Core\Model;
 
 class TipoEvento extends Model
 {
-    protected $table = 'TipoEvento';
-    protected $pk = 'Id_TipoEvento';
+    protected string $table = 'TipoEvento';
+    protected string $pk = 'Id_TipoEvento';
     
     // Lista todos los tipos de eventos (ej: perdido, adopcion, etc.)
     public function listar(){

@@ -6,8 +6,8 @@ use App\Core\Model;
 
 class EstadoEvento extends Model
 {
-    protected $table = 'EstadoEvento';
-    protected $pk = 'Id_EstadoEvento';
+    protected string $table = 'EstadoEvento';
+    protected string $pk = 'Id_EstadoEvento';
     
     // Devuelve todos los estados posibles de eventos
     public function listar(){

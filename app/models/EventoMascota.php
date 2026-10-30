@@ -5,8 +5,8 @@ use App\Core\Model;
 
 class EventoMascota extends Model
 {
-    protected $table = 'EventoMascota';
-    protected $pk = 'Id_Evento';
+    protected string $table = 'EventoMascota';
+    protected string $pk = 'Id_Evento';
 
     // ── Creación (HU-08, HU-09, HU-10) ────────────────────────────────────
 
