@@ -164,6 +164,19 @@ $placeholderVista   = [
                                 </div>
                             </div>
                             <div class="pb-hint">Opcional, pero ayuda mucho a quien pueda reconocer el lugar.</div>
+
+                            <input type="hidden" id="latitud" name="latitud"
+                                value="<?= htmlspecialchars($old['latitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                            <input type="hidden" id="longitud" name="longitud"
+                                value="<?= htmlspecialchars($old['longitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                            <button type="button" id="btn-geo"
+                                    style="background:none; color:var(--pb-violet); border:1.5px solid var(--pb-border); border-radius:8px; padding:0.42rem 0.8rem; font-size:0.82rem; font-weight:600; font-family:'DM Sans', sans-serif; cursor:pointer; margin-top:0.35rem;">
+                                <i class="bi bi-crosshair"></i> Usar mi ubicación actual
+                            </button>
+
+                            <div class="pb-hint" id="geo-hint">Opcional; si la aceptás, se guarda tu posición exacta del momento.</div>
                         </div>
                     <?php endif; ?>
 
@@ -206,6 +219,45 @@ $placeholderVista   = [
 
     </div>
 </div>
+
+<script>
+(function ($) {
+    const $btn  = $('#btn-geo');
+    const $hint = $('#geo-hint');
+    const $lat  = $('#latitud');
+    const $lon  = $('#longitud');
+
+    // Sin API de geolocalización (navegadores viejos o HTTP no seguro):
+    // la ubicación manual sigue siendo válida, así que solo deshabilitamos el botón.
+    if (!('geolocation' in navigator)) {
+        $btn.prop('disabled', true).html('<i class="bi bi-slash-circle"></i> Geolocalización no disponible');
+        return;
+    }
+
+    $btn.on('click', function () {
+        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Obteniendo…');
+
+        navigator.geolocation.getCurrentPosition(
+            function (pos) {
+                // 6 decimales ≈ 11 cm de precisión, sobra para una mascota.
+                $lat.val(pos.coords.latitude.toFixed(6));
+                $lon.val(pos.coords.longitude.toFixed(6));
+                $hint.text('Posición capturada: se envía junto con el formulario.');
+                $btn.prop('disabled', false).html('<i class="bi bi-check2-circle"></i> Volver a capturar');
+            },
+            function (err) {
+                $hint.text(
+                    err.code === 1
+                        ? 'Permiso de ubicación denegado; podés completar los campos de texto igual.'
+                        : 'No se pudo obtener tu ubicación; podés completar los campos de texto igual.'
+                );
+                $btn.prop('disabled', false).html('<i class="bi bi-crosshair"></i> Usar mi ubicación actual');
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    });
+})(jQuery);
+</script>
 
 <?php
 $content = ob_get_clean();
