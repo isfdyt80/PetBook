@@ -144,6 +144,43 @@ class EventoController extends Controller
         $this->redirect('evento/' . $idEvento);
     }
 
+    // ── POST /evento/:id/eliminar ─────────────────────────────────────────
+
+    /**
+     * Da de baja un evento y su publicación (soft delete en cascada).
+     *
+     * Solo el dueño puede eliminar. Al completar redirige al feed, porque
+     * el detalle del evento deja de existir para la UI.
+     */
+    public function eliminar(string $id): void
+    {
+        Auth::requireAuth();
+        Session::validateCsrf();
+
+        $idEvento = (int) $id;
+        $evento   = (new EventoMascota())->buscarDetalle($idEvento);
+
+        if (
+            $evento === false
+            || (int) $evento['Id_Usuario'] !== (int) Session::user()['id']
+        ) {
+            $this->responder404();
+            return;
+        }
+
+        try {
+            (new EventoMascota())->darBaja($idEvento);
+        } catch (\Throwable $e) {
+            error_log('[EVENTO ERROR] ' . $e->getMessage());
+            Session::flash('error', 'No se pudo eliminar el evento. Intentá de nuevo.');
+            $this->redirect('evento/' . $idEvento);
+            return;
+        }
+
+        Session::flash('success', 'El evento fue eliminado, junto con su publicación.');
+        $this->redirect('feed');
+    }
+
     // ── POST /evento/crear/:tipo ──────────────────────────────────────────
 
     /**

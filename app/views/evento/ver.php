@@ -180,25 +180,37 @@ $ubicacion = array_filter([
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($esDueno) && $estado === 'ACTIVO'): ?>
-                        <form method="POST" action="<?= APP_URL ?>/evento/<?= (int) $evento['Id_Evento'] ?>/estado"
-                              class="pt-3 border-top mt-4" onsubmit="return confirm('¿Querés marcar este evento como resuelto o cancelarlo?')">
-                            <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
+                    <?php if (!empty($esDueno)): ?>
+                        <?php if ($estado === 'ACTIVO'): ?>
+                            <form method="POST" action="<?= APP_URL ?>/evento/<?= (int) $evento['Id_Evento'] ?>/estado"
+                                  class="pt-3 border-top mt-4" onsubmit="return confirm('¿Querés marcar este evento como resuelto o cancelarlo?')">
+                                <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
 
-                            <div class="d-flex align-items-end gap-2">
-                                <div class="flex-grow-1">
-                                    <label class="pb-list-label d-block" for="estado">Cerrar evento</label>
-                                    <select class="pb-input" id="estado" name="estado" style="padding:0.45rem 0.7rem;">
-                                        <option value="RESUELTO">Resuelto — se encontró / fue dado</option>
-                                        <option value="CANCELADO">Cancelado — ya no sigue activo</option>
-                                    </select>
+                                <div class="d-flex align-items-end gap-2">
+                                    <div class="flex-grow-1">
+                                        <label class="pb-list-label d-block" for="estado">Cerrar evento</label>
+                                        <select class="pb-input" id="estado" name="estado" style="padding:0.45rem 0.7rem;">
+                                            <option value="RESUELTO">Resuelto — se encontró / fue dado</option>
+                                            <option value="CANCELADO">Cancelado — ya no sigue activo</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit"
+                                            style="background:var(--pb-violet); color:#fff; border:none; border-radius:8px; padding:0.5rem 1rem; font-weight:600; font-size:0.88rem; white-space:nowrap; cursor:pointer;">
+                                        Actualizar
+                                    </button>
                                 </div>
-                                <button type="submit"
-                                        style="background:var(--pb-violet); color:#fff; border:none; border-radius:8px; padding:0.5rem 1rem; font-weight:600; font-size:0.88rem; white-space:nowrap; cursor:pointer;">
-                                    Actualizar
-                                </button>
-                            </div>
-                            <div class="pb-hint">Al cerrarlo se archiva la publicación del feed y queda en tu historial.</div>
+                                <div class="pb-hint">Al cerrarlo se archiva la publicación del feed y queda en tu historial.</div>
+                            </form>
+                        <?php endif; ?>
+
+                        <form method="POST" action="<?= APP_URL ?>/evento/<?= (int) $evento['Id_Evento'] ?>/eliminar"
+                              class="<?= $estado === 'ACTIVO' ? 'pt-2' : 'pt-3 border-top mt-4' ?>"
+                              onsubmit="return confirm('¿Seguro que querés eliminar este evento? También desaparecerá del feed.')">
+                            <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
+                            <button type="submit"
+                                    style="background:none; color:#9F1239; border:none; font-size:0.85rem; font-weight:600; padding:0; cursor:pointer;">
+                                <i class="bi bi-trash3"></i> Eliminar evento
+                            </button>
                         </form>
                     <?php endif; ?>
 

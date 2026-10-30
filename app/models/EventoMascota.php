@@ -352,6 +352,45 @@ class EventoMascota extends Model
         return (int) $estado['Id_EstadoEvento'];
     }
 
+    /**
+     * Da de baja un evento y su publicación asociada (soft delete).
+     *
+     * El evento queda marcado Eliminado = 1 y la publicación automática
+     * también, para que no quede en el feed apuntando a un evento muerto.
+     * Ambas escrituras se hacen en una sola transacción (wrapper
+     * Model::transactional, docs/conventions.md).
+     *
+     * La validación de propiedad del evento es responsabilidad del
+     * controlador (tiene los datos de sesión); acá solo se valida que
+     * exista y no esté ya eliminado.
+     *
+     * @param  int  $idEvento  Id_Evento a dar de baja.
+     * @return bool            true si la transacción se completó.
+     * @throws \RuntimeException Si el evento no existe o ya está eliminado.
+     */
+    public function darBaja(int $idEvento): bool
+    {
+        $evento = $this->buscarPorId($idEvento);
+
+        if ($evento === false) {
+            throw new \RuntimeException('El evento no existe o ya fue eliminado.');
+        }
+
+        return $this->transactional(function () use ($idEvento) {
+            $this->softDelete($idEvento);
+
+            $this->execute(
+                'UPDATE Publicacion
+                 SET Eliminado = 1
+                 WHERE Id_Evento = :evento
+                 AND Eliminado = 0',
+                [':evento' => $idEvento]
+            );
+
+            return true;
+        });
+    }
+
     // Soft delete: marca el evento como eliminado
     public function eliminar(int $id): bool
     {
