@@ -83,6 +83,67 @@ class EventoController extends Controller
         ]);
     }
 
+    // ── POST /evento/:id/estado ───────────────────────────────────────────
+
+    /**
+     * Resuelve o cancela un evento (HU-11).
+     *
+     * Solo el dueño del evento puede cambiar el estado, y solo hacia
+     * RESUELTO o CANCELADO (la vuelta a ACTIVO no se ofrece desde la UI).
+     * El modelo valida estado terminal, actualiza el evento, escribe el
+     * historial, sella Fecha_Resolucion y archiva la publicación asociada
+     * dentro de la misma transacción.
+     */
+    public function cambiarEstado(string $id): void
+    {
+        Auth::requireAuth();
+        Session::validateCsrf();
+
+        $idEvento = (int) $id;
+        $modelo   = new EventoMascota();
+
+        $evento = $modelo->buscarDetalle($idEvento);
+
+        if (
+            $evento === false
+            || (int) $evento['Id_Usuario'] !== (int) Session::user()['id']
+        ) {
+            $this->responder404();
+            return;
+        }
+
+        $nuevoEstado = strtoupper((string) ($this->input('estado') ?? ''));
+
+        if (!in_array($nuevoEstado, ['RESUELTO', 'CANCELADO'], true)) {
+            Session::flash('error', 'El estado indicado no es válido para un evento.');
+            $this->redirect('evento/' . $idEvento);
+            return;
+        }
+
+        try {
+            $modelo->cambiarEstado($idEvento, $nuevoEstado, (int) Session::user()['id']);
+        } catch (\RuntimeException $e) {
+            // Mensajes de negocio del modelo (evento terminal, catálogo),
+            // pensados para verse en pantalla.
+            Session::flash('error', $e->getMessage());
+            $this->redirect('evento/' . $idEvento);
+            return;
+        } catch (\Throwable $e) {
+            error_log('[EVENTO ERROR] ' . $e->getMessage());
+            Session::flash('error', 'No se pudo actualizar el evento. Intentá de nuevo.');
+            $this->redirect('evento/' . $idEvento);
+            return;
+        }
+
+        Session::flash(
+            'success',
+            $nuevoEstado === 'RESUELTO'
+                ? 'Marcaste el evento como resuelto. ¡Se buscó a la mascota!'
+                : 'El evento fue cancelado.'
+        );
+        $this->redirect('evento/' . $idEvento);
+    }
+
     // ── POST /evento/crear/:tipo ──────────────────────────────────────────
 
     /**

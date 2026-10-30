@@ -152,8 +152,22 @@ class EventoMascota extends Model
         $estadoDestino = strtoupper($nuevoEstadoNombre);
         $idNuevoEstado = $this->idEstadoPorNombre($estadoDestino);
 
+        // Estado terminal implica archivar la publicación asociada (si existe)
+        // para que el evento resuelto/cancelado salga del feed. Resuelto por
+        // nombre de catálogo, antes de abrir la transacción (convención regla 2).
+        $idEstadoArchivada = null;
+        if (in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true)) {
+            $idEstadoArchivada = $this->idEstadoPublicacionPorNombre('ARCHIVADA');
+        }
+
         // transactional() hace el rollback y re-lanza la excepción tal cual.
-        return $this->transactional(function () use ($idEvento, $idNuevoEstado, $estadoDestino, $idUsuarioResponsable) {
+        return $this->transactional(function () use (
+            $idEvento,
+            $idNuevoEstado,
+            $estadoDestino,
+            $idUsuarioResponsable,
+            $idEstadoArchivada
+        ) {
             $this->update($idEvento, ['Id_EstadoEvento' => $idNuevoEstado]);
 
             if (in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true)) {
@@ -174,6 +188,22 @@ class EventoMascota extends Model
                     ':usuario'  => $idUsuarioResponsable,
                 ]
             );
+
+            // Estado terminal → la publicación automática se archiva para
+            // salir del feed (toda modificación multi-tabla vive en esta
+            // misma transacción, docs/conventions.md).
+            if ($idEstadoArchivada !== null) {
+                $this->execute(
+                    'UPDATE Publicacion
+                     SET Id_EstadoPublicacion = :estado
+                     WHERE Id_Evento = :evento
+                     AND Eliminado = 0',
+                    [
+                        ':estado' => $idEstadoArchivada,
+                        ':evento' => $idEvento,
+                    ]
+                );
+            }
 
             return true;
         });
@@ -261,7 +291,7 @@ class EventoMascota extends Model
                 (new Publicacion())->crear([
                     'Id_Evento'            => $idEvento,
                     'Id_Usuario'           => $datos['Id_Usuario'],
-                    'Id_EstadoPublicacion' => (int) $this->idEstadoPublicacionActiva(),
+                    'Id_EstadoPublicacion' => $this->idEstadoPublicacionPorNombre('ACTIVA'),
                     'Contenido'            => $datos['Descripcion'] ?? '',
                 ]);
 
@@ -275,19 +305,23 @@ class EventoMascota extends Model
     }
 
     /**
-     * Resuelve el Id_EstadoPublicacion 'ACTIVA' desde el catálogo.
+     * Resuelve el Id_EstadoPublicacion a partir del nombre del catálogo.
      * Evita IDs hardcodeados (convención de la guía de desarrollo, 2.3).
      *
-     * @return int
+     * Se usa al crear la publicación automática (ACTIVA) y al archivar la
+     * publicación de un evento que llega a estado terminal (ARCHIVADA).
+     *
+     * @param  string $nombre  Nombre del estado según el catálogo.
+     * @return int             Id_EstadoPublicacion correspondiente.
      * @throws \RuntimeException Si el estado no existe en el catálogo.
      */
-    private function idEstadoPublicacionActiva(): int
+    private function idEstadoPublicacionPorNombre(string $nombre): int
     {
-        $estado = (new EstadoPublicacion())->buscarPorNombre('ACTIVA');
+        $estado = (new EstadoPublicacion())->buscarPorNombre($nombre);
 
         if ($estado === false) {
             throw new \RuntimeException(
-                "El estado 'ACTIVA' no existe en el catálogo de estados de publicación."
+                "El estado '{$nombre}' no existe en el catálogo de estados de publicación."
             );
         }
 
