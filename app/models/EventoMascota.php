@@ -8,27 +8,7 @@ class EventoMascota extends Model
     protected $table = 'EventoMascota';
     protected $pk = 'Id_Evento';
 
-    // Crea un nuevo evento asociado a una mascota
-    public function crear(array $datos): int{
-        $sql = "INSERT INTO EventoMascota
-                (Id_Mascota, Id_Usuario, Id_TipoEvento, Id_EstadoEvento, 
-                 Descripcion, Id_Ubicacion, Recompensa)
-                VALUES
-                (:mascota, :usuario, :tipo, :estado, 
-                 :descripcion, :ubicacion, :recompensa)";
-
-        $this->execute($sql, [
-            ':mascota'     => $datos['mascota'],
-            ':usuario'     => $datos['usuario'],
-            ':tipo'        => $datos['tipo'],
-            ':estado'      => $datos['estado'],
-            ':descripcion' => $datos['descripcion'],
-            ':ubicacion'   => $datos['ubicacion'] ?? null,
-            ':recompensa'  => $datos['recompensa'] ?? null,
-        ]);
-
-        return (int)$this->db->lastInsertId();
-    }
+    // ── Creación (HU-08, HU-09, HU-10) ────────────────────────────────────
 
     // Busca un evento por su ID
     public function buscarPorId(int $id){
@@ -156,6 +136,121 @@ class EventoMascota extends Model
 
             return true;
         });
+    }
+
+    /**
+     * Crea un evento de mascota completo (HU-08, HU-09 y HU-10).
+     *
+     * El tipo no llega como ID: llega como nombre del catálogo TipoEvento
+     * (ej: 'PERDIDA', 'ENCONTRADA', 'ADOPCION') y se resuelve por nombre,
+     * de modo que la validación 404 de la capa HTTP y esta validación de
+     * negocio compartan la misma fuente de verdad.
+     *
+     * Dentro de una sola transacción (wrapper Model::transactional, ver
+     * docs/conventions.md) escribe:
+     *   1. Ubicacion          (si el formulario aporta datos de ubicación).
+     *   2. EventoMascota      con estado ACTIVO resuelto por catálogo.
+     *   3. HistorialEstadoEvento (primer registro de estado).
+     *   4. Publicacion        con estado ACTIVA resuelto por catálogo
+     *                         ("toda creación de evento genera automáticamente
+     *                         una publicación", HU-08/09/10).
+     *
+     * Las validaciones de negocio van antes del transactional(); si fallan
+     * no hay nada que revertir (convención regla 2).
+     *
+     * @param  array  $datos                  Debe contener Id_Mascota,
+     *                                        Id_Usuario y Descripcion.
+     *                                        Opcionales: ubicacion (array con
+     *                                        claves direccion/ciudad/...),
+     *                                        Recompensa, Fecha_UltimaVista.
+     * @param  string $tipoNombre             Nombre del tipo según catálogo.
+     * @return int                            Id_Evento generado.
+     * @throws \RuntimeException              Si el tipo o el estado no figuran
+     *                                        en su catálogo, o si la
+     *                                        transacción falla.
+     */
+    public function crear(array $datos, string $tipoNombre): int
+    {
+        // ── Validaciones de negocio (antes de abrir la transacción) ──────
+        $tipoEvento = (new TipoEvento())->buscarPorNombre($tipoNombre);
+
+        if ($tipoEvento === false) {
+            throw new \RuntimeException(
+                "El tipo de evento '{$tipoNombre}' no existe en el catálogo."
+            );
+        }
+
+        $estadoActivo = (new EstadoEvento())->buscarPorNombre('ACTIVO');
+
+        if ($estadoActivo === false) {
+            throw new \RuntimeException(
+                "El estado 'ACTIVO' no existe en el catálogo de estados."
+            );
+        }
+
+        try {
+            return $this->transactional(function () use ($datos, $tipoEvento, $estadoActivo) {
+                // 1. Ubicación, si el formulario la aporta (opcional).
+                $idUbicacion = null;
+                if (!empty($datos['ubicacion'])) {
+                    $idUbicacion = (new Ubicacion())->crear($datos['ubicacion']);
+                }
+
+                // 2. EventoMascota en estado ACTIVO.
+                $idEvento = $this->insert([
+                    'Id_Mascota'       => $datos['Id_Mascota'],
+                    'Id_Usuario'       => $datos['Id_Usuario'],
+                    'Id_TipoEvento'    => (int) $tipoEvento['Id_TipoEvento'],
+                    'Id_EstadoEvento'  => (int) $estadoActivo['Id_EstadoEvento'],
+                    'Descripcion'      => $datos['Descripcion']                    ?? null,
+                    'Id_Ubicacion'     => $idUbicacion,
+                    'Fecha_UltimaVista' => $datos['Fecha_UltimaVista']             ?? null,
+                    'Recompensa'       => $datos['Recompensa']                     ?? null,
+                    'Eliminado'        => 0,
+                ]);
+
+                // 3. Primer registro de historial de estado.
+                (new HistorialEstadoEvento())->crear(
+                    $idEvento,
+                    (int) $estadoActivo['Id_EstadoEvento'],
+                    (int) $datos['Id_Usuario']
+                );
+
+                // 4. Publicación automática en estado ACTIVA.
+                (new Publicacion())->crear([
+                    'Id_Evento'            => $idEvento,
+                    'Id_Usuario'           => $datos['Id_Usuario'],
+                    'Id_EstadoPublicacion' => (int) $this->idEstadoPublicacionActiva(),
+                    'Contenido'            => $datos['Descripcion'] ?? '',
+                ]);
+
+                return $idEvento;
+            });
+        } catch (\Throwable $e) {
+            // El rollback lo hace transactional(); acá solo se preserva el
+            // contrato de RuntimeException que consume EventoController.
+            throw new \RuntimeException('Error al crear el evento: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Resuelve el Id_EstadoPublicacion 'ACTIVA' desde el catálogo.
+     * Evita IDs hardcodeados (convención de la guía de desarrollo, 2.3).
+     *
+     * @return int
+     * @throws \RuntimeException Si el estado no existe en el catálogo.
+     */
+    private function idEstadoPublicacionActiva(): int
+    {
+        $estado = (new EstadoPublicacion())->buscarPorNombre('ACTIVA');
+
+        if ($estado === false) {
+            throw new \RuntimeException(
+                "El estado 'ACTIVA' no existe en el catálogo de estados de publicación."
+            );
+        }
+
+        return (int) $estado['Id_EstadoPublicacion'];
     }
 
     /**

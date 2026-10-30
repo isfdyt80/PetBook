@@ -100,11 +100,13 @@ class Database
      *   });
      *
      * Uso (desde un controlador orquestando varios modelos):
-     *   $idEvento = Database::transactional(function () use (...) {
-     *       (new Mascota())->registrar(...);
-     *       (new Ubicacion())->crear(...);
-     *       return (new EventoMascota())->crear(...);
+     *   $id = Database::transactional(function () use ($datos) {
+     *       $idMascota = (new Mascota())->registrar($datos);
+     *       return (new Publicacion())->crear([...]);
      *   });
+     *   Nota: el flujo HU-08/09/10 ya está encapsulado en
+     *   EventoMascota::crear($datos, $tipoNombre), que abre su propia
+     *   transacción y no requiere orquestación desde el controlador.
      *
      * @param  callable $fn  Bloque de escritura. Su valor de retorno se
      *                       devuelve desde commit(); si lanza, se revierte.
