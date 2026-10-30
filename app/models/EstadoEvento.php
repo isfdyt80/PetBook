@@ -29,4 +29,24 @@ class EstadoEvento extends Model
 
         return $this->queryOne($sql, [':id' => $id]);
     }
+
+    /**
+     * Busca un estado de evento por nombre del catálogo.
+     * Devuelve false si no existe.
+     *
+     * Complemento de EstadoEvento::listar() para resolver estados por nombre
+     * en vez de IDs hardcodeados (convención de la guía de desarrollo, 2.3).
+     *
+     * @param  string      $nombre  Nombre según el catálogo (ej: 'ACTIVO').
+     * @return array|false
+     */
+    public function buscarPorNombre(string $nombre): array|false
+    {
+        return $this->queryOne(
+            'SELECT Id_EstadoEvento, Nombre
+             FROM EstadoEvento
+             WHERE UPPER(Nombre) = :nombre',
+            [':nombre' => strtoupper($nombre)]
+        ) ?: false;
+    }
 }
