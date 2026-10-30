@@ -45,6 +45,44 @@ class EventoController extends Controller
         $this->renderCrear($tipoNombre);
     }
 
+    // ── GET /evento/:id ───────────────────────────────────────────────────
+
+    /**
+     * Muestra el detalle de un evento con mascota y ubicación.
+     *
+     * Responde 404 si el evento no existe o está eliminado (soft delete).
+     * El detalle es visible para cualquier usuario autenticado: los eventos
+     * alimentan el feed público mediante su publicación.
+     */
+    public function ver(string $id): void
+    {
+        Auth::requireAuth();
+
+        $idEvento = (int) $id;
+
+        // Resguardo: /evento/crear sin tipo matchearía /evento/:id antes
+        // de caer acá con $id="crear"; (int) y ambos casos resuelven a 404.
+        if ($idEvento <= 0) {
+            $this->responder404();
+            return;
+        }
+
+        $evento = (new EventoMascota())->buscarDetalle($idEvento);
+
+        if ($evento === false) {
+            $this->responder404();
+            return;
+        }
+
+        $this->view('evento.ver', [
+            'titulo'  => $evento['Tipo_Evento'] === 'PERDIDA'   ? 'Mascota perdida'
+                       : ($evento['Tipo_Evento'] === 'ENCONTRADA' ? 'Mascota encontrada'
+                                                                   : 'Mascota en adopción'),
+            'evento'  => $evento,
+            'esDueno' => (int) $evento['Id_Usuario'] === (int) Session::user()['id'],
+        ]);
+    }
+
     // ── POST /evento/crear/:tipo ──────────────────────────────────────────
 
     /**

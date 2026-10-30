@@ -10,6 +10,47 @@ class EventoMascota extends Model
 
     // ── Creación (HU-08, HU-09, HU-10) ────────────────────────────────────
 
+    /**
+     * Busca un evento con los datos completos para la vista de detalle.
+     * Une evento + tipo + estado + mascota (con especie y raza) + ubicación
+     * en una sola consulta. Considera el soft delete (Eliminado = 0).
+     *
+     * @param  int         $id  Id_Evento.
+     * @return array|false      false si el evento no existe o está eliminado.
+     */
+    public function buscarDetalle(int $id): array|false
+    {
+        $sql = "SELECT
+                    e.Id_Evento,
+                    e.Id_Mascota,
+                    e.Id_Usuario,
+                    e.Descripcion,
+                    e.Fecha_Creacion,
+                    e.Fecha_Resolucion,
+                    e.Fecha_UltimaVista,
+                    e.Recompensa,
+                    t.Nombre  AS Tipo_Evento,
+                    s.Nombre  AS Estado_Evento,
+                    m.Nombre  AS Mascota_Nombre,
+                    s2.Nombre AS Especie,
+                    r.Nombre  AS Raza,
+                    u.Direccion,
+                    u.Ciudad,
+                    u.Provincia,
+                    u.Pais
+                FROM EventoMascota e
+                JOIN TipoEvento   t ON t.Id_TipoEvento   = e.Id_TipoEvento
+                JOIN EstadoEvento s ON s.Id_EstadoEvento = e.Id_EstadoEvento
+                JOIN Mascota      m ON m.Id_Mascota      = e.Id_Mascota
+                JOIN Especie      s2 ON s2.Id_Especie    = m.Id_Especie
+                LEFT JOIN Raza     r ON r.Id_Raza        = m.Id_Raza
+                LEFT JOIN Ubicacion u ON u.Id_Ubicacion  = e.Id_Ubicacion
+                WHERE e.Id_Evento = :id
+                AND e.Eliminado = 0";
+
+        return $this->queryOne($sql, [':id' => $id]);
+    }
+
     // Busca un evento por su ID
     public function buscarPorId(int $id){
         $sql = "SELECT 
