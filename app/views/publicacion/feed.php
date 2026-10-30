@@ -160,6 +160,23 @@ ob_start();
                 Cuando los usuarios compartan eventos, actividades o novedades
                 de sus mascotas, aparecerán aquí.
             </p>
+
+            <?php if (\App\Core\Auth::check()): ?>
+                <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                    <a href="<?= APP_URL ?>/evento/crear/perdida"
+                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                        <i class="bi bi-search-heart me-1"></i>Reportar perdida
+                    </a>
+                    <a href="<?= APP_URL ?>/evento/crear/encontrada"
+                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                        <i class="bi bi-handbag me-1"></i>Reportar encontrada
+                    </a>
+                    <a href="<?= APP_URL ?>/evento/crear/adopcion"
+                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                        <i class="bi bi-stars me-1"></i>Dar en adopción
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
     <?php else: ?>
@@ -235,6 +252,11 @@ ob_start();
                         <i class="bi bi-chat"></i>
                         <?= (int) ($pub['Num_Comentarios'] ?? 0) ?> comentarios
                     </span>
+
+                    <a href="<?= APP_URL ?>/evento/<?= (int) ($pub['Id_Evento'] ?? 0) ?>"
+                       style="margin-left:auto; font-size:0.82rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                        Ver evento <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
 
             </article>

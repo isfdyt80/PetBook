@@ -6,8 +6,8 @@ use App\Core\Model;
 
 class Ubicacion extends Model
 {
-    protected $table = 'Ubicacion';
-    protected $pk = 'Id_Ubicacion';
+    protected string $table = 'Ubicacion';
+    protected string $pk = 'Id_Ubicacion';
 
     // Inserta una nueva ubicacion en la base de datos
     // Devuelve el ID generado automaticamente

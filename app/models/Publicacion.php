@@ -70,6 +70,7 @@ class Publicacion extends Model
 
         $sql = "SELECT
                     p.Id_Publicacion,
+                    p.Id_Evento,
                     p.Contenido,
                     p.Fecha_Publicacion,
                     p.Editado,

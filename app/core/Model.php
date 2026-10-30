@@ -85,7 +85,9 @@ abstract class Model
     public function insert(array $data): int
     {
         $cols         = array_keys($data);
-        $placeholders = array_map(fn($c) => ":{$c}", $cols);
+        // Placeholders posicionales: PDO no acepta nombres con caracteres
+        // fuera de [a-zA-Z0-9_], y las columnas pueden llamarse 'Tamaño'.
+        $placeholders = array_fill(0, count($cols), '?');
 
         $sql = sprintf(
             'INSERT INTO `%s` (%s) VALUES (%s)',
@@ -95,7 +97,7 @@ abstract class Model
         );
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(array_combine($placeholders, array_values($data)));
+        $stmt->execute(array_values($data));
 
         return (int) $this->db->lastInsertId();
     }
@@ -109,17 +111,19 @@ abstract class Model
      */
     public function update(int $id, array $data): bool
     {
-        $sets = array_map(fn($c) => "`{$c}` = :{$c}", array_keys($data));
+        // Placeholders posicionales por la misma razón que insert():
+        // 'Tamaño' no es un nombre de parámetro PDO válido.
+        $sets = array_map(fn($c) => "`{$c}` = ?", array_keys($data));
 
         $sql = sprintf(
-            'UPDATE `%s` SET %s WHERE `%s` = :__pk',
+            'UPDATE `%s` SET %s WHERE `%s` = ?',
             $this->table,
             implode(', ', $sets),
             $this->pk
         );
 
-        $params         = $data;
-        $params['__pk'] = $id;
+        $params   = array_values($data);
+        $params[] = $id;
 
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);

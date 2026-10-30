@@ -22,12 +22,14 @@ $router->post('/reset/:token',       'AuthController', 'reset');
 // ── Feed ──────────────────────────────────────────────────────────────────
 $router->get('/feed',                'PublicacionController', 'index');
 
-// ── Eventos ───────────────────────────────────────────────────────────────
-$router->get( '/evento/crear',       'EventoController', 'crear');
-$router->post('/evento/crear',       'EventoController', 'store');
-$router->get( '/evento/:id',         'EventoController', 'ver');
-$router->post('/evento/:id/estado',  'EventoController', 'cambiarEstado');
-$router->post('/evento/:id/eliminar','EventoController', 'eliminar');
+// ── Eventos ─────────────────────────────────────────────────────────────
+// El tipo de evento viaja en la ruta (catálogo: perdida/encontrada/adopcion).
+// Se valida contra el catálogo en el controller; un tipo inválido responde 404.
+$router->get( '/evento/crear/:tipo',  'EventoController', 'crear');
+$router->post('/evento/crear/:tipo',  'EventoController', 'store');
+$router->get( '/evento/:id',          'EventoController', 'ver');
+$router->post('/evento/:id/estado',   'EventoController', 'cambiarEstado');
+$router->post('/evento/:id/eliminar', 'EventoController', 'eliminar');
 
 // ── Mascotas ──────────────────────────────────────────────────────────────
 $router->get( '/mascota',            'MascotaController', 'index');
