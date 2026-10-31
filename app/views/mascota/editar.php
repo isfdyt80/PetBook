@@ -194,44 +194,7 @@ $old = $old ?? [];
     </div>
 </div>
 
-<script>
-(function ($) {
-    const $especie = $('#especie');
-    const $raza    = $('#raza');
-
-    function limpiarRazas() {
-        $raza.empty().append($('<option>').val('').text('Raza (opcional)'));
-    }
-
-    function cargarRazas(idEspecie, razaSeleccionada) {
-        limpiarRazas();
-
-        if (!idEspecie) {
-            return;
-        }
-
-        $.getJSON('<?= APP_URL ?>' + '/raza/por-especie/' + idEspecie, function (razas) {
-            $.each(razas, function (_, raza) {
-                $raza.append($('<option>').val(raza.Id_Raza).text(raza.Nombre));
-            });
-
-            if (razaSeleccionada) {
-                $raza.val(String(razaSeleccionada));
-            }
-        });
-    }
-
-    // La mascota ya tiene especie asignada: cargamos sus razas y
-    // restauramos la raza guardada.
-    if ($especie.val()) {
-        cargarRazas($especie.val(), $raza.data('razaOld'));
-    }
-
-    $especie.on('change', function () {
-        cargarRazas(this.value, null);
-    });
-})(jQuery);
-</script>
+<script src="<?= APP_URL ?>/js/mascota/razas.js" data-app-url="<?= APP_URL ?>"></script>
 
 <?php
 $content = ob_get_clean();
