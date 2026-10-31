@@ -221,42 +221,49 @@ $placeholderVista   = [
 </div>
 
 <script>
-(function ($) {
-    const $btn  = $('#btn-geo');
-    const $hint = $('#geo-hint');
-    const $lat  = $('#latitud');
-    const $lon  = $('#longitud');
+    (function () {
+        const btn  = document.getElementById('btn-geo');
+        const hint = document.getElementById('geo-hint');
+        const lat  = document.getElementById('latitud');
+        const lon  = document.getElementById('longitud');
 
-    // Sin API de geolocalización (navegadores viejos o HTTP no seguro):
-    // la ubicación manual sigue siendo válida, así que solo deshabilitamos el botón.
-    if (!('geolocation' in navigator)) {
-        $btn.prop('disabled', true).html('<i class="bi bi-slash-circle"></i> Geolocalización no disponible');
-        return;
-    }
+        // Sin bloque de ubicación en esta vista (ADOPCION): no hay nada que inicializar.
+        if (!btn || !hint || !lat || !lon) {
+            return;
+        }
 
-    $btn.on('click', function () {
-        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Obteniendo…');
+        // Sin API de geolocalización (navegadores viejos o HTTP no seguro):
+        // la ubicación manual sigue siendo válida, así que solo deshabilitamos el botón.
+        if (!('geolocation' in navigator)) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-slash-circle"></i> Geolocalización no disponible';
+            return;
+        }
 
-        navigator.geolocation.getCurrentPosition(
-            function (pos) {
-                // 6 decimales ≈ 11 cm de precisión, sobra para una mascota.
-                $lat.val(pos.coords.latitude.toFixed(6));
-                $lon.val(pos.coords.longitude.toFixed(6));
-                $hint.text('Posición capturada: se envía junto con el formulario.');
-                $btn.prop('disabled', false).html('<i class="bi bi-check2-circle"></i> Volver a capturar');
-            },
-            function (err) {
-                $hint.text(
-                    err.code === 1
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Obteniendo…';
+
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    // 6 decimales ≈ 1 metro de precisión, sobra para una mascota.
+                    lat.value = pos.coords.latitude.toFixed(6);
+                    lon.value = pos.coords.longitude.toFixed(6);
+                    hint.textContent = 'Posición capturada (' + lat.value + ', ' + lon.value + '). Se envía con el formulario.';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check2-circle"></i> Volver a capturar';
+                },
+                function (err) {
+                    hint.textContent = err.code === 1
                         ? 'Permiso de ubicación denegado; podés completar los campos de texto igual.'
-                        : 'No se pudo obtener tu ubicación; podés completar los campos de texto igual.'
-                );
-                $btn.prop('disabled', false).html('<i class="bi bi-crosshair"></i> Usar mi ubicación actual');
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-    });
-})(jQuery);
+                        : 'No se pudo obtener tu ubicación; podés completar los campos de texto igual.';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-crosshair"></i> Usar mi ubicación actual';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        });
+    })();
 </script>
 
 <?php
