@@ -5,7 +5,9 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
+use App\Models\Especie;
 use App\Models\Mascota;
+use App\Models\HistorialEstadoEvento;
 use App\Models\EventoMascota;
 use App\Models\TipoEvento;
 
@@ -80,6 +82,7 @@ class EventoController extends Controller
                                                                    : 'Mascota en adopción'),
             'evento'  => $evento,
             'esDueno' => (int) $evento['Id_Usuario'] === (int) Session::user()['id'],
+            'historial' => (new HistorialEstadoEvento())->listarPorEvento($idEvento),
         ]);
     }
 
@@ -204,12 +207,14 @@ class EventoController extends Controller
             return;
         }
 
-        $idMascota = (int) $this->input('mascota');
+        if ($tipoNombre !== 'ENCONTRADA') {
+            $idMascota = (int) $this->input('mascota');
 
-        if ($idMascota <= 0 || !(new Mascota())->perteneceAUsuario($idMascota, (int) Session::user()['id'])) {
-            Session::flash('error', 'La mascota indicada no existe o no te pertenece.');
-            $this->renderCrear($tipoNombre);
-            return;
+            if ($idMascota <= 0 || !(new Mascota())->perteneceAUsuario($idMascota, (int) Session::user()['id'])) {
+                Session::flash('error', 'La mascota indicada no existe o no te pertenece.');
+                $this->renderCrear($tipoNombre);
+                return;
+            }
         }
 
         $datos = $this->leerDatosFormulario($tipoNombre);
@@ -270,10 +275,27 @@ class EventoController extends Controller
         }
 
         $datos = [
-            'Id_Mascota'  => (int) $this->input('mascota'),
             'Id_Usuario'  => (int) Session::user()['id'],
             'Descripcion' => $descripcion,
         ];
+
+        if ($tipoNombre === 'ENCONTRADA') {
+            $idEspecie = (int) $this->input('especie');
+            $especie = (new Especie())->buscarPorId($idEspecie);
+
+            if ($especie === null) {
+                Session::flash('error', 'Elegí una especie válida para la mascota encontrada.');
+                return false;
+            }
+
+            $datos['mascota_nueva'] = [
+                'Nombre'     => $this->input('nombre_mascota') ?: 'Mascota encontrada',
+                'Id_Especie' => $idEspecie,
+                'Color'      => $this->input('color_mascota') ?: null,
+            ];
+        } else {
+            $datos['Id_Mascota'] = (int) $this->input('mascota');
+        }
 
         // Ubicación: disponible en PERDIDA y ENCONTRADA, no aplica a ADOPCION.
         if ($tipoNombre !== 'ADOPCION') {
@@ -393,7 +415,10 @@ class EventoController extends Controller
         $this->view('evento.crear', [
             'titulo'   => self::TITULOS[$tipoNombre] ?? 'Crear evento',
             'tipo'     => $tipoNombre,
-            'mascotas' => (new Mascota())->listarPorUsuario((int) Session::user()['id']),
+            'mascotas' => $tipoNombre === 'ENCONTRADA'
+                ? []
+                : (new Mascota())->listarPorUsuario((int) Session::user()['id']),
+            'especies' => $tipoNombre === 'ENCONTRADA' ? (new Especie())->listar() : [],
             'old'      => $_POST,
         ]);
     }
