@@ -103,27 +103,27 @@ $placeholderVista   = [
                  style="background: var(--pb-surface); border: 1px solid var(--pb-border); border-radius: var(--pb-radius); padding: 2.25rem 2rem;">
 
                 <div class="pb-evento-icono text-center">
-                    <i class="bi <?= htmlspecialchars($iconoPorTipo[$tipo] ?? 'bi-calendar-event', ENT_QUOTES, 'UTF-8') ?>"></i>
+                    <i class="bi <?php echo htmlspecialchars($iconoPorTipo[$tipo] ?? 'bi-calendar-event', ENT_QUOTES, 'UTF-8') ?>"></i>
                 </div>
 
-                <h1 class="pb-page-title text-center"><?= htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8') ?></h1>
-                <div class="pb-page-subtitle text-center">Completá los datos del evento</div>
+                <h1 class="pb-page-title text-center"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8') ?></h1>
+                <div class="pb-page-subtitle text-center">Completá los datos de la publicación</div>
 
-                <form action="<?= APP_URL ?>/evento/crear/<?= strtolower($tipo) ?>" method="POST" novalidate>
-                    <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
+                <form action="<?php echo APP_URL ?>/evento/crear/<?php echo strtolower($tipo) ?>" method="POST" novalidate>
+                    <input type="hidden" name="_csrf" value="<?php echo Session::csrfToken() ?>">
 
                     <div class="mb-3">
                         <label class="pb-label" for="mascota">Mascota</label>
                         <select class="pb-input" id="mascota" name="mascota" required>
                             <option value="" disabled
-                                <?= empty($old['mascota']) ? 'selected' : '' ?>>
+                                <?php echo empty($old['mascota']) ? 'selected' : '' ?>>
                                 Elegí una de tus mascotas
                             </option>
 
                             <?php foreach ($mascotas as $mascota) : ?>
-                                <option value="<?= (int) $mascota['Id_Mascota'] ?>"
-                                    <?= (string) ($old['mascota'] ?? '') === (string) $mascota['Id_Mascota'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($mascota['Nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                <option value="<?php echo (int) $mascota['Id_Mascota'] ?>"
+                                    <?php echo (string) ($old['mascota'] ?? '') === (string) $mascota['Id_Mascota'] ? 'selected' : '' ?>>
+                                    <?php echo htmlspecialchars($mascota['Nombre'], ENT_QUOTES, 'UTF-8') ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -133,7 +133,7 @@ $placeholderVista   = [
                     <div class="mb-3">
                         <label class="pb-label" for="descripcion">Descripción</label>
                         <textarea class="pb-input" id="descripcion" name="descripcion" rows="4" required
-                            placeholder="<?= htmlspecialchars($placeholderVista[$tipo] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($old['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                            placeholder="<?php echo htmlspecialchars($placeholderVista[$tipo] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?php echo htmlspecialchars($old['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                         <div class="pb-hint">Estos detalles se publicarán en tu feed.</div>
                     </div>
 
@@ -143,33 +143,33 @@ $placeholderVista   = [
 
                             <label class="pb-label" for="direccion">Dirección</label>
                             <input class="pb-input mb-2" type="text" id="direccion" name="direccion"
-                                value="<?= htmlspecialchars($old['direccion'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                value="<?php echo htmlspecialchars($old['direccion'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                 placeholder="Ej: Av. Illia 480" autocomplete="off">
 
                             <div class="row">
                                 <div class="col-md-4 mb-1">
                                     <input class="pb-input" type="text" name="ciudad"
-                                        value="<?= htmlspecialchars($old['ciudad'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        value="<?php echo htmlspecialchars($old['ciudad'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                         placeholder="Ciudad" autocomplete="off">
                                 </div>
                                 <div class="col-md-4 mb-1">
                                     <input class="pb-input" type="text" name="provincia"
-                                        value="<?= htmlspecialchars($old['provincia'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        value="<?php echo htmlspecialchars($old['provincia'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                         placeholder="Provincia" autocomplete="off">
                                 </div>
                                 <div class="col-md-4 mb-1">
                                     <input class="pb-input" type="text" name="pais"
-                                        value="<?= htmlspecialchars($old['pais'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        value="<?php echo htmlspecialchars($old['pais'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                         placeholder="País" autocomplete="off">
                                 </div>
                             </div>
                             <div class="pb-hint">Opcional, pero ayuda mucho a quien pueda reconocer el lugar.</div>
 
                             <input type="hidden" id="latitud" name="latitud"
-                                value="<?= htmlspecialchars($old['latitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                value="<?php echo htmlspecialchars($old['latitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                             <input type="hidden" id="longitud" name="longitud"
-                                value="<?= htmlspecialchars($old['longitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                value="<?php echo htmlspecialchars($old['longitud'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                             <button type="button" id="btn-geo"
                                     style="background:none; color:var(--pb-violet); border:1.5px solid var(--pb-border); border-radius:8px; padding:0.42rem 0.8rem; font-size:0.82rem; font-weight:600; font-family:'DM Sans', sans-serif; cursor:pointer; margin-top:0.35rem;">
@@ -185,14 +185,14 @@ $placeholderVista   = [
                             <div class="col-md-6 mb-3">
                                 <label class="pb-label" for="fecha_ultima_vista">Fecha de última vista</label>
                                 <input class="pb-input" type="date" id="fecha_ultima_vista" name="fecha_ultima_vista"
-                                    value="<?= htmlspecialchars($old['fecha_ultima_vista'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                    value="<?php echo htmlspecialchars($old['fecha_ultima_vista'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                 <div class="pb-hint">Opcional</div>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="pb-label" for="recompensa">Recompensa</label>
                                 <input class="pb-input" type="number" id="recompensa" name="recompensa" min="0" step="0.01"
-                                    value="<?= htmlspecialchars($old['recompensa'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                    value="<?php echo htmlspecialchars($old['recompensa'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     placeholder="Ej: 5000" autocomplete="off">
                                 <div class="pb-hint">Opcional</div>
                             </div>
@@ -201,13 +201,13 @@ $placeholderVista   = [
 
                     <div class="mb-4">
                         <button type="submit" class="pb-btn">
-                            <i class="bi <?= htmlspecialchars($iconoPorTipo[$tipo] ?? 'bi-calendar-event', ENT_QUOTES, 'UTF-8') ?> me-1"></i>Crear evento
+                            <i class="bi <?php echo htmlspecialchars($iconoPorTipo[$tipo] ?? 'bi-calendar-event', ENT_QUOTES, 'UTF-8') ?> me-1"></i>Crear publicación
                         </button>
                     </div>
                 </form>
 
                 <div class="text-center mt-3">
-                    <a href="<?= APP_URL ?>/mascota"
+                    <a href="<?php echo APP_URL ?>/mascota"
                        style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
                         Volver a mis mascotas
                     </a>
@@ -220,7 +220,7 @@ $placeholderVista   = [
     </div>
 </div>
 
-<script src="<?= APP_URL ?>/js/evento/geolocalizacion.js"></script>
+<script src="<?php echo APP_URL ?>/js/evento/geolocalizacion.js"></script>
 
 <?php
 $content = ob_get_clean();
