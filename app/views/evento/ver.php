@@ -5,6 +5,7 @@ use App\Core\Session;
 ob_start();
 
 $evento = $evento ?? [];
+$historial = $historial ?? [];
 $tipo = $evento['Tipo_Evento'] ?? '';
 
 $iconoPorTipo = ['PERDIDA' => 'bi-search-heart', 'ENCONTRADA' => 'bi-handbag', 'ADOPCION' => 'bi-stars'];
@@ -73,6 +74,10 @@ $ubicacion = array_filter(
         color: var(--pb-violet);
         font-size: 2.6rem;
     }
+
+    .pb-history-item { position:relative; padding:0 0 1rem 1.35rem; border-left:2px solid var(--pb-border); }
+    .pb-history-item:last-child { padding-bottom:0; border-left-color:transparent; }
+    .pb-history-dot { position:absolute; left:-0.42rem; top:.15rem; width:.7rem; height:.7rem; border-radius:50%; background:var(--pb-violet); border:2px solid #fff; }
 </style>
 
 <div class="container py-4">
@@ -124,11 +129,15 @@ $ubicacion = array_filter(
                         <div class="w-50 mb-3">
                             <div class="pb-list-label">Mascota</div>
                             <p class="pb-list-value mb-0">
+                                <?php if ($tipo !== 'ENCONTRADA') : ?>
                                 <a href="<?php echo APP_URL ?>/mascota/<?php echo (int) ($evento['Id_Mascota'] ?? 0) ?>"
                                    style="color:var(--pb-violet); font-weight:600; text-decoration:none;">
                                     <?php echo htmlspecialchars($evento['Mascota_Nombre'] ?? '—', ENT_QUOTES, 'UTF-8') ?>
                                     <i class="bi bi-paw" style="font-size:0.8rem;"></i>
                                 </a>
+                                <?php else : ?>
+                                    <?php echo htmlspecialchars($evento['Mascota_Nombre'] ?? 'Mascota encontrada', ENT_QUOTES, 'UTF-8') ?>
+                                <?php endif; ?>
                             </p>
                         </div>
 
@@ -181,6 +190,28 @@ $ubicacion = array_filter(
                             </p>
                         </div>
                     <?php endif; ?>
+
+                    <div class="pt-3 border-top mt-3">
+                        <div class="pb-list-label mb-3"><i class="bi bi-clock-history me-1"></i>Historial del evento</div>
+                        <?php if (empty($historial)) : ?>
+                            <p class="pb-hint mb-0">Todavía no hay movimientos registrados.</p>
+                        <?php else : ?>
+                            <?php foreach ($historial as $movimiento) : ?>
+                                <div class="pb-history-item">
+                                    <span class="pb-history-dot"></span>
+                                    <div class="d-flex justify-content-between flex-wrap gap-1">
+                                        <strong style="font-size:.88rem; color:var(--pb-text);">
+                                            <?php echo htmlspecialchars($movimiento['Estado'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                        </strong>
+                                        <time class="pb-hint" datetime="<?php echo htmlspecialchars($movimiento['Fecha'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                            <?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($movimiento['Fecha'])), ENT_QUOTES, 'UTF-8') ?>
+                                        </time>
+                                    </div>
+                                    <div class="pb-hint">Por <?php echo htmlspecialchars($movimiento['Nombre_Usuario'] ?? 'Usuario', ENT_QUOTES, 'UTF-8') ?></div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
 
                     <?php if (!empty($esDueno)) : ?>
                         <?php if ($estado === 'ACTIVO') : ?>
