@@ -261,6 +261,13 @@ class EventoMascota extends Model
 
         try {
             return $this->transactional(function () use ($datos, $tipoEvento, $estadoActivo) {
+                // Una mascota encontrada no tiene por qué pertenecer a quien
+                // reporta. Se registra una ficha sin vínculo MascotaUsuario,
+                // dentro de la misma transacción del evento y su publicación.
+                $idMascota = isset($datos['mascota_nueva'])
+                    ? (new Mascota())->crear($datos['mascota_nueva'])
+                    : (int) $datos['Id_Mascota'];
+
                 // 1. Ubicación, si el formulario la aporta (opcional).
                 $idUbicacion = null;
                 if (!empty($datos['ubicacion'])) {
@@ -269,7 +276,7 @@ class EventoMascota extends Model
 
                 // 2. EventoMascota en estado ACTIVO.
                 $idEvento = $this->insert([
-                    'Id_Mascota'       => $datos['Id_Mascota'],
+                    'Id_Mascota'       => $idMascota,
                     'Id_Usuario'       => $datos['Id_Usuario'],
                     'Id_TipoEvento'    => (int) $tipoEvento['Id_TipoEvento'],
                     'Id_EstadoEvento'  => (int) $estadoActivo['Id_EstadoEvento'],

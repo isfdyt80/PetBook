@@ -130,6 +130,28 @@ class Publicacion extends Model
     {
         return $this->listarActivas($pagina, $porPagina);
     }
+
+    /** Lista el historial del usuario, incluyendo publicaciones archivadas. */
+    public function listarPorUsuario(int $idUsuario): array
+    {
+        return $this->query(
+            "SELECT p.Id_Publicacion, p.Id_Evento, p.Contenido, p.Fecha_Publicacion,
+                    ep.Nombre AS Estado_Publicacion, te.Nombre AS Tipo_Evento,
+                    ee.Nombre AS Estado_Evento, m.Nombre AS Nombre_Mascota
+             FROM Publicacion p
+             JOIN EstadoPublicacion ep ON ep.Id_EstadoPublicacion = p.Id_EstadoPublicacion
+             JOIN EventoMascota ev ON ev.Id_Evento = p.Id_Evento
+             JOIN EstadoEvento ee ON ee.Id_EstadoEvento = ev.Id_EstadoEvento
+             JOIN TipoEvento te ON te.Id_TipoEvento = ev.Id_TipoEvento
+             JOIN Mascota m ON m.Id_Mascota = ev.Id_Mascota
+             WHERE p.Id_Usuario = :usuario
+               AND p.Eliminado = 0
+               AND ev.Eliminado = 0
+             ORDER BY p.Fecha_Publicacion DESC",
+            [':usuario' => $idUsuario]
+        );
+    }
+
     /**
      * Actualiza el contenido de una publicación y marca Editado = 1.
      *

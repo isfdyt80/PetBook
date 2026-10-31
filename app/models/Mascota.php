@@ -169,7 +169,7 @@ class Mascota extends Model
             [':mascota' => $idMascota, ':usuario' => $idUsuario]
         );
 
-        return $row !== null;
+        return $row !== false;
     }
 
     /**
