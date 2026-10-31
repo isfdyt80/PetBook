@@ -143,10 +143,26 @@ ob_start();
         color: var(--pb-text);
         margin-bottom: 0.4rem;
     }
+
+    .feed-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .feed-create-link {
+        display:inline-flex; align-items:center; gap:.4rem;
+        border:1px solid var(--pb-border); border-radius:8px;
+        padding:.48rem .7rem; color:var(--pb-violet-d); background:var(--pb-surface);
+        font-size:.82rem; font-weight:600; text-decoration:none;
+    }
+    .feed-create-link:hover { background:#F3F1FE; color:var(--pb-violet-d); }
 </style>
 
 <div class="feed-wrap">
-    <h1 class="feed-title">Feed</h1>
+    <div class="feed-heading mb-4">
+        <h1 class="feed-title mb-0">Feed</h1>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="feed-create-link" href="<?= APP_URL ?>/evento/crear/perdida"><i class="bi bi-search-heart"></i> Perdida</a>
+            <a class="feed-create-link" href="<?= APP_URL ?>/evento/crear/encontrada"><i class="bi bi-handbag"></i> Encontrada</a>
+            <a class="feed-create-link" href="<?= APP_URL ?>/evento/crear/adopcion"><i class="bi bi-stars"></i> Adopción</a>
+        </div>
+    </div>
 
     <?php if (empty($publicaciones)): ?>
 
@@ -161,22 +177,6 @@ ob_start();
                 de sus mascotas, aparecerán aquí.
             </p>
 
-            <?php if (\App\Core\Auth::check()): ?>
-                <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
-                    <a href="<?= APP_URL ?>/evento/crear/perdida"
-                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
-                        <i class="bi bi-search-heart me-1"></i>Reportar perdida
-                    </a>
-                    <a href="<?= APP_URL ?>/evento/crear/encontrada"
-                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
-                        <i class="bi bi-handbag me-1"></i>Reportar encontrada
-                    </a>
-                    <a href="<?= APP_URL ?>/evento/crear/adopcion"
-                       style="font-size:0.87rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
-                        <i class="bi bi-stars me-1"></i>Dar en adopción
-                    </a>
-                </div>
-            <?php endif; ?>
         </div>
 
     <?php else: ?>

@@ -5,7 +5,9 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
+use App\Models\Especie;
 use App\Models\Mascota;
+use App\Models\HistorialEstadoEvento;
 use App\Models\EventoMascota;
 use App\Models\TipoEvento;
 
@@ -80,6 +82,7 @@ class EventoController extends Controller
                                                                    : 'Mascota en adopción'),
             'evento'  => $evento,
             'esDueno' => (int) $evento['Id_Usuario'] === (int) Session::user()['id'],
+            'historial' => (new HistorialEstadoEvento())->listarPorEvento($idEvento),
         ]);
     }
 
@@ -204,12 +207,14 @@ class EventoController extends Controller
             return;
         }
 
-        $idMascota = (int) $this->input('mascota');
+        if ($tipoNombre !== 'ENCONTRADA') {
+            $idMascota = (int) $this->input('mascota');
 
-        if ($idMascota <= 0 || !(new Mascota())->perteneceAUsuario($idMascota, (int) Session::user()['id'])) {
-            Session::flash('error', 'La mascota indicada no existe o no te pertenece.');
-            $this->renderCrear($tipoNombre);
-            return;
+            if ($idMascota <= 0 || !(new Mascota())->perteneceAUsuario($idMascota, (int) Session::user()['id'])) {
+                Session::flash('error', 'La mascota indicada no existe o no te pertenece.');
+                $this->renderCrear($tipoNombre);
+                return;
+            }
         }
 
         $datos = $this->leerDatosFormulario($tipoNombre);
@@ -270,14 +275,37 @@ class EventoController extends Controller
         }
 
         $datos = [
-            'Id_Mascota'  => (int) $this->input('mascota'),
             'Id_Usuario'  => (int) Session::user()['id'],
             'Descripcion' => $descripcion,
         ];
 
+        if ($tipoNombre === 'ENCONTRADA') {
+            $idEspecie = (int) $this->input('especie');
+            $especie = (new Especie())->buscarPorId($idEspecie);
+
+            if ($especie === null) {
+                Session::flash('error', 'Elegí una especie válida para la mascota encontrada.');
+                return false;
+            }
+
+            $datos['mascota_nueva'] = [
+                'Nombre'     => $this->input('nombre_mascota') ?: 'Mascota encontrada',
+                'Id_Especie' => $idEspecie,
+                'Color'      => $this->input('color_mascota') ?: null,
+            ];
+        } else {
+            $datos['Id_Mascota'] = (int) $this->input('mascota');
+        }
+
         // Ubicación: disponible en PERDIDA y ENCONTRADA, no aplica a ADOPCION.
         if ($tipoNombre !== 'ADOPCION') {
-            $datos['ubicacion'] = $this->leerUbicacion();
+            $ubicacion = $this->leerUbicacion();
+
+            if ($ubicacion === false) {
+                return false;
+            }
+
+            $datos['ubicacion'] = $ubicacion;
         }
 
         // Recompensa y fecha de última vista: exclusivos de PERDIDA.
@@ -309,26 +337,59 @@ class EventoController extends Controller
     }
 
     /**
-     * Lee los campos de ubicación del formulario.
-     * Si todos están vacíos devuelve null (ubicación opcional); si algún
-     * campo tiene contenido arma el array para Ubicacion::crear().
+     * Lee y valida los campos de ubicación del formulario.
      *
-     * @return array|null
+     * Comprende los cuatro campos de texto (dirección/ciudad/provincia/país)
+     * y las coordenadas que el navegador aporta con su geolocalización
+     * (latitud/longitud, opcionales y por pares).
+     *
+     * Devuelve:
+     *   - null   si el formulario no aportó nada de lo anterior,
+     *   - false  si la validación falló (ya cargó el flash de error),
+     *   - array  listo para Ubicacion::crear(), con claves null cuando un
+     *            campo no se completó (ej. coordenadas GPS sin dirección).
+     *
+     * @return array|null|false
      */
-    private function leerUbicacion(): ?array
+    private function leerUbicacion(): array|null|false
     {
         $direccion  = $this->input('direccion');
         $ciudad     = $this->input('ciudad');
         $provincia  = $this->input('provincia');
         $pais       = $this->input('pais');
 
+        $latitud  = $this->input('latitud');
+        $longitud = $this->input('longitud');
+
+        $latitud  = ($latitud !== null && $latitud !== '')  ? $latitud  : null;
+        $longitud = ($longitud !== null && $longitud !== '') ? $longitud : null;
+
+        // Sin nada aportado: no crear registro de ubicación.
         if (
             ($direccion === null || $direccion === '')
             && ($ciudad === null || $ciudad === '')
             && ($provincia === null || $provincia === '')
             && ($pais === null || $pais === '')
+            && $latitud === null
+            && $longitud === null
         ) {
             return null;
+        }
+
+        // Las coordenadas vienen por pares: media posición es un punto roto.
+        if (($latitud === null) !== ($longitud === null)) {
+            Session::flash('error', 'Si aportás coordenadas, necesitamos latitud y longitud juntas.');
+            return false;
+        }
+
+        if ($latitud !== null && (!is_numeric($latitud) || $latitud < -90 || $latitud > 90)) {
+            Session::flash('error', 'La latitud debe ser un número entre -90 y 90.');
+            return false;
+        }
+
+        if ($longitud !== null && (!is_numeric($longitud) || $longitud < -180 || $longitud > 180)) {
+            Session::flash('error', 'La longitud debe ser un número entre -180 y 180.');
+            return false;
         }
 
         return [
@@ -336,6 +397,8 @@ class EventoController extends Controller
             'ciudad'    => $ciudad     !== null && $ciudad     !== '' ? $ciudad     : null,
             'provincia' => $provincia  !== null && $provincia  !== '' ? $provincia  : null,
             'pais'      => $pais       !== null && $pais       !== '' ? $pais       : null,
+            'latitud'   => $latitud  !== null ? (float) $latitud  : null,
+            'longitud'  => $longitud !== null ? (float) $longitud : null,
         ];
     }
 
@@ -352,7 +415,10 @@ class EventoController extends Controller
         $this->view('evento.crear', [
             'titulo'   => self::TITULOS[$tipoNombre] ?? 'Crear evento',
             'tipo'     => $tipoNombre,
-            'mascotas' => (new Mascota())->listarPorUsuario((int) Session::user()['id']),
+            'mascotas' => $tipoNombre === 'ENCONTRADA'
+                ? []
+                : (new Mascota())->listarPorUsuario((int) Session::user()['id']),
+            'especies' => $tipoNombre === 'ENCONTRADA' ? (new Especie())->listar() : [],
             'old'      => $_POST,
         ]);
     }

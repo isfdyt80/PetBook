@@ -21,6 +21,7 @@ $router->post('/reset/:token',       'AuthController', 'reset');
 
 // ── Feed ──────────────────────────────────────────────────────────────────
 $router->get('/feed',                'PublicacionController', 'index');
+$router->get('/mis-publicaciones',   'PublicacionController', 'misPublicaciones');
 
 // ── Eventos ─────────────────────────────────────────────────────────────
 // El tipo de evento viaja en la ruta (catálogo: perdida/encontrada/adopcion).
