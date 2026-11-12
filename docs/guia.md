@@ -29,7 +29,7 @@ Documento de referencia para el equipo. Define la estructura del proyecto, conve
 | Servidor       | Apache (WampServer)               |
 | Dependencias   | Composer                          |
 | Variables de entorno | vlucas/phpdotenv            |
-| Frontend       | Bootstrap 5 · jQuery              |
+| Frontend       | Bootstrap 5 · jQuery · SweetAlert2 |
 | Control de versiones | Git                         |
 
 ---
@@ -182,6 +182,10 @@ Request POST /evento/crear
 | Archivos CSS | kebab-case | `main.css`           |
 | Clases CSS   | kebab-case | `.card-mascota`      |
 | IDs HTML     | camelCase  | `formCrearEvento`    |
+
+### SweetAlert2
+
+SweetAlert2 se carga desde CDN en `app/views/layouts/main.php`, seguido por el helper `public/js/pb-alerts.js`. Las vistas no deben volver a importar la librería. Para mensajes breves de resultado usar `pbToast(tipo, mensaje)`; para confirmar una acción destructiva usar `pbConfirm(opciones)` o los atributos declarativos del formulario. La guía técnica incluye ejemplos y opciones en la sección 5.5.
 
 ---
 

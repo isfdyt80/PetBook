@@ -451,6 +451,65 @@ El único PHP permitido dentro de una vista es `if`, `foreach` y `htmlspecialcha
 
 `app/views/{controlador sin sufijo}/{accion}.php` en snake_case: `app/views/publicacion/index.php`, `app/views/evento/crear.php`. La notación con puntos que usa `Controller::view()` (`'publicacion.index'`) se traduce a slashes internamente — al escribir `$this->view(...)` en el controlador, usar puntos; al crear el archivo en disco, usar la carpeta real.
 
+### 5.5 Alertas y confirmaciones con SweetAlert2
+
+El layout global `app/views/layouts/main.php` carga SweetAlert2 desde CDN y luego `public/js/pb-alerts.js`. No agregar otra etiqueta `<script>` de SweetAlert2 en una vista o un JS de página: el helper global ya está disponible en las páginas que usan este layout.
+
+#### Mensajes de resultado
+
+Para una acción procesada por el servidor, el controlador guarda un mensaje flash y redirige. El layout lo recoge y `pb-alerts.js` lo presenta como toast automáticamente:
+
+```php
+use App\Core\Session;
+
+Session::flash('success', 'Mascota registrada correctamente.');
+$this->redirect('mascota');
+```
+
+Se aceptan los tipos `success`, `error`, `warning` e `info`. Para feedback que nace enteramente en el navegador, se puede llamar directamente al helper:
+
+```js
+pbToast('success', 'Cambios guardados.');
+pbToast('error', 'No se pudo completar la acción.');
+```
+
+El texto se pasa como mensaje (no como HTML). No interpolar contenido del usuario con `html` de SweetAlert2.
+
+#### Confirmación declarativa de formularios
+
+Para confirmar un formulario antes de enviarlo, agregar `data-confirm-titulo`. El listener global intercepta el primer submit, muestra el diálogo y solo envía el formulario si se confirma:
+
+```php
+<form method="POST"
+      action="<?= APP_URL ?>/evento/<?= (int) $evento['Id_Evento'] ?>/eliminar"
+      data-confirm-titulo="Eliminar publicación"
+      data-confirm-texto="También desaparecerá del feed."
+      data-confirm-boton="Sí, eliminar">
+    <button type="submit">Eliminar publicación</button>
+</form>
+```
+
+`data-confirm-texto`, `data-confirm-boton` y `data-confirm-color` son opcionales. Si no se define el texto del botón, se muestra “Sí, confirmar”. Este patrón aplica a formularios; no reemplaza la autorización ni la validación del controlador.
+
+#### Confirmación desde JavaScript
+
+Para una acción que no se ejecuta enviando un formulario, `pbConfirm()` devuelve una promesa con `true` si se confirmó y `false` si se canceló:
+
+```js
+const acepta = await pbConfirm({
+    titulo: '¿Cerrar el evento?',
+    texto: 'El evento dejará de aparecer como activo.',
+    confirmar: 'Sí, cerrar',
+    cancelar: 'Seguir editando',
+});
+
+if (acepta) {
+    // Continuar la acción, por ejemplo enviar una petición fetch.
+}
+```
+
+Opciones admitidas: `titulo`, `texto`, `icono` (`success`, `error`, `warning` o `info`), `confirmar`, `cancelar` y `colorBoton`. Para operaciones destructivas, indicar claramente el efecto y continuar solo si el resultado es `true`.
+
 ---
 
 ## 6. Agregar una tabla de relación N:M
