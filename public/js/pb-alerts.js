@@ -14,6 +14,11 @@
  *   - cancelar     texto del botón de cancelación
  *   - colorBoton   color hex del botón de confirmación (paleta del proyecto)
  *
+ * Confirmación declarativa: cualquier <form data-confirm-titulo="...">
+ * intercepta su submit y muestra el diálogo antes de enviarse de verdad.
+ * Atributos opcionales: data-confirm-texto, data-confirm-boton,
+ * data-confirm-color.
+ *
  * Referenciado desde: app/views/layouts/main.php (cargado en el footer,
  * después del bundle de SweetAlert2).
  */
@@ -54,6 +59,32 @@
             reverseButtons: true,
         }).then((resultado) => resultado.isConfirmed);
     };
+
+    // Confirmación genérica por formulario: los <form data-confirm-titulo="...">
+    // esperan la promesa de pbConfirm antes de enviarse de verdad. La
+    // delegación en document no necesita ajustar las vistas.
+    document.addEventListener('submit', (evento) => {
+        const form = evento.target;
+        if (!(form instanceof HTMLFormElement) || !form.dataset.confirmTitulo) {
+            return;
+        }
+        if (form.dataset.confirmado === '1') {
+            return; // Ya confirmado: dejar pasar el envío.
+        }
+        evento.preventDefault();
+        window.pbConfirm({
+            titulo: form.dataset.confirmTitulo,
+            texto: form.dataset.confirmTexto || '',
+            confirmar: form.dataset.confirmBoton || 'Sí, confirmar',
+            colorBoton: form.dataset.confirmColor || undefined,
+        }).then((acepta) => {
+            if (!acepta) {
+                return;
+            }
+            form.dataset.confirmado = '1';
+            form.submit();
+        });
+    });
 
     // Flashes de sesión: el layout inyecta window.pbFlashes como objeto
     // { tipo: mensaje } y los mostramos como toasts al cargar la página.
