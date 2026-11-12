@@ -54,4 +54,11 @@
             reverseButtons: true,
         }).then((resultado) => resultado.isConfirmed);
     };
+
+    // Flashes de sesión: el layout inyecta window.pbFlashes como objeto
+    // { tipo: mensaje } y los mostramos como toasts al cargar la página.
+    document.addEventListener('DOMContentLoaded', () => {
+        const flashes = window.pbFlashes || {};
+        Object.keys(flashes).forEach((tipo) => window.pbToast(tipo, flashes[tipo]));
+    });
 })();
