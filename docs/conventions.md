@@ -55,3 +55,68 @@ El modelo que orquesta abre y cierra la transacción a mano (`beginTransaction()
 
 - `transactional()` **no lanza excepciones propias**: relanza la original que lanzó `$fn` (o la del `beginTransaction()` si la conexión falla).
 - `rollBack()` solo se invoca si hay transacción activa; un fallo dentro del rollback (conexión caída) se propaga como `PDOException` normal y la excepción original se pierde — comportamiento heredado de PDO, aceptado para este sistema.
+
+---
+
+## Límite de intentos repetidos en acciones sensibles (rate limiting)
+
+**Estado:** aceptada · **Origen:** issue de límites sobre login/registro/recuperación · **Afecta:** `IntentoAcceso`, `App\Core\RateLimiter`, `AuthController`, toda acción de autenticación futura.
+
+### Decisión
+
+Toda acción sensible (login, registro, recuperación de contraseña) limita sus intentos repetidos a través de `App\Core\RateLimiter`, que persiste cada intento en la tabla `IntentoAcceso`. Los límites aplican **por cuenta** (email normalizado a lowercase + trim) y **por origen** (IP del cliente), dentro de una ventana deslizante de `RATE_LIMIT_VENTANA_MINUTOS`. Los máximos por acción viven en `RateLimiter::LIMITES` y se alimentan de constantes de `config/app.php` (a su vez del `.env`, con defaults razonables).
+
+El flujo estándar en el controlador:
+
+```php
+// 1. Antes de procesar: ¿sigue bloqueado?
+if ($espera = RateLimiter::verificar('login', $email)) {
+    Session::flash('error', 'Demasiados intentos fallidos. Volvé a intentarlo en ' . RateLimiter::formatearEspera($espera) . '.');
+    $this->redirect('login');
+}
+
+// 2. En cada fallo: registrar el intento.
+RateLimiter::registrar('login', $email);
+
+// 3. Al éxito: limpiar el conteo de esa cuenta y origen.
+RateLimiter::resetear('login', $email);
+```
+
+### Por qué
+
+Sin límite, login y registro son explotables por fuerza bruta y por spam de cuentas (un atacante prueba contraseñas de una cuenta hasta agotar un diccionario, o genera cuentas masivamente desde una misma IP). Limitar por cuenta frena el ataque dirigido a una víctima; limitar por origen frena el barrido distribuido sobre muchas cuentas y el abuso de registro. La respuesta bloqueada es controlada (flash con tiempo de espera estimado), nunca un 500 ni un bloqueo permanente.
+
+### Alternativa descartada
+
+Limitar en memoria (sesión o archivo) con `APCu`/`$_SESSION`. Se descartó porque el conteo debe sobrevivir al cambio de sesión (session_regenerate_id en login), ser visible para un futuro panel de moderación, y no depender de extensiones no garantizadas en el hosting compartido. La tabla `IntentoAcceso` es simple, índice por `(Accion, Tipo, Identificador, Fecha)` y se autodepura: cada `registrar()` borra las filas salidas de la ventana.
+
+### Reglas de uso
+
+1. **La verificación va antes de tocar la base de datos de dominio** (`verificar()` primera consulta del POST, después de CSRF y validaciones de campos obligatorios).
+2. **Solo cuentan los intentos de requests bien formados**: en registro, `registrar()` se invoca después de las validaciones de formato, para no bloquear a alguien que se equivoca de campo tres veces.
+3. **El bloqueo nunca revela información de la cuenta**: el mensaje es el mismo si el email existe o no.
+4. **Para una acción nueva**: agregar su entrada en `RateLimiter::LIMITES` (y sus constantes en `config/app.php` + `.env_example`), luego integrar el flujo de tres pasos en el controlador. Una acción sin entrada en `LIMITES` no se limita (no-op).
+5. **`IntentoAcceso` no tiene FK a Usuario**: cubre también intentos con emails inexistentes, que son precisamente los que hay que frenar.
+
+---
+
+## Mensajes de autenticación no reveladores
+
+**Estado:** aceptada · **Origen:** issue de límites sobre login/registro/recuperación · **Afecta:** `AuthController::login()`, `Auth::verifyDummy()`.
+
+### Decisión
+
+Todo fallo de login responde el mismo mensaje — "Credenciales incorrectas." — sin importar el motivo real: email inexistente, contraseña incorrecta, cuenta desactivada (`Activo = 0`) o eliminada (`Eliminado = 1`). Además, las rutas de fallo que no ejecutan `password_verify()` (email inexistente, cuenta inhabilitada) lo simulan con `Auth::verifyDummy()` contra un hash bcrypt real pero sin dueño, para que el tiempo de respuesta sea indistinguible del de una verificación real.
+
+La unicidad del email en registro tampoco depende del pre-check: la UNIQUE `uq_usuario_email` es la última línea de defensa ante registros simultáneos. `Usuario::registrar()` detecta la violación (error de driver 1062 / SQLSTATE 23000 sobre `uq_usuario_email`) y la convierte en `RuntimeException` con código `23000`, que el controlador traduce a "El email ya está registrado.". Cualquier otro error sigue el camino genérico.
+
+### Por qué
+
+Un mensaje que distingue "no existe" de "contraseña incorrecta" o "cuenta desactivada" es un oráculo de enumeración de cuentas: permite a un atacante descubrir qué emails están registrados y cuáles fueron inhabilitados. El tiempo de respuesta es el mismo oráculo en versión silenciosa — `password_hash` cuesta ~100 ms y una consulta no — por eso el dummy. El pre-check de duplicado no basta como garantía de unicidad porque dos requests simultáneos pueden pasar ambos la verificación antes de que ninguno inserte; solo la constraint de la base es atómica.
+
+### Reglas de uso
+
+1. **Un solo camino de fallo** (`AuthController::falloLogin()`): registrar intento + mensaje genérico + redirect. No agregar flashes distintos por caso.
+2. **Nunca propagar al log el mensaje crudo del PDOException de duplicado**: incluye el email en claro; el mensaje de la excepción envuelta es el genérico.
+3. **Nunca loguear la contraseña en claro**, ni en error_log ni en ningún almacenamiento; los mensajes de PDO no incluyen valores de parámetros enlazados, así que loguear `$e->getMessage()` es seguro.
+4. **Las contraseñas se hashean con `PASSWORD_DEFAULT`** (algoritmo adaptativo por defecto de PHP, cost 12) y el rehash oportunista en login exitoso (`password_needs_rehash` → `Usuario::actualizarPasswordHash()`) migra los hashes viejos sin migración de datos: la contraseña en claro solo está disponible en ese momento, y nunca se persiste ni se loguea.

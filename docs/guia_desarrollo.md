@@ -684,3 +684,51 @@ Siguiendo el criterio de tareas ya establecido (vertical, no horizontal — cada
 5. **Vista** — sección 5. Solo contenido de `<main>`; nunca reimplementar navbar/footer.
 
 El issue no se considera terminado hasta que los cinco pasos están commiteados y la funcionalidad es clickeable de punta a punta en `localhost/petbook/public` — un modelo con métodos sin controlador que los llame, o un controlador sin ruta registrada, no es un incremento demostrable y no cierra el issue aunque el código individual esté correcto.
+
+---
+
+## 12. Límite de intentos en una acción sensible nueva (RateLimiter)
+
+Login, registro y recuperación de contraseña limitan intentos repetidos por cuenta y por origen (IP) mediante `App\Core\RateLimiter`, que persiste en la tabla `IntentoAcceso` (dominio Seguridad en `petbook.sql`). Ver la decisión completa en `conventions.md` — "Límite de intentos repetidos en acciones sensibles".
+
+### 12.1 Agregar una acción nueva al límite
+
+1. Definir los máximos como constantes en `config/app.php` leyendo del `.env` (con default), y declararlas en `.env_example` con comentario:
+
+   ```php
+   define('MI_ACCION_MAX_INTENTOS', (int) env('MI_ACCION_MAX_INTENTOS', 5));
+   ```
+
+2. Agregar la entrada en `RateLimiter::LIMITES` con las claves que apliquen — `'cuenta'`, `'origen'` o ambas:
+
+   ```php
+   private const LIMITES = [
+       // ...
+       'mi_accion' => ['cuenta' => MI_ACCION_MAX_INTENTOS, 'origen' => MI_ACCION_MAX_INTENTOS_ORIGEN],
+   ];
+   ```
+
+   Una acción sin entrada no se limita: `verificar()` y `registrar()` son no-op.
+
+3. Integrar el flujo de tres pasos en el controlador (sección 3.2, después de `Session::validateCsrf()` y las validaciones de campos obligatorios):
+
+   ```php
+   // 1. Bloqueado → flash genérico con espera estimada y redirect
+   if ($espera = RateLimiter::verificar('mi_accion', $email)) {
+       Session::flash('error', 'Demasiados intentos. Volvé a intentarlo en ' . RateLimiter::formatearEspera($espera) . '.');
+       $this->redirect('ruta');
+   }
+
+   // 2. En cada fallo (o solicitud, si es una acción sin fallo posible):
+   RateLimiter::registrar('mi_accion', $email);
+
+   // 3. Al éxito:
+   RateLimiter::resetear('mi_accion', $email);
+   ```
+
+### 12.2 Reglas
+
+- **El mensaje de bloqueo es genérico** y no revela si la cuenta existe (ver `conventions.md` — "Mensajes de autenticación no reveladores").
+- **`registrar()` va después de las validaciones de formato** en acciones con formulario: solo cuentan los requests bien formados.
+- **No escribir en `IntentoAcceso` a mano**: la tabla se manipula exclusivamente desde `RateLimiter`; la depuración de filas vencidas la hace `registrar()` en cada invocación.
+- **El identificador de cuenta se normaliza adentro** (`mb_strtolower` + trim): pasar el email tal como llega del formulario, sin normalizar afuera.

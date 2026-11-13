@@ -71,8 +71,12 @@ petbook/
 │   │
 │   └── core/               # Infraestructura base del framework casero
 │       ├── Database.php    # Singleton PDO
+│       ├── Model.php       # Clase base de modelos (helpers de consulta)
 │       ├── Controller.php  # Clase base de controladores
-│       └── Router.php      # Enrutador
+│       ├── Router.php      # Enrutador
+│       ├── Session.php     # Sesión, flash y CSRF
+│       ├── Auth.php        # Roles, permisos y utilidades de contraseña
+│       └── RateLimiter.php # Límite de intentos por cuenta y origen
 │
 ├── config/
 │   └── database.php        # Lee variables del .env y configura la conexión
@@ -210,7 +214,7 @@ cp .env.example .env
 #    (credenciales de base de datos, etc.)
 
 # 5. Crear la base de datos
-#    Ejecutar el script: docs/petbook_schema.sql en MySQL
+#    Ejecutar el script: database/petbook.sql en MySQL
 
 # 6. Configurar Apache para que el DocumentRoot apunte a public/
 ```
@@ -431,12 +435,42 @@ arreglé el login
 ### Contraseñas
 
 ```php
-// Siempre hashear con password_hash — nunca MD5 ni SHA1
-$hash = password_hash($password, PASSWORD_BCRYPT);
+// Hashear con el algoritmo adaptativo por defecto de PHP — nunca MD5 ni SHA1.
+// PASSWORD_DEFAULT sigue el algoritmo recomendado por PHP (bcrypt hoy, cost 12)
+// y permite migrar hashes viejos con password_needs_rehash() sin cambiar código.
+$hash = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
 
 // Verificar
 if (password_verify($inputPassword, $hashGuardado)) { ... }
+
+// Rehash oportunista al iniciar sesión: regenera hashes con algoritmo o
+// costo anterior al default. Solo ahí la contraseña en claro está disponible
+// (y nunca se persiste ni se loguea).
+if (password_needs_rehash($hashGuardado, PASSWORD_DEFAULT, ['cost' => 12])) {
+    (new Usuario())->actualizarPasswordHash($idUsuario, password_hash($inputPassword, PASSWORD_DEFAULT, ['cost' => 12]));
+}
 ```
+
+### Límite de intentos (rate limiting)
+
+Login, registro y recuperación de contraseña limitan los intentos repetidos **por cuenta** (email) y **por origen** (IP) dentro de una ventana de tiempo configurable (`RATE_LIMIT_VENTANA_MINUTOS` y máximos por acción en `.env`). El conteo persiste en la tabla `IntentoAcceso` y la lógica vive en `App\Core\RateLimiter`:
+
+```php
+// Antes de procesar: bloqueado → flash con espera estimada y redirect
+if ($espera = RateLimiter::verificar('login', $email)) { ... }
+
+// En cada fallo: registrar el intento
+RateLimiter::registrar('login', $email);
+
+// Al éxito: limpiar el conteo
+RateLimiter::resetear('login', $email);
+```
+
+Los detalles y la regla para agregar acciones nuevas están en `docs/conventions.md`, sección "Límite de intentos repetidos en acciones sensibles".
+
+### Mensajes de autenticación
+
+Todo fallo de login responde el mismo mensaje ("Credenciales incorrectas."), sin revelar si el email no existe, la contraseña es incorrecta o la cuenta está desactivada. La unicidad del email en registro la garantiza la UNIQUE `uq_usuario_email` incluso ante registros simultáneos. Ver `docs/conventions.md`, sección "Mensajes de autenticación no reveladores".
 
 ### Consultas SQL
 
