@@ -64,3 +64,13 @@ define('SESSION_LIFETIME', (int) env('SESSION_LIFETIME', 3600));
 
 // ── Seguridad ─────────────────────────────────────────────────────────────
 define('APP_KEY', env('APP_KEY', ''));
+
+// ── Límites de intentos (rate limiting) ───────────────────────────────────
+// Consumidos por App\Core\RateLimiter para login, registro y recuperación.
+// Todos los valores tienen defaults: ninguna variable es obligatoria.
+define('RATE_LIMIT_VENTANA_MINUTOS',       (int) env('RATE_LIMIT_VENTANA_MINUTOS', 15));
+define('LOGIN_MAX_INTENTOS',               (int) env('LOGIN_MAX_INTENTOS', 5));
+define('LOGIN_MAX_INTENTOS_ORIGEN',        (int) env('LOGIN_MAX_INTENTOS_ORIGEN', 15));
+define('REGISTRO_MAX_POR_ORIGEN',          (int) env('REGISTRO_MAX_POR_ORIGEN', 3));
+define('RECUPERACION_MAX_INTENTOS',        (int) env('RECUPERACION_MAX_INTENTOS', 3));
+define('RECUPERACION_MAX_INTENTOS_ORIGEN', (int) env('RECUPERACION_MAX_INTENTOS_ORIGEN', 10));
