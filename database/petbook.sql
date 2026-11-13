@@ -1,11 +1,9 @@
 -- =============================================================================
--- PETBOOK — Script de creación de base de datos
+-- PETBOOK — Instalación inicial (solo para una base vacía)
 -- Motor: InnoDB | Charset: utf8mb4 | Collation: utf8mb4_unicode_ci
 -- =============================================================================
 
-SET FOREIGN_KEY_CHECKS = 0;
-DROP DATABASE IF EXISTS petbook;
-CREATE DATABASE petbook
+CREATE DATABASE IF NOT EXISTS petbook
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 USE petbook;
@@ -454,4 +452,11 @@ INSERT INTO Especie (Nombre) VALUES
     ('Hurón'),
     ('Otro');
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- Registro de versiones. La instalación inicial queda marcada como aplicada.
+CREATE TABLE schema_migrations (
+    version     VARCHAR(64)  NOT NULL,
+    applied_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_schema_migrations PRIMARY KEY (version)
+) ENGINE=InnoDB;
+
+INSERT INTO schema_migrations (version) VALUES ('202611120001_baseline');
