@@ -58,6 +58,12 @@ class AuthController extends Controller
             $this->falloLogin($email);
         }
 
+        // Rehash oportunista: solo al iniciar sesión (cuando la contraseña
+        // en claro está disponible y nunca se persiste ni se loguea).
+        if (password_needs_rehash($usuario['Password_Hash'], PASSWORD_DEFAULT, ['cost' => 12])) {
+            (new Usuario())->actualizarPasswordHash((int) $usuario['Id_Usuario'], Auth::hashPassword($password));
+        }
+
         RateLimiter::resetear('login', $email);
         Session::login($usuario);
         Auth::redirectAfterLogin();

@@ -156,6 +156,18 @@ class Usuario extends Model
     }
 
     /**
+     * Actualiza el hash de contraseña de un usuario.
+     * Lo consume el rehash oportunista del login (AuthController): hashes
+     * generados con un algoritmo o costo anterior a PASSWORD_DEFAULT se
+     * regeneran al iniciar sesión. Recibe el hash ya procesado, nunca la
+     * contraseña en claro.
+     */
+    public function actualizarPasswordHash(int $id, string $hash): bool
+    {
+        return $this->update($id, ['Password_Hash' => $hash]);
+    }
+
+    /**
      * Desactiva un usuario (Activo = 0). No elimina.
      */
     public function desactivar(int $id): bool

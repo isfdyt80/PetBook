@@ -114,15 +114,20 @@ class Auth
     // ── Contraseñas ───────────────────────────────────────────────────────
 
     /**
-     * Genera el hash bcrypt de una contraseña.
+     * Genera el hash de una contraseña con el algoritmo adaptativo por
+     * defecto de PHP (PASSWORD_DEFAULT): bcrypt hoy, y se actualiza solo
+     * cuando PHP promueve un algoritmo más fuerte.
      * Cost 12: balance entre seguridad y rendimiento en servidores compartidos.
+     *
+     * Combinar con password_needs_rehash() al iniciar sesión para regenerar
+     * hashes viejos cuando cambie el algoritmo o los parámetros por defecto.
      *
      * Uso en registro:
      *   $hash = Auth::hashPassword($passwordPlano);
      */
     public static function hashPassword(string $plain): string
     {
-        return password_hash($plain, PASSWORD_BCRYPT, ['cost' => 12]);
+        return password_hash($plain, PASSWORD_DEFAULT, ['cost' => 12]);
     }
 
     /**
