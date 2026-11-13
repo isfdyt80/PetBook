@@ -71,6 +71,28 @@ CREATE TABLE TokenRecuperacion (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
+-- DOMINIO: SEGURIDAD (límite de intentos repetidos)
+-- =============================================================================
+
+-- Registro de intentos fallidos de acciones sensibles (login, registro,
+-- recuperación de contraseña). Cada intento genera una fila por clave:
+--   Tipo = 'cuenta' → Identificador = email normalizado (lowercase + trim)
+--   Tipo = 'origen' → Identificador = IP del cliente
+-- La ventana de conteo es por fecha; los registros viejos se depuran
+-- automáticamente desde App\Core\RateLimiter. Sin FK a Usuario: la fila
+-- también cubre intentos con emails inexistentes.
+CREATE TABLE IntentoAcceso (
+    Id_Intento    INT          NOT NULL AUTO_INCREMENT,
+    Accion        VARCHAR(20)  NOT NULL,
+    Tipo          VARCHAR(10)  NOT NULL,
+    Identificador VARCHAR(191) NOT NULL,
+    Fecha         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_intentoacceso PRIMARY KEY (Id_Intento),
+    CONSTRAINT uq_intentoacceso UNIQUE (Accion, Tipo, Identificador, Fecha),
+    CONSTRAINT ck_intentoacceso_tipo CHECK (Tipo IN ('cuenta', 'origen'))
+) ENGINE=InnoDB;
+
+-- =============================================================================
 -- DOMINIO: MASCOTAS
 -- =============================================================================
 
@@ -406,6 +428,10 @@ CREATE INDEX idx_reporte_moderador    ON Reporte (Id_Moderador);
 -- TokenRecuperacion
 CREATE INDEX idx_token_usuario        ON TokenRecuperacion (Id_Usuario);
 CREATE INDEX idx_token_valor          ON TokenRecuperacion (Token);
+
+-- IntentoAcceso (conteo por ventana de tiempo desde RateLimiter)
+CREATE INDEX idx_intentoacceso_clave  ON IntentoAcceso (Accion, Tipo, Identificador, Fecha);
+CREATE INDEX idx_intentoacceso_fecha  ON IntentoAcceso (Fecha);
 
 -- =============================================================================
 -- DATOS DE CATÁLOGO (seed obligatorio para que el sistema funcione)
