@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Core\RateLimiter;
 use App\Core\Session;
 use App\Models\Usuario;
 
@@ -31,6 +32,12 @@ class AuthController extends Controller
             $this->redirect('login');
         }
 
+        // Límite de intentos por cuenta y por origen antes de tocar la base.
+        if ($espera = RateLimiter::verificar('login', $email)) {
+            Session::flash('error', 'Demasiados intentos fallidos. Volvé a intentarlo en ' . RateLimiter::formatearEspera($espera) . '.');
+            $this->redirect('login');
+        }
+
         $usuario = (new Usuario())->buscarPorEmail($email);
 
         // Mensaje único para todo fallo: no se revela si el email no existe,
@@ -39,29 +46,32 @@ class AuthController extends Controller
         // filtrar la existencia de la cuenta por el tiempo de procesamiento.
         if (!$usuario) {
             Auth::verifyDummy($password);
-            $this->falloLogin();
+            $this->falloLogin($email);
         }
 
         if ((int) $usuario['Eliminado'] === 1 || (int) $usuario['Activo'] === 0) {
             Auth::verifyDummy($password);
-            $this->falloLogin();
+            $this->falloLogin($email);
         }
 
         if (!Auth::verifyPassword($password, $usuario['Password_Hash'])) {
-            $this->falloLogin();
+            $this->falloLogin($email);
         }
 
+        RateLimiter::resetear('login', $email);
         Session::login($usuario);
         Auth::redirectAfterLogin();
     }
 
     /**
-     * Camino único de fallo de login: un solo mensaje para el usuario,
+     * Camino único de fallo de login: registra el intento para el límite
+     * por cuenta y origen, y responde con un solo mensaje para el usuario,
      * sin detalles sobre el motivo (email inexistente, contraseña errónea
      * o cuenta desactivada/eliminada).
      */
-    private function falloLogin(): void
+    private function falloLogin(string $email): void
     {
+        RateLimiter::registrar('login', $email);
         Session::flash('error', 'Credenciales incorrectas.');
         $this->redirect('login');
     }
@@ -103,7 +113,16 @@ class AuthController extends Controller
             $this->redirect('registro');
         }
 
+        // Límite de solicitudes de registro por origen (IP), después de las
+        // validaciones de formato: solo cuentan los envíos bien formados.
+        if ($espera = RateLimiter::verificar('registro')) {
+            Session::flash('error', 'Demasiadas solicitudes de registro. Volvé a intentarlo en ' . RateLimiter::formatearEspera($espera) . '.');
+            $this->redirect('registro');
+        }
+
         $modelo = new Usuario();
+
+        RateLimiter::registrar('registro');
 
         // Validación de email duplicado
         if ($modelo->buscarPorEmail($email)) {
