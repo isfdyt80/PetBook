@@ -138,6 +138,16 @@ class AuthController extends Controller
                 'Password_Hash' => Auth::hashPassword($password),
             ]);
         } catch (\RuntimeException $e) {
+            // Duplicado confirmado por la UNIQUE uq_usuario_email (INSERT
+            // simultáneo que ganó la carrera después del pre-check).
+            if ($e->getCode() === 23000) {
+                Session::flash('error', 'El email ya está registrado.');
+                $this->redirect('registro');
+            }
+
+            // Log sin datos sensibles: la contraseña en claro nunca forma
+            // parte del mensaje (los mensajes de PDO no incluyen valores
+            // de parámetros enlazados).
             error_log('[REGISTRO ERROR] ' . $e->getMessage());
             Session::flash('error', 'Ocurrió un error al registrarte. Intentá de nuevo.');
             $this->redirect('registro');

@@ -69,7 +69,13 @@ class Usuario extends Model
      * El hash de contraseña debe llegar ya procesado desde el controlador.
      * Devuelve el Id_Usuario generado.
      *
-     * @throws \RuntimeException Si la transacción falla.
+     * La unicidad del email ante registros simultáneos no depende del
+     * pre-check del controlador: la UNIQUE uq_usuario_email es la última
+     * línea de defensa, y el segundo INSERT falla con un
+     * RuntimeException reconocible (código 23000).
+     *
+     * @throws \RuntimeException       Si la transacción falla.
+     * @throws \RuntimeException 23000 Si el email ya está registrado.
      */
     public function registrar(array $datos): int
     {
@@ -121,10 +127,32 @@ class Usuario extends Model
                 return $idUsuario;
             });
         } catch (\Throwable $e) {
+            // Registro simultáneo con el mismo email: la UNIQUE
+            // uq_usuario_email rechaza el segundo INSERT con error 1062
+            // (SQLSTATE 23000). Se convierte en un RuntimeException con ese
+            // código para que el controlador distinga el duplicado del error
+            // genérico. El mensaje del PDOException contiene el email en
+            // claro y no se propaga ni se loguea.
+            if ($e instanceof \PDOException && $this->esDuplicadoEmail($e)) {
+                throw new \RuntimeException('El email ya está registrado.', 23000, $e);
+            }
+
             // El rollback lo hace transactional(); acá solo se preserva el
             // contrato de RuntimeException que consume AuthController.
             throw new \RuntimeException('Error al registrar usuario: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    /**
+     * Detecta una violación de la UNIQUE de email en el error de MySQL:
+     * código de driver 1062 (entrada duplicada) sobre uq_usuario_email.
+     */
+    private function esDuplicadoEmail(\PDOException $e): bool
+    {
+        $codigoDriver = (int) ($e->errorInfo[1] ?? 0);
+        $mensaje      = (string) ($e->errorInfo[2] ?? '');
+
+        return $codigoDriver === 1062 && str_contains($mensaje, 'uq_usuario_email');
     }
 
     /**
