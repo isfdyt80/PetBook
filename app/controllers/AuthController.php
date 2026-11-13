@@ -33,28 +33,37 @@ class AuthController extends Controller
 
         $usuario = (new Usuario())->buscarPorEmail($email);
 
+        // Mensaje único para todo fallo: no se revela si el email no existe,
+        // si la contraseña es incorrecta o si la cuenta está desactivada.
+        // verifyDummy() iguala el tiempo de respuesta entre rutas para no
+        // filtrar la existencia de la cuenta por el tiempo de procesamiento.
         if (!$usuario) {
-            Session::flash('error', 'Credenciales incorrectas.');
-            $this->redirect('login');
+            Auth::verifyDummy($password);
+            $this->falloLogin();
         }
 
-        if ((int) $usuario['Eliminado'] === 1) {
-            Session::flash('error', 'Credenciales incorrectas.');
-            $this->redirect('login');
-        }
-
-        if ((int) $usuario['Activo'] === 0) {
-            Session::flash('error', 'Tu cuenta está desactivada. Contactá al administrador.');
-            $this->redirect('login');
+        if ((int) $usuario['Eliminado'] === 1 || (int) $usuario['Activo'] === 0) {
+            Auth::verifyDummy($password);
+            $this->falloLogin();
         }
 
         if (!Auth::verifyPassword($password, $usuario['Password_Hash'])) {
-            Session::flash('error', 'Credenciales incorrectas.');
-            $this->redirect('login');
+            $this->falloLogin();
         }
 
         Session::login($usuario);
         Auth::redirectAfterLogin();
+    }
+
+    /**
+     * Camino único de fallo de login: un solo mensaje para el usuario,
+     * sin detalles sobre el motivo (email inexistente, contraseña errónea
+     * o cuenta desactivada/eliminada).
+     */
+    private function falloLogin(): void
+    {
+        Session::flash('error', 'Credenciales incorrectas.');
+        $this->redirect('login');
     }
 
     // ── GET /registro ─────────────────────────────────────────────────────

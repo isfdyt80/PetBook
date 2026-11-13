@@ -135,4 +135,22 @@ class Auth
     {
         return password_verify($plain, $hash);
     }
+
+    /**
+     * Hash bcrypt real pero sin dueño: se usa cuando el email no existe o
+     * la cuenta está desactivada, para que el tiempo de respuesta sea igual
+     * al de una verificación de contraseña exitosa. Sin esto, la diferencia
+     * de milisegundos actúa como oráculo de timing que revela si una cuenta
+     * existe.
+     */
+    private const HASH_DUMMY = '$2y$12$ihUma7mtByN9j1C.Fz4F9uCKdxw/GULQyXPNIk.VbkHrt/yOkr6qe';
+
+    /**
+     * Consume el mismo costo de CPU que verifyPassword() sin verificar nada.
+     * El resultado se descarta: solo importa uniformar el tiempo de respuesta.
+     */
+    public static function verifyDummy(string $plain): void
+    {
+        password_verify($plain, self::HASH_DUMMY);
+    }
 }
