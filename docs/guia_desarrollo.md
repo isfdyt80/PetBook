@@ -272,13 +272,12 @@ Helpers heredados y su propósito exacto:
 
 ### 3.2 Estructura estándar de un método de escritura (POST)
 
-Todo método que procesa un formulario sigue el mismo esqueleto, en este orden — el orden importa: CSRF antes que nada, porque si el token es inválido no tiene sentido gastar una consulta de validación de negocio:
+Todo método que procesa un formulario sigue el mismo esqueleto, en este orden — el orden importa:
 
 ```php
 public function comentar(string $idPublicacion): void
 {
     Auth::requireAuth();
-    Session::validateCsrf();
 
     $contenido = $this->input('contenido');
 
@@ -300,6 +299,17 @@ public function comentar(string $idPublicacion): void
     $this->redirect('publicacion/' . $idPublicacion);
 }
 ```
+
+**El token CSRF no se valida en el controlador.** El `Router` llama `Session::validateCsrf()` automáticamente en cada `POST` antes de ejecutar cualquier controlador: sin token o con token inválido, la request muere con 403 antes de tocar negocio. Por eso el controlador solo necesita: autenticación → validaciones de entrada → persistencia. El requisito no depende de que el desarrollador se acuerde: toda ruta `POST` dada de alta en `routes.php` queda protegida desde el día 1.
+
+Del lado de la vista, la contraparte obligatoria es el campo oculto en todo formulario POST:
+
+```php
+<form action="<?= APP_URL ?>/..." method="POST">
+    <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
+```
+
+El token es **estable por sesión**: no rota por uso, se regenera solo al iniciar sesión (`Session::login()`) y al destruirla. Así los formularios abiertos en pestañas separadas (o varios formularios en una misma página) siguen válidos entre sí sin invalidarse.
 
 Validación de tipo y presencia va en el controlador (sección 0: no hay validación declarativa). Validación de regla de negocio (ej. "el usuario no puede reaccionar dos veces", que ya está garantizada a nivel de PK compuesta en `Reaccion`, o "el evento no puede volver a ACTIVO") va en el modelo.
 
@@ -346,13 +356,12 @@ public function eliminar(string $idPublicacion): void
 
 ### 3.4 Endpoints AJAX
 
-Si la interacción no recarga la página (ej. reaccionar a una publicación desde el feed sin recargar), el método usa `$this->json()` en vez de `redirect()`/`view()`. CSRF se sigue validando igual — el token viaja en el body del `fetch()`, no cambia el mecanismo:
+Si la interacción no recarga la página (ej. reaccionar a una publicación desde el feed sin recargar), el método usa `$this->json()` en vez de `redirect()`/`view()`. El CSRF se valida igual que en cualquier POST — automáticamente en el `Router` — solo que el token viaja en el body del `fetch()`:
 
 ```php
 public function reaccionar(string $idPublicacion): void
 {
     Auth::requireAuth();
-    Session::validateCsrf();
 
     $tipo = $this->input('tipo');
     // ...
@@ -383,6 +392,8 @@ Reglas del `Router` (`addRoute()` en `Router.php`) a tener en cuenta al diseñar
 - `any()` existe para rutas que aceptan cualquier verbo — en la práctica no se usa en el proyecto hasta ahora; usarlo solo si un mismo método realmente maneja tanto `GET` como `POST` de forma condicional internamente (`$_SERVER['REQUEST_METHOD']`), lo cual generalmente es peor que separar en dos rutas explícitas.
 - El orden de registro importa cuando dos patrones podrían matchear la misma URI (no es el caso actual porque los prefijos no colisionan, pero al agregar rutas nuevas con parámetros hay que verificar que no se superpongan con una ruta más específica ya registrada antes en el archivo — el router usa la primera coincidencia, no la más específica).
 - Rutas que requieren rol específico **no se restringen en el router** — el router no sabe nada de roles. La restricción vive exclusivamente en el primer llamado del método del controlador (`Auth::requireRole(...)`). Esto es deliberado dado el diseño de dos capas, pero significa que **olvidar el `Auth::requireRole()` en el método dado de alta es un 403 ausente**, no un error que el router detecte.
+- Toda ruta `POST` valida el token CSRF automáticamente en `dispatch()` (ver sección 3.2): no se llama `Session::validateCsrf()` dentro del controlador, y todo formulario/fetch debe enviar el campo `_csrf`.
+- **Ninguna acción que modifique o destruya estado se expone por GET**, ni siquiera el logout: una acción destructiva enlazada con `<a href>` es explotable por CSRF trivial (`<img src="/logout">`). El patrón es `POST` + formulario con `_csrf`, como `/logout` (form estilizado como enlace en la navbar de `main.php`).
 
 ---
 
