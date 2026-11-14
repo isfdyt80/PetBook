@@ -116,10 +116,13 @@
                     <span style="font-size:0.9rem; color:var(--pb-muted);">
                         <?= htmlspecialchars($usuario['nombre'], ENT_QUOTES, 'UTF-8') ?>
                     </span>
-                    <a href="<?= APP_URL ?>/logout"
-                       style="font-size:0.88rem; color:var(--pb-violet); text-decoration:none; font-weight:500;">
-                        Salir
-                    </a>
+                    <form method="POST" action="<?= APP_URL ?>/logout" style="margin:0;">
+                        <input type="hidden" name="_csrf" value="<?= \App\Core\Session::csrfToken() ?>">
+                        <button type="submit"
+                                style="background:none; border:0; padding:0; font:inherit; font-size:0.88rem; color:var(--pb-violet); text-decoration:none; font-weight:500; cursor:pointer;">
+                            Salir
+                        </button>
+                    </form>
                 </div>
             <?php endif; ?>
         </div>

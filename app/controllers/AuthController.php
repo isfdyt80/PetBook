@@ -163,8 +163,13 @@ class AuthController extends Controller
         $this->redirect('login');
     }
 
-    // ── GET /logout ───────────────────────────────────────────────────────
+    // ── POST /logout ──────────────────────────────────────────────────────
 
+    /**
+     * Cierra la sesión del usuario.
+     * Solo accesible por POST con token CSRF validado por el Router;
+     * una petición GET a /logout no matchea ninguna ruta (404).
+     */
     public function logout(): void
     {
         Session::logout();
