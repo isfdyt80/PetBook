@@ -22,6 +22,7 @@ header('X-Frame-Options: DENY');
 header("Content-Security-Policy: frame-ancestors 'none'");
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header_remove('X-Powered-By');
 if (APP_HTTPS) {
     header('Strict-Transport-Security: max-age=31536000');
 }
