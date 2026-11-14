@@ -63,6 +63,34 @@ class Usuario extends Model
     }
 
     /**
+     * Devuelve el estado y rol vigentes de una sesión existente.
+     *
+     * @return array|false
+     */
+    public function buscarEstadoAutenticacion(int $id): array|false
+    {
+        return $this->queryOne(
+            "SELECT
+                 u.Id_Usuario,
+                 u.Activo,
+                 u.Eliminado,
+                 (
+                     SELECT r.Nombre
+                     FROM UsuarioRol ur
+                     JOIN Rol r ON r.Id_Rol = ur.Id_Rol
+                     WHERE ur.Id_Usuario = u.Id_Usuario
+                       AND ur.Eliminado = 0
+                     ORDER BY ur.Id_UsuarioRol ASC
+                     LIMIT 1
+                 ) AS rol
+             FROM Usuario u
+             WHERE u.Id_Usuario = :id
+             LIMIT 1",
+            [':id' => $id]
+        );
+    }
+
+    /**
      * Registra un nuevo usuario en una transacción atómica.
      * Crea Persona + Usuario + UsuarioRol en un solo bloque,
      * vía el wrapper transaccional de la clase base (Model::transactional).

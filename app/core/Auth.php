@@ -6,6 +6,8 @@
 
 namespace App\Core;
 
+use App\Models\Usuario;
+
 class Auth
 {
     // ── Verificación de sesión ────────────────────────────────────────────
@@ -61,6 +63,22 @@ class Auth
             header('Location: ' . APP_URL . '/login');
             exit;
         }
+
+        $usuario = (new Usuario())->buscarEstadoAutenticacion((int) ($_SESSION['user']['id'] ?? 0));
+
+        if (
+            $usuario === false
+            || (int) $usuario['Activo'] !== 1
+            || (int) $usuario['Eliminado'] !== 0
+        ) {
+            Session::logout();
+            Session::flash('error', 'Tu sesión ya no está disponible. Iniciá sesión nuevamente.');
+            header('Location: ' . APP_URL . '/login');
+            exit;
+        }
+
+        // La autorización siempre usa el rol actual, no el que había al iniciar sesión.
+        $_SESSION['user']['rol'] = $usuario['rol'] ?? null;
     }
 
     /**
