@@ -90,8 +90,31 @@ if (APP_DEBUG) {
 define('SESSION_NAME',     env('SESSION_NAME',     'petbook_session'));
 define('SESSION_LIFETIME', (int) env('SESSION_LIFETIME', 3600));
 
+// Endurecer el manejo de sesión antes de que index.php la inicie: modo
+// estricto (PHP rechaza IDs no generados por él) y solo cookies (el ID
+// nunca se propaga por URL).
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+
 // ── Seguridad ─────────────────────────────────────────────────────────────
 define('APP_KEY', env('APP_KEY', ''));
+
+// Detección de HTTPS, directa o detrás del proxy del despliegue (Cloudflare).
+// APP_TRUST_PROXY=true habilita confiar en X-Forwarded-Proto, el header que
+// Cloudflare agrega al pasar la request al vhost de Apache. Fuera de un
+// proxy debe quedar en false: un cliente podría enviar ese header por su
+// cuenta y falsear la detección.
+$confiaProxy = filter_var(env('APP_TRUST_PROXY', false), FILTER_VALIDATE_BOOLEAN);
+$protoProxy  = strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '');
+$scheme      = strtolower($_SERVER['REQUEST_SCHEME'] ?? '');
+
+define('APP_HTTPS',
+    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off')
+    || ($confiaProxy && $protoProxy === 'https')
+    || $scheme === 'https'
+    || ($_SERVER['SERVER_PORT'] ?? '') == 443
+);
 
 // ── Límites de intentos (rate limiting) ───────────────────────────────────
 // Consumidos por App\Core\RateLimiter para login, registro y recuperación.
