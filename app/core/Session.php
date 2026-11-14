@@ -133,7 +133,9 @@ class Session
     {
         $token = $_POST['_csrf'] ?? '';
 
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        // El token es obligatorio en ambos lados: hash_equals('', '')
+        // sería true y dejaría pasar un POST sin token ni sesión.
+        if ($token === '' || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
             http_response_code(403);
             die('Token CSRF inválido. Recargá la página e intentá de nuevo.');
         }
