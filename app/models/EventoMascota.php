@@ -402,6 +402,6 @@ class EventoMascota extends Model
     public function eliminar(int $id): bool
     {
        
-        return $this->softDelete($id);
+        return $this->darBaja($id);
     }
 }

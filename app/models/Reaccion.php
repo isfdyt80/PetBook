@@ -29,9 +29,15 @@ class Reaccion extends Model
     public function crear(int $idUsuario, int $idPublicacion, int $idTipoReaccion): bool
     {
         return $this->execute(
-            'INSERT INTO Reaccion (Id_Usuario, Id_Publicacion, Id_TipoReaccion)
-             VALUES (:idUsuario, :idPublicacion, :idTipoReaccion)
-             ON DUPLICATE KEY UPDATE Id_TipoReaccion = VALUES(Id_TipoReaccion)',
+            "INSERT INTO Reaccion (Id_Usuario, Id_Publicacion, Id_TipoReaccion)
+            SELECT :idUsuario, p.Id_Publicacion, :idTipoReaccion
+            FROM Publicacion p
+            WHERE p.Id_Publicacion = :idPublicacion
+            AND p.Eliminado = 0
+            AND p.Id_EstadoPublicacion = (
+                SELECT Id_EstadoPublicacion FROM EstadoPublicacion WHERE Nombre = 'ACTIVA'
+            )
+            ON DUPLICATE KEY UPDATE Id_TipoReaccion = VALUES(Id_TipoReaccion)",
             [
                 ':idUsuario'      => $idUsuario,
                 ':idPublicacion'  => $idPublicacion,
@@ -71,10 +77,12 @@ class Reaccion extends Model
     {
         return $this->query(
             'SELECT tr.Nombre, COUNT(*) AS Cantidad
-             FROM Reaccion r
-             INNER JOIN TipoReaccion tr ON r.Id_TipoReaccion = tr.Id_TipoReaccion
-             WHERE r.Id_Publicacion = :idPublicacion
-             GROUP BY tr.Nombre',
+            FROM Reaccion r
+            JOIN TipoReaccion tr ON tr.Id_TipoReaccion = r.Id_TipoReaccion
+            JOIN Publicacion p   ON p.Id_Publicacion = r.Id_Publicacion AND p.Eliminado = 0
+            WHERE r.Id_Publicacion = :idPublicacion
+            GROUP BY tr.Nombre
+            ORDER BY tr.Nombre',
             [':idPublicacion' => $idPublicacion]
         );
     }

@@ -96,8 +96,8 @@ class Publicacion extends Model
                 FROM Publicacion p
                 JOIN EventoMascota ev ON ev.Id_Evento = p.Id_Evento AND ev.Eliminado = 0
                 JOIN TipoEvento   te ON te.Id_TipoEvento   = ev.Id_TipoEvento
-                JOIN EstadoEvento ee ON ee.Id_EstadoEvento = ev.Id_EstadoEvento
-                LEFT JOIN Mascota  m  ON m.Id_Mascota  = ev.Id_Mascota  AND m.Eliminado = 0
+                JOIN EstadoEvento ee ON ee.Id_EstadoEvento = ev.Id_EstadoEvento AND ee.Nombre = 'ACTIVO'
+                JOIN Mascota  m  ON m.Id_Mascota  = ev.Id_Mascota  AND m.Eliminado = 0
                 LEFT JOIN Especie  sp ON sp.Id_Especie = m.Id_Especie
                 LEFT JOIN Ubicacion u ON u.Id_Ubicacion = ev.Id_Ubicacion
                 WHERE p.Eliminado = 0
@@ -106,7 +106,7 @@ class Publicacion extends Model
                       FROM EstadoPublicacion
                       WHERE Nombre = 'ACTIVA'
                   )
-                ORDER BY p.Fecha_Publicacion DESC
+                ORDER BY p.Fecha_Publicacion DESC, p.Id_Publicacion DESC
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->db->prepare($sql);
@@ -147,7 +147,7 @@ class Publicacion extends Model
              WHERE p.Id_Usuario = :usuario
                AND p.Eliminado = 0
                AND ev.Eliminado = 0
-             ORDER BY p.Fecha_Publicacion DESC",
+             ORDER BY p.Fecha_Publicacion DESC, p.Id_Publicacion DESC",
             [':usuario' => $idUsuario]
         );
     }
