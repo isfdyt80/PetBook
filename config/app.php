@@ -78,8 +78,12 @@ if (APP_DEBUG) {
     ini_set('display_startup_errors', '1');
     error_reporting(E_ALL);
 } else {
+    // En producción los errores nunca se muestran al usuario, pero sí se
+    // registran: error_reporting(0) silenciaría también el log del servidor.
     ini_set('display_errors', '0');
-    error_reporting(0);
+    ini_set('display_startup_errors', '0');
+    ini_set('log_errors', '1');
+    error_reporting(E_ALL);
 }
 
 // ── Sesión ────────────────────────────────────────────────────────────────
