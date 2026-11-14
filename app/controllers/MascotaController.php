@@ -57,7 +57,6 @@ class MascotaController extends Controller
     public function guardar(): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $datos = $this->leerDatosFormulario();
 
@@ -172,7 +171,6 @@ class MascotaController extends Controller
     public function actualizar(string $id): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $idMascota = (int) $id;
         $modelo    = new Mascota();

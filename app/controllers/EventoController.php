@@ -100,7 +100,6 @@ class EventoController extends Controller
     public function cambiarEstado(string $id): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $idEvento = (int) $id;
         $modelo   = new EventoMascota();
@@ -158,7 +157,6 @@ class EventoController extends Controller
     public function eliminar(string $id): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $idEvento = (int) $id;
         $evento   = (new EventoMascota())->buscarDetalle($idEvento);
@@ -198,7 +196,6 @@ class EventoController extends Controller
     public function store(string $tipo): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $tipoNombre = $this->resolverTipo($tipo);
 

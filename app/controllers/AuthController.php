@@ -22,7 +22,7 @@ class AuthController extends Controller
 
     public function login(): void
     {
-        Session::validateCsrf();
+        // El CSRF de este POST ya fue validado por el Router.
 
         $email    = $this->input('email');
         $password = $this->input('password');
@@ -94,7 +94,7 @@ class AuthController extends Controller
 
     public function registro(): void
     {
-        Session::validateCsrf();
+        // El CSRF de este POST ya fue validado por el Router.
 
         $nombre   = $this->input('nombre');
         $apellido = $this->input('apellido');
