@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\RateLimiter;
 use App\Core\Session;
+use App\Core\Validator;
 use App\Models\Usuario;
 
 class AuthController extends Controller
@@ -101,9 +102,15 @@ class AuthController extends Controller
         $email    = $this->input('email');
         $password = $this->input('password');
 
-        // Validación de campos obligatorios
-        if (empty($nombre) || empty($apellido) || empty($email) || empty($password)) {
-            Session::flash('error', 'Completá todos los campos.');
+        // Obligatoriedad y longitudes del esquema: Persona.Nombre/Apellido
+        // son VARCHAR(100) y Usuario.Email VARCHAR(191). Sin estos límites
+        // el INSERT falla en la base con un mensaje genérico.
+        try {
+            $nombre   = Validator::texto($nombre, 'El nombre', 100, true);
+            $apellido = Validator::texto($apellido, 'El apellido', 100, true);
+            $email    = Validator::texto($email, 'El email', 191, true);
+        } catch (\InvalidArgumentException $e) {
+            Session::flash('error', $e->getMessage());
             $this->redirect('registro');
         }
 
@@ -113,9 +120,11 @@ class AuthController extends Controller
             $this->redirect('registro');
         }
 
-        // Validación de longitud mínima de contraseña
-        if (strlen($password) < 8) {
-            Session::flash('error', 'La contraseña debe tener al menos 8 caracteres.');
+        // Límite de la contraseña: 8 mínimo, 72 máximo. Bcrypt solo
+        // considera los primeros 72 bytes: un valor mayor sería truncado
+        // silenciosamente al hashear.
+        if (strlen($password) < 8 || strlen($password) > 72) {
+            Session::flash('error', 'La contraseña debe tener entre 8 y 72 caracteres.');
             $this->redirect('registro');
         }
 
