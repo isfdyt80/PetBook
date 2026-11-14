@@ -45,6 +45,30 @@ define('APP_DEBUG', filter_var(env('APP_DEBUG', false), FILTER_VALIDATE_BOOLEAN)
 define('APP_NAME',  env('APP_NAME',  'Petbook'));
 define('APP_URL',   rtrim(env('APP_URL', ''), '/'));
 
+// ── Gate de producción ────────────────────────────────────────────────────
+// Con APP_ENV=production la configuración crítica debe estar completa:
+// debug desactivado, APP_KEY fuerte y URL bajo HTTPS. Si algo falla,
+// la aplicación no arranca y solo se emite una respuesta genérica.
+if (APP_ENV === 'production' && PHP_SAPI !== 'cli') {
+    $motivos = [];
+
+    if (APP_DEBUG) {
+        $motivos[] = 'APP_DEBUG debe estar deshabilitado en producción.';
+    }
+    if (!preg_match('/^[0-9a-f]{64}$/i', (string) env('APP_KEY', ''))) {
+        $motivos[] = 'APP_KEY debe tener 64 caracteres hexadecimales.';
+    }
+    if (!str_starts_with(APP_URL, 'https://')) {
+        $motivos[] = 'APP_URL debe comenzar con https://.';
+    }
+
+    if ($motivos !== []) {
+        error_log('[CONFIG] Configuración de producción inválida: ' . implode(' ', $motivos));
+        http_response_code(500);
+        exit('Error de configuración del servidor.');
+    }
+}
+
 // ── Zona horaria ──────────────────────────────────────────────────────────
 date_default_timezone_set(env('APP_TIMEZONE', 'America/Argentina/Buenos_Aires'));
 
