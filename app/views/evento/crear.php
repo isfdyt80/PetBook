@@ -121,6 +121,7 @@ $placeholderVista   = [
                                     <label class="pb-label" for="nombre_mascota">Nombre (si lo conocés)</label>
                                     <input class="pb-input" type="text" id="nombre_mascota" name="nombre_mascota"
                                         value="<?php echo htmlspecialchars($old['nombre_mascota'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        maxlength="100"
                                         placeholder="Sin nombre conocido">
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -139,6 +140,7 @@ $placeholderVista   = [
                             <label class="pb-label" for="color_mascota">Color / señas particulares (opcional)</label>
                             <input class="pb-input" type="text" id="color_mascota" name="color_mascota"
                                 value="<?php echo htmlspecialchars($old['color_mascota'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                maxlength="100"
                                 placeholder="Ej: marrón, collar rojo">
                             <div class="pb-hint">No hace falta que sea una mascota registrada en tu cuenta.</div>
                         </div>
@@ -166,7 +168,7 @@ $placeholderVista   = [
 
                     <div class="mb-3">
                         <label class="pb-label" for="descripcion">Descripción</label>
-                        <textarea class="pb-input" id="descripcion" name="descripcion" rows="4" required
+                        <textarea class="pb-input" id="descripcion" name="descripcion" rows="4" required maxlength="2000"
                             placeholder="<?php echo htmlspecialchars($placeholderVista[$tipo] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?php echo htmlspecialchars($old['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                         <div class="pb-hint">Estos detalles se publicarán en tu feed.</div>
                     </div>
@@ -178,21 +180,22 @@ $placeholderVista   = [
                             <label class="pb-label" for="direccion">Dirección</label>
                             <input class="pb-input mb-2" type="text" id="direccion" name="direccion"
                                 value="<?php echo htmlspecialchars($old['direccion'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                maxlength="255"
                                 placeholder="Ej: Av. Illia 480" autocomplete="off">
 
                             <div class="row">
                                 <div class="col-md-4 mb-1">
-                                    <input class="pb-input" type="text" name="ciudad"
+                                    <input class="pb-input" type="text" name="ciudad" maxlength="100"
                                         value="<?php echo htmlspecialchars($old['ciudad'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                         placeholder="Ciudad" autocomplete="off">
                                 </div>
                                 <div class="col-md-4 mb-1">
-                                    <input class="pb-input" type="text" name="provincia"
+                                    <input class="pb-input" type="text" name="provincia" maxlength="100"
                                         value="<?php echo htmlspecialchars($old['provincia'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                         placeholder="Provincia" autocomplete="off">
                                 </div>
                                 <div class="col-md-4 mb-1">
-                                    <input class="pb-input" type="text" name="pais"
+                                    <input class="pb-input" type="text" name="pais" maxlength="100"
                                         value="<?php echo htmlspecialchars($old['pais'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                         placeholder="País" autocomplete="off">
                                 </div>
@@ -225,7 +228,7 @@ $placeholderVista   = [
 
                             <div class="col-md-6 mb-3">
                                 <label class="pb-label" for="recompensa">Recompensa</label>
-                                <input class="pb-input" type="number" id="recompensa" name="recompensa" min="0" step="0.01"
+                                <input class="pb-input" type="number" id="recompensa" name="recompensa" min="0" max="99999999.99" step="0.01"
                                     value="<?php echo htmlspecialchars($old['recompensa'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     placeholder="Ej: 5000" autocomplete="off">
                                 <div class="pb-hint">Opcional</div>
