@@ -63,6 +63,13 @@ class Router
         $verb = $_SERVER['REQUEST_METHOD'];
         $uri  = $this->parseUri();
 
+        // Toda petición POST valida el token CSRF antes de ejecutar
+        // cualquier controlador. El requisito aplica de forma automática
+        // a las rutas actuales y a las que se agreguen en el futuro.
+        if ($verb === 'POST') {
+            Session::validateCsrf();
+        }
+
         foreach ($this->routes as $route) {
             $verbMatch = $route['verb'] === 'ANY' || $route['verb'] === $verb;
 
