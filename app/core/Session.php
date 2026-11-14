@@ -23,6 +23,10 @@ class Session
     {
         session_regenerate_id(true);
 
+        // Regenerar también el token CSRF: un token que pudo haber sido
+        // expuesto antes del login no debe sobrevivir al cambio de identidad.
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
         $_SESSION['user'] = [
             'id'         => $user['Id_Usuario'],
             'id_persona' => $user['Id_Persona'],
@@ -116,10 +120,14 @@ class Session
     /**
      * Valida el token CSRF enviado en el formulario.
      * Aborta con 403 si el token es inválido o no existe.
-     * Rota el token luego de validarlo.
      *
-     * Llamar al inicio de cualquier método que procese un POST:
-     *   Session::validateCsrf();
+     * El token es estable por sesión (no rota por uso): se regenera solo
+     * al iniciar sesión y al destruirse la sesión. Así los formularios
+     * abiertos en varias pestañas (o varios formularios en una misma
+     * página) permanecen válidos entre sí.
+     *
+     * El Router lo invoca automáticamente en cada POST; los controladores
+     * no necesitan llamarlo.
      */
     public static function validateCsrf(): void
     {
@@ -129,8 +137,5 @@ class Session
             http_response_code(403);
             die('Token CSRF inválido. Recargá la página e intentá de nuevo.');
         }
-
-        // Rotar el token para que no pueda reutilizarse
-        unset($_SESSION['csrf_token']);
     }
 }
