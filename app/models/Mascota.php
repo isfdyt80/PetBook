@@ -181,7 +181,7 @@ class Mascota extends Model
      * @param  array $datos  Campos a actualizar (parcial o completo).
      * @return bool          true si se modificó al menos una fila.
      */
-    public function actualizar(int $id, array $datos): bool
+    public function actualizar(int $id, int $idUsuario, array $datos): bool
     {
         $this->validarRazaEspecie($datos);
 
@@ -193,7 +193,30 @@ class Mascota extends Model
             return false;
         }
 
-        return $this->update($id, $payload);
+        $sets = [];
+        $params = [':id' => $id, ':usuario' => $idUsuario];
+
+        foreach ($payload as $campo => $valor) {
+            $placeholder = ':campo' . count($sets);
+            $sets[] = "`{$campo}` = {$placeholder}";
+            $params[$placeholder] = $valor;
+        }
+
+        $stmt = $this->execute(
+            'UPDATE Mascota
+             SET ' . implode(', ', $sets) . '
+             WHERE Id_Mascota = :id
+               AND Eliminado = 0
+               AND EXISTS (
+                   SELECT 1 FROM MascotaUsuario mu
+                   WHERE mu.Id_Mascota = Mascota.Id_Mascota
+                     AND mu.Id_Usuario = :usuario
+                     AND mu.FechaHasta IS NULL
+               )',
+            $params
+        );
+
+        return $stmt->rowCount() > 0;
     }
 
     /**
@@ -203,9 +226,23 @@ class Mascota extends Model
      * @param  int  $id  Id_Mascota a eliminar.
      * @return bool      true si se modificó al menos una fila.
      */
-    public function eliminar(int $id): bool
+    public function eliminar(int $id, int $idUsuario): bool
     {
-        return $this->softDelete($id);
+        $stmt = $this->execute(
+            'UPDATE Mascota
+             SET Eliminado = 1
+             WHERE Id_Mascota = :id
+               AND Eliminado = 0
+               AND EXISTS (
+                   SELECT 1 FROM MascotaUsuario mu
+                   WHERE mu.Id_Mascota = Mascota.Id_Mascota
+                     AND mu.Id_Usuario = :usuario
+                     AND mu.FechaHasta IS NULL
+               )',
+            [':id' => $id, ':usuario' => $idUsuario]
+        );
+
+        return $stmt->rowCount() > 0;
     }
 
     // ── Privado ──────────────────────────────────────────────────────────

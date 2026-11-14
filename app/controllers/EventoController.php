@@ -184,7 +184,7 @@ class EventoController extends Controller
         }
 
         try {
-            (new EventoMascota())->darBaja($idEvento);
+            (new EventoMascota())->darBaja($idEvento, (int) Session::user()['id']);
         } catch (\Throwable $e) {
             error_log('[EVENTO ERROR] ' . $e->getMessage());
             Session::flash('error', 'No se pudo eliminar el evento. Intentá de nuevo.');

@@ -223,7 +223,11 @@ class MascotaController extends Controller
         }
 
         try {
-            (new Mascota())->actualizar($idMascota, $datos);
+            (new Mascota())->actualizar(
+                $idMascota,
+                (int) Session::user()['id'],
+                $datos
+            );
         } catch (\InvalidArgumentException $e) {
             Session::flash('error', $e->getMessage());
             $this->back();
