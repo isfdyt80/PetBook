@@ -400,6 +400,11 @@ class EventoMascota extends Model
     // Soft delete: marca el evento como eliminado
     public function eliminar(int $id, int $idUsuario): bool
     {
+<<<<<<< HEAD
         return $this->darBaja($id, $idUsuario);
+=======
+       
+        return $this->darBaja($id);
+>>>>>>> defa3b99dc6539c9a45df86f752036fde941151a
     }
 }

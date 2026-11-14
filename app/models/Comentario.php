@@ -50,7 +50,7 @@ class Comentario extends Model
                 FROM Comentario
                 WHERE Id_Publicacion = :idPublicacion
                   AND Eliminado = 0
-                ORDER BY Fecha ASC
+                ORDER BY Fecha ASC, Id_Comentario ASC
                 LIMIT :limit OFFSET :offset';
 
         $stmt = $this->db->prepare($sql);
