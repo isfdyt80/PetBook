@@ -100,11 +100,11 @@ petbook/
 │   └── uploads/            # Archivos subidos en desarrollo — NO versionar
 │
 ├── .env                    # Variables de entorno locales — NO versionar
-├── .env.example            # Plantilla pública del .env — SÍ versionar
+├── .env_example            # Plantilla pública del .env — SÍ versionar
 ├── .gitignore
 ├── composer.json
 ├── composer.lock           # SÍ versionar — garantiza reproducibilidad
-├── GUIDE.md                # Este archivo
+├── docs/guia.md            # Esta guía
 └── README.md               # Descripción pública del proyecto
 ```
 
@@ -208,7 +208,7 @@ cd petbook
 composer install
 
 # 3. Copiar la plantilla de variables de entorno
-cp .env.example .env
+cp .env_example .env
 
 # 4. Editar .env con los valores del entorno local
 #    (credenciales de base de datos, etc.)
@@ -219,9 +219,9 @@ cp .env.example .env
 # 6. Configurar Apache para que el DocumentRoot apunte a public/
 ```
 
-### Archivo `.env.example`
+### Archivo `.env_example`
 
-Ver el archivo `.env.example` en la raíz del proyecto. Contiene todas las variables necesarias con valores de ejemplo. **Nunca** copiar credenciales reales en `.env.example`.
+Ver el archivo `.env_example` en la raíz del proyecto. Contiene todas las variables necesarias con valores de ejemplo. **Nunca** copiar credenciales reales en `.env_example`.
 
 ---
 
@@ -492,7 +492,7 @@ echo htmlspecialchars($usuario['Nombre'], ENT_QUOTES, 'UTF-8');
 
 - Las credenciales de base de datos, claves de sesión y cualquier valor sensible van en `.env`.
 - `.env` está en `.gitignore` y **nunca se sube al repositorio**.
-- `.env.example` es la plantilla pública con valores vacíos o de ejemplo.
+- `.env_example` es la plantilla pública con valores vacíos o de ejemplo.
 
 ### Sesiones
 

@@ -1,6 +1,6 @@
 # Petbook — Guía Técnica de Componentes
 
-Este documento es complementario a `GUIDE.md`. Aquél define estructura general, convenciones y flujo Git; este define **el procedimiento exacto** para agregar cada tipo de componente al sistema — tabla, modelo, controlador, ruta, vista, relación N:M, catálogo, extensión de roles — usando como referencia el código real de `app/core/` (`Model.php`, `Controller.php`, `Router.php`, `Auth.php`, `Session.php`) y el schema de `petbook.sql`.
+Este documento es complementario a `guia.md`. Aquél define estructura general, convenciones y flujo Git; este define **el procedimiento exacto** para agregar cada tipo de componente al sistema — tabla, modelo, controlador, ruta, vista, relación N:M, catálogo, extensión de roles — usando como referencia el código real de `app/core/` (`Model.php`, `Controller.php`, `Router.php`, `Auth.php`, `Session.php`) y el schema de `petbook.sql`.
 
 
 ---
@@ -452,7 +452,7 @@ require_once APP_PATH . '/views/layouts/main.php';
 ?>
 ```
 
-### 5.3 Reglas de contenido de vista (de `GUIDE.md`, reforzadas acá)
+### 5.3 Reglas de contenido de vista (de `guia.md`, reforzadas acá)
 
 El único PHP permitido dentro de una vista es `if`, `foreach` y `htmlspecialchars()` de salida. Concretamente, **nunca**:
 - `new Modelo()` dentro de una vista — todos los datos llegan ya resueltos por el controlador vía `$data` en `view()`.
