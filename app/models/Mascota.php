@@ -183,15 +183,21 @@ class Mascota extends Model
      */
     public function actualizar(int $id, array $datos): bool
     {
-        $this->validarRazaEspecie($datos);
-
-        // Filtramos solo los campos permitidos para no enviar columnas extrañas al UPDATE.
-        // No usamos array_filter para no descartar nulls válidos (ej: borrar la raza).
+        // Solo campos permitidos; no se usa array_filter para no descartar nulls válidos.
         $payload = array_intersect_key($datos, array_flip(self::CAMPOS_PERMITIDOS));
 
         if (empty($payload)) {
             return false;
         }
+
+        $actual = $this->find($id);
+
+        if ($actual === false) {
+            return false;
+        }
+
+        // Se valida el resultado final (datos actuales + cambios), no solo lo recibido.
+        $this->validarRazaEspecie(array_merge($actual, $payload));
 
         return $this->update($id, $payload);
     }
@@ -230,7 +236,7 @@ class Mascota extends Model
             [':raza' => $datos['Id_Raza']]
         );
 
-        if (!$raza || $raza['Id_Especie'] != $datos['Id_Especie']) {
+        if (!$raza || (int) $raza['Id_Especie'] !== (int) ($datos['Id_Especie'] ?? 0)) {
             throw new \InvalidArgumentException('La raza no pertenece a la especie indicada.');
         }
     }

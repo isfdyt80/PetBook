@@ -91,9 +91,12 @@ class Reporte extends Model
     public function resolver(int $id, int $idEstado): bool
     {
         $stmt = $this->execute(
-            'UPDATE Reporte
-             SET Id_EstadoReporte = :estado, Fecha_Resolucion = NOW()
-             WHERE Id_Reporte = :id',
+            "UPDATE Reporte
+            SET Id_EstadoReporte = :estado, Fecha_Resolucion = NOW()
+            WHERE Id_Reporte = :id
+            AND Id_EstadoReporte NOT IN (
+                SELECT Id_EstadoReporte FROM EstadoReporte WHERE Nombre IN ('ACCIONADO', 'DESESTIMADO')
+            )",
             [
                 ':estado' => $idEstado,
                 ':id'     => $id,

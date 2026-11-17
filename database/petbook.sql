@@ -88,6 +88,7 @@ CREATE TABLE Raza (
     Nombre     VARCHAR(100) NOT NULL,
     Id_Especie INT          NOT NULL,
     CONSTRAINT pk_raza PRIMARY KEY (Id_Raza),
+    CONSTRAINT uq_raza_id_especie UNIQUE (Id_Raza, Id_Especie),
     CONSTRAINT fk_raza_especie
         FOREIGN KEY (Id_Especie) REFERENCES Especie (Id_Especie)
 ) ENGINE=InnoDB;
@@ -108,7 +109,7 @@ CREATE TABLE Mascota (
     CONSTRAINT fk_mascota_especie
         FOREIGN KEY (Id_Especie) REFERENCES Especie (Id_Especie),
     CONSTRAINT fk_mascota_raza
-        FOREIGN KEY (Id_Raza) REFERENCES Raza (Id_Raza)
+        FOREIGN KEY (Id_Raza, Id_Especie) REFERENCES Raza (Id_Raza, Id_Especie)
 ) ENGINE=InnoDB;
 
 -- Nota: la coherencia entre Id_Especie e Id_Raza debe validarse en backend.
@@ -121,7 +122,13 @@ CREATE TABLE MascotaUsuario (
     EsDueno           BOOLEAN  NOT NULL DEFAULT FALSE,
     FechaDesde        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FechaHasta        DATETIME NULL,
+
+    -- Clave de la asociación activa: solo tiene valor mientras FechaHasta es NULL.
+    -- MySQL no tiene índices únicos parciales; los NULL no chocan entre sí.
+    Asociacion_Activa VARCHAR(25)
+        GENERATED ALWAYS AS (IF(FechaHasta IS NULL, CONCAT(Id_Mascota, '-', Id_Usuario), NULL)) STORED,
     CONSTRAINT pk_mascotausuario PRIMARY KEY (Id_MascotaUsuario),
+    CONSTRAINT uq_mascotausuario_activa UNIQUE (Asociacion_Activa),
     CONSTRAINT fk_mascotausuario_mascota
         FOREIGN KEY (Id_Mascota) REFERENCES Mascota (Id_Mascota),
     CONSTRAINT fk_mascotausuario_usuario
@@ -344,7 +351,7 @@ CREATE TABLE Reporte (
     Fecha            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     Fecha_Resolucion DATETIME NULL,
     CONSTRAINT pk_reporte PRIMARY KEY (Id_Reporte),
-    -- Exactamente uno de los dos debe ser no null. Validar en backend.
+    -- Exactamente uno de los dos debe ser no null. También se valida en el backend (Reporte::crear).
     CONSTRAINT chk_reporte_target
         CHECK (
             (Id_Publicacion IS NOT NULL AND Id_Comentario IS NULL) OR
