@@ -1,0 +1,22 @@
+Options -Indexes
+
+RewriteEngine On
+
+# ── Bloqueo de archivos y rutas sensibles ─────────────────────────────────
+# Defensa en profundidad: si el docroot se apunta por error a la raíz del
+# proyecto (o quedan rutas residuales), nada de esto debe poder servirse.
+# Dotfiles: .env, .env.*, .git, .htaccess, .htpasswd, etc. Se exceptúa
+# .well-known para no romper la verificación ACME de certificados.
+RewriteRule (^|/)\.(?!well-known/) - [F]
+
+# Código fuente y archivos internos del proyecto (alcanzables solo si el
+# docroot no es public/).
+RewriteRule ^(app|config|vendor|database|docs|storage)(/|$) - [F]
+RewriteRule ^composer\.(json|lock)$ - [F]
+
+# Permitir acceso directo a archivos y carpetas que existen (css, js, imágenes)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás va al front controller
+RewriteRule ^(.*)$ index.php [QSA,L]

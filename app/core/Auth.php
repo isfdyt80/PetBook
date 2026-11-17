@@ -1,0 +1,179 @@
+<?php
+
+// app/core/Auth.php
+// Verificación de roles, permisos y utilidades de contraseña.
+// Complementa Session.php.
+
+namespace App\Core;
+
+use App\Models\Usuario;
+
+class Auth
+{
+    // ── Verificación de sesión ────────────────────────────────────────────
+
+    /**
+     * Devuelve true si hay un usuario logueado.
+     */
+    public static function check(): bool
+    {
+        return !empty($_SESSION['user']);
+    }
+
+    /**
+     * Devuelve el rol del usuario activo o null si no hay sesión.
+     */
+    public static function role(): ?string
+    {
+        return $_SESSION['user']['rol'] ?? null;
+    }
+
+    /**
+     * Devuelve true si el usuario tiene exactamente el rol indicado.
+     *
+     * Uso:
+     *   Auth::is('ADMIN')
+     */
+    public static function is(string $role): bool
+    {
+        return self::role() === $role;
+    }
+
+    /**
+     * Devuelve true si el usuario tiene alguno de los roles indicados.
+     * Acepta un rol como string o varios como array.
+     *
+     * Uso:
+     *   Auth::isAny(['MODERADOR', 'ADMIN'])
+     */
+    public static function isAny(string|array $roles): bool
+    {
+        return in_array(self::role(), (array) $roles, true);
+    }
+
+    // ── Control de acceso ─────────────────────────────────────────────────
+
+    /**
+     * Aborta con redirect al login si no hay sesión activa.
+     */
+    public static function requireAuth(): void
+    {
+        if (!self::check()) {
+            Session::flash('error', 'Debés iniciar sesión para acceder a esa página.');
+            header('Location: ' . APP_URL . '/login');
+            exit;
+        }
+
+        $usuario = (new Usuario())->buscarEstadoAutenticacion((int) ($_SESSION['user']['id'] ?? 0));
+
+        if (
+            $usuario === false
+            || (int) $usuario['Activo'] !== 1
+            || (int) $usuario['Eliminado'] !== 0
+        ) {
+            Session::logout();
+            Session::flash('error', 'Tu sesión ya no está disponible. Iniciá sesión nuevamente.');
+            header('Location: ' . APP_URL . '/login');
+            exit;
+        }
+
+        // La autorización siempre usa el rol actual, no el que había al iniciar sesión.
+        $_SESSION['user']['rol'] = $usuario['rol'] ?? null;
+    }
+
+    /**
+     * Verifica que el usuario tenga uno de los roles requeridos.
+     * Acepta un rol como string o varios como array.
+     * Aborta con 403 si no tiene el rol necesario.
+     *
+     * Uso:
+     *   Auth::requireRole('ADMIN');
+     *   Auth::requireRole(['MODERADOR', 'ADMIN']);
+     */
+    public static function requireRole(string|array $roles): void
+    {
+        self::requireAuth();
+
+        if (!self::isAny($roles)) {
+            http_response_code(403);
+            if (defined('APP_DEBUG') && APP_DEBUG) {
+                die('Acceso no autorizado. Tu rol: ' . self::role());
+            }
+            require_once APP_PATH . '/views/errors/403.php';
+            exit;
+        }
+    }
+
+    /**
+     * Redirige al feed si el usuario ya está logueado.
+     * Usar en login y registro para evitar acceso redundante.
+     */
+    public static function requireGuest(): void
+    {
+        if (self::check()) {
+            header('Location: ' . APP_URL . '/feed');
+            exit;
+        }
+    }
+
+    /**
+     * Redirige al destino correspondiente según el rol del usuario.
+     * Llamar inmediatamente después de Session::login().
+     *
+     * Roles de Petbook → todos van al feed.
+     * MODERADOR y ADMIN tienen acceso a secciones adicionales desde el feed.
+     */
+    public static function redirectAfterLogin(): void
+    {
+        header('Location: ' . APP_URL . '/feed');
+        exit;
+    }
+
+    // ── Contraseñas ───────────────────────────────────────────────────────
+
+    /**
+     * Genera el hash de una contraseña con el algoritmo adaptativo por
+     * defecto de PHP (PASSWORD_DEFAULT): bcrypt hoy, y se actualiza solo
+     * cuando PHP promueve un algoritmo más fuerte.
+     * Cost 12: balance entre seguridad y rendimiento en servidores compartidos.
+     *
+     * Combinar con password_needs_rehash() al iniciar sesión para regenerar
+     * hashes viejos cuando cambie el algoritmo o los parámetros por defecto.
+     *
+     * Uso en registro:
+     *   $hash = Auth::hashPassword($passwordPlano);
+     */
+    public static function hashPassword(string $plain): string
+    {
+        return password_hash($plain, PASSWORD_DEFAULT, ['cost' => 12]);
+    }
+
+    /**
+     * Verifica una contraseña contra su hash almacenado.
+     *
+     * Uso en login:
+     *   if (Auth::verifyPassword($input, $usuario['Password_Hash'])) { ... }
+     */
+    public static function verifyPassword(string $plain, string $hash): bool
+    {
+        return password_verify($plain, $hash);
+    }
+
+    /**
+     * Hash bcrypt real pero sin dueño: se usa cuando el email no existe o
+     * la cuenta está desactivada, para que el tiempo de respuesta sea igual
+     * al de una verificación de contraseña exitosa. Sin esto, la diferencia
+     * de milisegundos actúa como oráculo de timing que revela si una cuenta
+     * existe.
+     */
+    private const HASH_DUMMY = '$2y$12$ihUma7mtByN9j1C.Fz4F9uCKdxw/GULQyXPNIk.VbkHrt/yOkr6qe';
+
+    /**
+     * Consume el mismo costo de CPU que verifyPassword() sin verificar nada.
+     * El resultado se descarta: solo importa uniformar el tiempo de respuesta.
+     */
+    public static function verifyDummy(string $plain): void
+    {
+        password_verify($plain, self::HASH_DUMMY);
+    }
+}
