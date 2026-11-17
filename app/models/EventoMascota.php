@@ -145,59 +145,78 @@ class EventoMascota extends Model
             [':id' => $evento['Id_EstadoEvento']]
         );
 
-        if (in_array($estadoActual['Nombre'], ['RESUELTO', 'CANCELADO'], true)) {
-            throw new \RuntimeException('El evento ya está en un estado terminal y no puede modificarse.');
+        // Un evento nace ACTIVO en crear() y solo avanza a un estado terminal:
+        // nunca vuelve a ACTIVO.
+        if ($estadoDestino === 'ACTIVO') {
+            throw new \RuntimeException('Un evento no puede volver a estado activo.');
         }
 
-        $estadoDestino = strtoupper($nuevoEstadoNombre);
-        $idNuevoEstado = $this->idEstadoPorNombre($estadoDestino);
+        // Catálogos resueltos por nombre, antes de abrir la transacción.
+        $idNuevoEstado     = $this->idEstadoPorNombre($estadoDestino);
+        $esTerminal        = in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true);
+        $idEstadoArchivada = $esTerminal ? $this->idEstadoPublicacionPorNombre('ARCHIVADA') : null;
 
-        // Estado terminal implica archivar la publicación asociada (si existe)
-        // para que el evento resuelto/cancelado salga del feed. Resuelto por
-        // nombre de catálogo, antes de abrir la transacción (convención regla 2).
-        $idEstadoArchivada = null;
-        if (in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true)) {
-            $idEstadoArchivada = $this->idEstadoPublicacionPorNombre('ARCHIVADA');
-        }
-
-        // transactional() hace el rollback y re-lanza la excepción tal cual.
         return $this->transactional(function () use (
             $idEvento,
             $idNuevoEstado,
-            $estadoDestino,
+            $esTerminal,
             $idUsuarioResponsable,
             $idEstadoArchivada
-        ) {
-            $this->update($idEvento, ['Id_EstadoEvento' => $idNuevoEstado]);
+        ): bool {
+            // 1. Lee el estado actual BLOQUEANDO la fila (FOR UPDATE): otra solicitud
+            //    sobre el mismo evento espera acá hasta que esta transacción termine.
+            $actual = $this->queryOne(
+                'SELECT ev.Id_EstadoEvento, ee.Nombre AS Estado
+                FROM EventoMascota ev
+                JOIN EstadoEvento ee ON ee.Id_EstadoEvento = ev.Id_EstadoEvento
+                WHERE ev.Id_Evento = :id AND ev.Eliminado = 0
+                FOR UPDATE',
+                [':id' => $idEvento]
+            );
 
-            if (in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true)) {
-                $this->execute(
-                    'UPDATE EventoMascota
-                     SET Fecha_Resolucion = NOW()
-                     WHERE Id_Evento = :id',
-                    [':id' => $idEvento]
-                );
+            if ($actual === false) {
+                throw new \RuntimeException('Evento no encontrado.');
             }
 
-            $this->execute(
-                'INSERT INTO HistorialEstadoEvento (Id_Evento, Id_EstadoEvento, Id_Usuario)
-                 VALUES (:evento, :estado, :usuario)',
+            if (in_array($actual['Estado'], ['RESUELTO', 'CANCELADO'], true)) {
+                throw new \RuntimeException('El evento ya está en un estado terminal y no puede modificarse.');
+            }
+
+            // 2. El UPDATE solo aplica si el estado sigue siendo el que se leyó.
+            $stmt = $this->execute(
+                'UPDATE EventoMascota
+                SET Id_EstadoEvento  = :nuevo,
+                    Fecha_Resolucion = CASE WHEN :terminal = 1 THEN NOW() ELSE Fecha_Resolucion END
+                WHERE Id_Evento = :id AND Id_EstadoEvento = :actual',
                 [
-                    ':evento'   => $idEvento,
-                    ':estado'   => $idNuevoEstado,
-                    ':usuario'  => $idUsuarioResponsable,
+                    ':nuevo'    => $idNuevoEstado,
+                    ':terminal' => $esTerminal ? 1 : 0,
+                    ':id'       => $idEvento,
+                    ':actual'   => $actual['Id_EstadoEvento'],
                 ]
             );
 
-            // Estado terminal → la publicación automática se archiva para
-            // salir del feed (toda modificación multi-tabla vive en esta
-            // misma transacción, docs/conventions.md).
+            if ($stmt->rowCount() !== 1) {
+                throw new \RuntimeException('El evento fue modificado por otra solicitud. Actualizá la página e intentá de nuevo.');
+            }
+
+            // 3. Historial: se confirma o se revierte junto con el cambio de estado.
+            $this->execute(
+                'INSERT INTO HistorialEstadoEvento (Id_Evento, Id_EstadoEvento, Id_Usuario)
+                VALUES (:evento, :estado, :usuario)',
+                [
+                    ':evento'  => $idEvento,
+                    ':estado'  => $idNuevoEstado,
+                    ':usuario' => $idUsuarioResponsable,
+                ]
+            );
+
+            // 4. Estado terminal: la publicación automática se archiva.
             if ($idEstadoArchivada !== null) {
                 $this->execute(
                     'UPDATE Publicacion
-                     SET Id_EstadoPublicacion = :estado
-                     WHERE Id_Evento = :evento
-                     AND Eliminado = 0',
+                    SET Id_EstadoPublicacion = :estado
+                    WHERE Id_Evento = :evento AND Eliminado = 0',
                     [
                         ':estado' => $idEstadoArchivada,
                         ':evento' => $idEvento,
@@ -208,7 +227,6 @@ class EventoMascota extends Model
             return true;
         });
     }
-
     /**
      * Crea un evento de mascota completo (HU-08, HU-09 y HU-10).
      *
@@ -400,11 +418,6 @@ class EventoMascota extends Model
     // Soft delete: marca el evento como eliminado
     public function eliminar(int $id, int $idUsuario): bool
     {
-<<<<<<< HEAD
         return $this->darBaja($id, $idUsuario);
-=======
-       
-        return $this->darBaja($id);
->>>>>>> defa3b99dc6539c9a45df86f752036fde941151a
     }
 }
