@@ -5,11 +5,19 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
+use App\Core\Validator;
 use App\Models\Especie;
 use App\Models\Mascota;
 
 class MascotaController extends Controller
 {
+    /**
+     * Valores permitidos para los campos de catálogo del formulario.
+     * La vista los ofrece como <select>; acá se revalidan porque el
+     * formulario puede enviarse desde fuera del navegador.
+     */
+    private const TAMAÑOS = ['Pequeño', 'Mediano', 'Grande'];
+    private const SEXOS   = ['Macho', 'Hembra'];
     // ── GET /mascota ──────────────────────────────────────────────────────
 
     /**
@@ -57,7 +65,6 @@ class MascotaController extends Controller
     public function guardar(): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $datos = $this->leerDatosFormulario();
 
@@ -98,9 +105,18 @@ class MascotaController extends Controller
     {
         Auth::requireAuth();
 
-        $idMascota = (int) $id;
-        $modelo    = new Mascota();
-        $mascota   = $modelo->buscarPorId($idMascota);
+        // Solo dígitos dentro del rango de un INT: "12abc" o "99999999999"
+        // no deben seleccionar ningún registro (404, no cast silencioso).
+        $idMascota = Validator::idDeRuta($id);
+
+        if ($idMascota === null) {
+            http_response_code(404);
+            $this->view('errors.404');
+            return;
+        }
+
+        $modelo  = new Mascota();
+        $mascota = $modelo->buscarPorId($idMascota);
 
         if (
             $mascota === null
@@ -129,7 +145,14 @@ class MascotaController extends Controller
     {
         Auth::requireAuth();
 
-        $idMascota = (int) $id;
+        $idMascota = Validator::idDeRuta($id);
+
+        if ($idMascota === null) {
+            http_response_code(404);
+            $this->view('errors.404');
+            return;
+        }
+
         $modelo    = new Mascota();
         $mascota   = $modelo->buscarPorId($idMascota);
 
@@ -172,10 +195,16 @@ class MascotaController extends Controller
     public function actualizar(string $id): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
-        $idMascota = (int) $id;
-        $modelo    = new Mascota();
+        $idMascota = Validator::idDeRuta($id);
+
+        if ($idMascota === null) {
+            http_response_code(404);
+            $this->view('errors.404');
+            return;
+        }
+
+        $modelo = new Mascota();
 
         if (
             $modelo->buscarPorId($idMascota) === null
@@ -194,7 +223,11 @@ class MascotaController extends Controller
         }
 
         try {
-            (new Mascota())->actualizar($idMascota, $datos);
+            (new Mascota())->actualizar(
+                $idMascota,
+                (int) Session::user()['id'],
+                $datos
+            );
         } catch (\InvalidArgumentException $e) {
             Session::flash('error', $e->getMessage());
             $this->back();
@@ -223,45 +256,59 @@ class MascotaController extends Controller
      */
     private function leerDatosFormulario(): array|false
     {
-        $nombre          = $this->input('nombre');
-        $idEspecie       = (int) $this->input('especie');
-        $idRaza          = (int) $this->input('raza');
-        $color           = $this->input('color');
-        $tamaño          = $this->input('tamaño');
-        $sexo            = $this->input('sexo');
-        $fechaNacimiento = $this->input('fecha_nacimiento');
-        $edadAproximada  = $this->input('edad_aproximada');
+        // Obligatoriedad, longitudes del esquema (Mascota.Nombre VARCHAR(100),
+        // Color VARCHAR(100), Tamaño VARCHAR(50), Sexo VARCHAR(20),
+        // Edad_Aproximada VARCHAR(50)) e IDs como enteros estrictos: todo
+        // dato inválido se corta acá, antes del INSERT/UPDATE.
+        try {
+            $idEspecie = Validator::enteroPositivo($this->input('especie'), 'La especie');
+            $idRaza    = Validator::enteroPositivo($this->input('raza'), 'La raza');
 
-        if ($idEspecie <= 0) {
-            Session::flash('error', 'La especie es obligatoria.');
-            return false;
-        }
-
-        if ($nombre === null || $nombre === '') {
-            Session::flash('error', 'El nombre de la mascota es obligatorio.');
-            return false;
-        }
-
-        if ($fechaNacimiento !== null && $fechaNacimiento !== '') {
-            $fecha = \DateTime::createFromFormat('Y-m-d', $fechaNacimiento);
-
-            if (!$fecha || $fecha->format('Y-m-d') !== $fechaNacimiento) {
-                Session::flash('error', 'La fecha de nacimiento no es válida.');
+            if ($idEspecie === null) {
+                Session::flash('error', 'La especie es obligatoria.');
                 return false;
             }
-        } else {
-            $fechaNacimiento = null;
+
+            $nombre = Validator::texto($this->input('nombre'), 'El nombre de la mascota', 100, true);
+            $color  = Validator::texto($this->input('color'), 'El color', 100);
+            $tamaño = Validator::texto($this->input('tamaño'), 'El tamaño', 50);
+            $sexo   = Validator::texto($this->input('sexo'), 'El sexo', 20);
+            $edad   = Validator::texto($this->input('edad_aproximada'), 'La edad aproximada', 50);
+
+            $fechaNacimiento = Validator::fecha($this->input('fecha_nacimiento'), 'La fecha de nacimiento');
+        } catch (\InvalidArgumentException $e) {
+            Session::flash('error', $e->getMessage());
+            return false;
+        }
+
+        // Catálogos con valores cerrados en la vista: cualquier otra cosa
+        // (el formulario puede enviarse desde fuera del navegador) se rechaza.
+        if ($tamaño !== null && !in_array($tamaño, self::TAMAÑOS, true)) {
+            Session::flash('error', 'El tamaño indicado no es válido.');
+            return false;
+        }
+
+        if ($sexo !== null && !in_array($sexo, self::SEXOS, true)) {
+            Session::flash('error', 'El sexo indicado no es válido.');
+            return false;
+        }
+
+        // La especie debe existir: un Id_Especie inexistente fallaría como
+        // error de FK en la base, con un mensaje genérico para el usuario.
+        if ((new Especie())->buscarPorId($idEspecie) === null) {
+            Session::flash('error', 'Elegí una especie válida.');
+            return false;
         }
 
         return [
             'Nombre'           => $nombre,
             'Id_Especie'       => $idEspecie,
-            'Id_Raza'          => $idRaza > 0 ? $idRaza : null,
-            'Color'            => $color !== null && $color !== '' ? $color : null,
-            'Tamaño'           => $tamaño !== null && $tamaño !== '' ? $tamaño : null,
-            'Sexo'             => $sexo !== null && $sexo !== '' ? $sexo : null,
+            'Id_Raza'          => $idRaza,
+            'Color'            => $color,
+            'Tamaño'           => $tamaño,
+            'Sexo'             => $sexo,
             'Fecha_Nacimiento' => $fechaNacimiento,
-            'Edad_Aproximada'  => $edadAproximada !== null && $edadAproximada !== '' ? $edadAproximada : null,
+            'Edad_Aproximada'  => $edad,
         ];
     }
 

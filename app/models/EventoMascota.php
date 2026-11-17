@@ -125,14 +125,25 @@ class EventoMascota extends Model
      *
      * @param  int    $idEvento              Id_Evento a modificar.
      * @param  string $nuevoEstadoNombre     Nombre del estado destino ('ACTIVO', 'RESUELTO', 'CANCELADO').
-     * @param  int    $idUsuarioResponsable  Id_Usuario que realiza el cambio.
+     * @param  int    $idUsuarioResponsable  Propietario y responsable del cambio.
      * @return bool                          true si la transacción se completó.
      * @throws \RuntimeException             Si el evento no existe, está en estado terminal
      *                                       o el estado destino no está en el catálogo.
      */
     public function cambiarEstado(int $idEvento, string $nuevoEstadoNombre, int $idUsuarioResponsable): bool
     {
-        $estadoDestino = strtoupper($nuevoEstadoNombre);
+        $evento = $this->find($idEvento);
+
+        if ($evento === false || (int) $evento['Id_Usuario'] !== $idUsuarioResponsable) {
+            throw new \RuntimeException('Evento no encontrado.');
+        }
+
+        $estadoActual = $this->queryOne(
+            'SELECT Nombre
+             FROM EstadoEvento
+             WHERE Id_EstadoEvento = :id',
+            [':id' => $evento['Id_EstadoEvento']]
+        );
 
         // Un evento nace ACTIVO en crear() y solo avanza a un estado terminal:
         // nunca vuelve a ACTIVO.
@@ -374,19 +385,18 @@ class EventoMascota extends Model
      * Ambas escrituras se hacen en una sola transacción (wrapper
      * Model::transactional, docs/conventions.md).
      *
-     * La validación de propiedad del evento es responsabilidad del
-     * controlador (tiene los datos de sesión); acá solo se valida que
-     * exista y no esté ya eliminado.
+     * También comprueba la propiedad para que el modelo no pueda dar de baja
+     * un evento ajeno aunque se invoque sin pasar por el controlador.
      *
      * @param  int  $idEvento  Id_Evento a dar de baja.
      * @return bool            true si la transacción se completó.
      * @throws \RuntimeException Si el evento no existe o ya está eliminado.
      */
-    public function darBaja(int $idEvento): bool
+    public function darBaja(int $idEvento, int $idUsuario): bool
     {
         $evento = $this->buscarPorId($idEvento);
 
-        if ($evento === false) {
+        if ($evento === false || (int) $evento['Id_Usuario'] !== $idUsuario) {
             throw new \RuntimeException('El evento no existe o ya fue eliminado.');
         }
 
@@ -406,9 +416,8 @@ class EventoMascota extends Model
     }
 
     // Soft delete: marca el evento como eliminado
-    public function eliminar(int $id): bool
+    public function eliminar(int $id, int $idUsuario): bool
     {
-       
-        return $this->softDelete($id);
+        return $this->darBaja($id, $idUsuario);
     }
 }

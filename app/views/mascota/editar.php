@@ -89,6 +89,7 @@ $old = $old ?? [];
                         <label class="pb-label" for="nombre">Nombre</label>
                         <input class="pb-input" type="text" id="nombre" name="nombre"
                             value="<?= htmlspecialchars($old['nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            maxlength="100"
                             placeholder="Ej: Firulais" autocomplete="off" required>
                     </div>
 
@@ -122,6 +123,7 @@ $old = $old ?? [];
                         <label class="pb-label" for="color">Color</label>
                         <input class="pb-input" type="text" id="color" name="color"
                             value="<?= htmlspecialchars($old['color'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            maxlength="100"
                             placeholder="Ej: Negro con manchas blancas" autocomplete="off">
                         <div class="pb-hint">Opcional</div>
                     </div>
@@ -168,6 +170,7 @@ $old = $old ?? [];
                             <label class="pb-label" for="edad_aproximada">Edad aproximada</label>
                             <input class="pb-input" type="text" id="edad_aproximada" name="edad_aproximada"
                                 value="<?= htmlspecialchars($old['edad_aproximada'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                maxlength="50"
                                 placeholder="Ej: 2 años" autocomplete="off">
                             <div class="pb-hint">Opcional</div>
                         </div>

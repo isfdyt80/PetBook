@@ -6,6 +6,8 @@
 
 namespace App\Core;
 
+use App\Models\Usuario;
+
 class Auth
 {
     // ── Verificación de sesión ────────────────────────────────────────────
@@ -61,6 +63,22 @@ class Auth
             header('Location: ' . APP_URL . '/login');
             exit;
         }
+
+        $usuario = (new Usuario())->buscarEstadoAutenticacion((int) ($_SESSION['user']['id'] ?? 0));
+
+        if (
+            $usuario === false
+            || (int) $usuario['Activo'] !== 1
+            || (int) $usuario['Eliminado'] !== 0
+        ) {
+            Session::logout();
+            Session::flash('error', 'Tu sesión ya no está disponible. Iniciá sesión nuevamente.');
+            header('Location: ' . APP_URL . '/login');
+            exit;
+        }
+
+        // La autorización siempre usa el rol actual, no el que había al iniciar sesión.
+        $_SESSION['user']['rol'] = $usuario['rol'] ?? null;
     }
 
     /**
@@ -114,15 +132,20 @@ class Auth
     // ── Contraseñas ───────────────────────────────────────────────────────
 
     /**
-     * Genera el hash bcrypt de una contraseña.
+     * Genera el hash de una contraseña con el algoritmo adaptativo por
+     * defecto de PHP (PASSWORD_DEFAULT): bcrypt hoy, y se actualiza solo
+     * cuando PHP promueve un algoritmo más fuerte.
      * Cost 12: balance entre seguridad y rendimiento en servidores compartidos.
+     *
+     * Combinar con password_needs_rehash() al iniciar sesión para regenerar
+     * hashes viejos cuando cambie el algoritmo o los parámetros por defecto.
      *
      * Uso en registro:
      *   $hash = Auth::hashPassword($passwordPlano);
      */
     public static function hashPassword(string $plain): string
     {
-        return password_hash($plain, PASSWORD_BCRYPT, ['cost' => 12]);
+        return password_hash($plain, PASSWORD_DEFAULT, ['cost' => 12]);
     }
 
     /**
@@ -134,5 +157,23 @@ class Auth
     public static function verifyPassword(string $plain, string $hash): bool
     {
         return password_verify($plain, $hash);
+    }
+
+    /**
+     * Hash bcrypt real pero sin dueño: se usa cuando el email no existe o
+     * la cuenta está desactivada, para que el tiempo de respuesta sea igual
+     * al de una verificación de contraseña exitosa. Sin esto, la diferencia
+     * de milisegundos actúa como oráculo de timing que revela si una cuenta
+     * existe.
+     */
+    private const HASH_DUMMY = '$2y$12$ihUma7mtByN9j1C.Fz4F9uCKdxw/GULQyXPNIk.VbkHrt/yOkr6qe';
+
+    /**
+     * Consume el mismo costo de CPU que verifyPassword() sin verificar nada.
+     * El resultado se descarta: solo importa uniformar el tiempo de respuesta.
+     */
+    public static function verifyDummy(string $plain): void
+    {
+        password_verify($plain, self::HASH_DUMMY);
     }
 }

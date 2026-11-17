@@ -1,6 +1,6 @@
 # Petbook — Guía Técnica de Componentes
 
-Este documento es complementario a `GUIDE.md`. Aquél define estructura general, convenciones y flujo Git; este define **el procedimiento exacto** para agregar cada tipo de componente al sistema — tabla, modelo, controlador, ruta, vista, relación N:M, catálogo, extensión de roles — usando como referencia el código real de `app/core/` (`Model.php`, `Controller.php`, `Router.php`, `Auth.php`, `Session.php`) y el schema de `petbook.sql`.
+Este documento es complementario a `guia.md`. Aquél define estructura general, convenciones y flujo Git; este define **el procedimiento exacto** para agregar cada tipo de componente al sistema — tabla, modelo, controlador, ruta, vista, relación N:M, catálogo, extensión de roles — usando como referencia el código real de `app/core/` (`Model.php`, `Controller.php`, `Router.php`, `Auth.php`, `Session.php`) y el schema de `petbook.sql`.
 
 
 ---
@@ -272,13 +272,12 @@ Helpers heredados y su propósito exacto:
 
 ### 3.2 Estructura estándar de un método de escritura (POST)
 
-Todo método que procesa un formulario sigue el mismo esqueleto, en este orden — el orden importa: CSRF antes que nada, porque si el token es inválido no tiene sentido gastar una consulta de validación de negocio:
+Todo método que procesa un formulario sigue el mismo esqueleto, en este orden — el orden importa:
 
 ```php
 public function comentar(string $idPublicacion): void
 {
     Auth::requireAuth();
-    Session::validateCsrf();
 
     $contenido = $this->input('contenido');
 
@@ -300,6 +299,17 @@ public function comentar(string $idPublicacion): void
     $this->redirect('publicacion/' . $idPublicacion);
 }
 ```
+
+**El token CSRF no se valida en el controlador.** El `Router` llama `Session::validateCsrf()` automáticamente en cada `POST` antes de ejecutar cualquier controlador: sin token o con token inválido, la request muere con 403 antes de tocar negocio. Por eso el controlador solo necesita: autenticación → validaciones de entrada → persistencia. El requisito no depende de que el desarrollador se acuerde: toda ruta `POST` dada de alta en `routes.php` queda protegida desde el día 1.
+
+Del lado de la vista, la contraparte obligatoria es el campo oculto en todo formulario POST:
+
+```php
+<form action="<?= APP_URL ?>/..." method="POST">
+    <input type="hidden" name="_csrf" value="<?= Session::csrfToken() ?>">
+```
+
+El token es **estable por sesión**: no rota por uso, se regenera solo al iniciar sesión (`Session::login()`) y al destruirla. Así los formularios abiertos en pestañas separadas (o varios formularios en una misma página) siguen válidos entre sí sin invalidarse.
 
 Validación de tipo y presencia va en el controlador (sección 0: no hay validación declarativa). Validación de regla de negocio (ej. "el usuario no puede reaccionar dos veces", que ya está garantizada a nivel de PK compuesta en `Reaccion`, o "el evento no puede volver a ACTIVO") va en el modelo.
 
@@ -346,13 +356,12 @@ public function eliminar(string $idPublicacion): void
 
 ### 3.4 Endpoints AJAX
 
-Si la interacción no recarga la página (ej. reaccionar a una publicación desde el feed sin recargar), el método usa `$this->json()` en vez de `redirect()`/`view()`. CSRF se sigue validando igual — el token viaja en el body del `fetch()`, no cambia el mecanismo:
+Si la interacción no recarga la página (ej. reaccionar a una publicación desde el feed sin recargar), el método usa `$this->json()` en vez de `redirect()`/`view()`. El CSRF se valida igual que en cualquier POST — automáticamente en el `Router` — solo que el token viaja en el body del `fetch()`:
 
 ```php
 public function reaccionar(string $idPublicacion): void
 {
     Auth::requireAuth();
-    Session::validateCsrf();
 
     $tipo = $this->input('tipo');
     // ...
@@ -383,6 +392,8 @@ Reglas del `Router` (`addRoute()` en `Router.php`) a tener en cuenta al diseñar
 - `any()` existe para rutas que aceptan cualquier verbo — en la práctica no se usa en el proyecto hasta ahora; usarlo solo si un mismo método realmente maneja tanto `GET` como `POST` de forma condicional internamente (`$_SERVER['REQUEST_METHOD']`), lo cual generalmente es peor que separar en dos rutas explícitas.
 - El orden de registro importa cuando dos patrones podrían matchear la misma URI (no es el caso actual porque los prefijos no colisionan, pero al agregar rutas nuevas con parámetros hay que verificar que no se superpongan con una ruta más específica ya registrada antes en el archivo — el router usa la primera coincidencia, no la más específica).
 - Rutas que requieren rol específico **no se restringen en el router** — el router no sabe nada de roles. La restricción vive exclusivamente en el primer llamado del método del controlador (`Auth::requireRole(...)`). Esto es deliberado dado el diseño de dos capas, pero significa que **olvidar el `Auth::requireRole()` en el método dado de alta es un 403 ausente**, no un error que el router detecte.
+- Toda ruta `POST` valida el token CSRF automáticamente en `dispatch()` (ver sección 3.2): no se llama `Session::validateCsrf()` dentro del controlador, y todo formulario/fetch debe enviar el campo `_csrf`.
+- **Ninguna acción que modifique o destruya estado se expone por GET**, ni siquiera el logout: una acción destructiva enlazada con `<a href>` es explotable por CSRF trivial (`<img src="/logout">`). El patrón es `POST` + formulario con `_csrf`, como `/logout` (form estilizado como enlace en la navbar de `main.php`).
 
 ---
 
@@ -441,7 +452,7 @@ require_once APP_PATH . '/views/layouts/main.php';
 ?>
 ```
 
-### 5.3 Reglas de contenido de vista (de `GUIDE.md`, reforzadas acá)
+### 5.3 Reglas de contenido de vista (de `guia.md`, reforzadas acá)
 
 El único PHP permitido dentro de una vista es `if`, `foreach` y `htmlspecialchars()` de salida. Concretamente, **nunca**:
 - `new Modelo()` dentro de una vista — todos los datos llegan ya resueltos por el controlador vía `$data` en `view()`.
@@ -450,6 +461,65 @@ El único PHP permitido dentro de una vista es `if`, `foreach` y `htmlspecialcha
 ### 5.4 Naming y ubicación
 
 `app/views/{controlador sin sufijo}/{accion}.php` en snake_case: `app/views/publicacion/index.php`, `app/views/evento/crear.php`. La notación con puntos que usa `Controller::view()` (`'publicacion.index'`) se traduce a slashes internamente — al escribir `$this->view(...)` en el controlador, usar puntos; al crear el archivo en disco, usar la carpeta real.
+
+### 5.5 Alertas y confirmaciones con SweetAlert2
+
+El layout global `app/views/layouts/main.php` carga SweetAlert2 desde CDN y luego `public/js/pb-alerts.js`. No agregar otra etiqueta `<script>` de SweetAlert2 en una vista o un JS de página: el helper global ya está disponible en las páginas que usan este layout.
+
+#### Mensajes de resultado
+
+Para una acción procesada por el servidor, el controlador guarda un mensaje flash y redirige. El layout lo recoge y `pb-alerts.js` lo presenta como toast automáticamente:
+
+```php
+use App\Core\Session;
+
+Session::flash('success', 'Mascota registrada correctamente.');
+$this->redirect('mascota');
+```
+
+Se aceptan los tipos `success`, `error`, `warning` e `info`. Para feedback que nace enteramente en el navegador, se puede llamar directamente al helper:
+
+```js
+pbToast('success', 'Cambios guardados.');
+pbToast('error', 'No se pudo completar la acción.');
+```
+
+El texto se pasa como mensaje (no como HTML). No interpolar contenido del usuario con `html` de SweetAlert2.
+
+#### Confirmación declarativa de formularios
+
+Para confirmar un formulario antes de enviarlo, agregar `data-confirm-titulo`. El listener global intercepta el primer submit, muestra el diálogo y solo envía el formulario si se confirma:
+
+```php
+<form method="POST"
+      action="<?= APP_URL ?>/evento/<?= (int) $evento['Id_Evento'] ?>/eliminar"
+      data-confirm-titulo="Eliminar publicación"
+      data-confirm-texto="También desaparecerá del feed."
+      data-confirm-boton="Sí, eliminar">
+    <button type="submit">Eliminar publicación</button>
+</form>
+```
+
+`data-confirm-texto`, `data-confirm-boton` y `data-confirm-color` son opcionales. Si no se define el texto del botón, se muestra “Sí, confirmar”. Este patrón aplica a formularios; no reemplaza la autorización ni la validación del controlador.
+
+#### Confirmación desde JavaScript
+
+Para una acción que no se ejecuta enviando un formulario, `pbConfirm()` devuelve una promesa con `true` si se confirmó y `false` si se canceló:
+
+```js
+const acepta = await pbConfirm({
+    titulo: '¿Cerrar el evento?',
+    texto: 'El evento dejará de aparecer como activo.',
+    confirmar: 'Sí, cerrar',
+    cancelar: 'Seguir editando',
+});
+
+if (acepta) {
+    // Continuar la acción, por ejemplo enviar una petición fetch.
+}
+```
+
+Opciones admitidas: `titulo`, `texto`, `icono` (`success`, `error`, `warning` o `info`), `confirmar`, `cancelar` y `colorBoton`. Para operaciones destructivas, indicar claramente el efecto y continuar solo si el resultado es `true`.
 
 ---
 
@@ -625,3 +695,51 @@ Siguiendo el criterio de tareas ya establecido (vertical, no horizontal — cada
 5. **Vista** — sección 5. Solo contenido de `<main>`; nunca reimplementar navbar/footer.
 
 El issue no se considera terminado hasta que los cinco pasos están commiteados y la funcionalidad es clickeable de punta a punta en `localhost/petbook/public` — un modelo con métodos sin controlador que los llame, o un controlador sin ruta registrada, no es un incremento demostrable y no cierra el issue aunque el código individual esté correcto.
+
+---
+
+## 12. Límite de intentos en una acción sensible nueva (RateLimiter)
+
+Login, registro y recuperación de contraseña limitan intentos repetidos por cuenta y por origen (IP) mediante `App\Core\RateLimiter`, que persiste en la tabla `IntentoAcceso` (dominio Seguridad en `petbook.sql`). Ver la decisión completa en `conventions.md` — "Límite de intentos repetidos en acciones sensibles".
+
+### 12.1 Agregar una acción nueva al límite
+
+1. Definir los máximos como constantes en `config/app.php` leyendo del `.env` (con default), y declararlas en `.env_example` con comentario:
+
+   ```php
+   define('MI_ACCION_MAX_INTENTOS', (int) env('MI_ACCION_MAX_INTENTOS', 5));
+   ```
+
+2. Agregar la entrada en `RateLimiter::LIMITES` con las claves que apliquen — `'cuenta'`, `'origen'` o ambas:
+
+   ```php
+   private const LIMITES = [
+       // ...
+       'mi_accion' => ['cuenta' => MI_ACCION_MAX_INTENTOS, 'origen' => MI_ACCION_MAX_INTENTOS_ORIGEN],
+   ];
+   ```
+
+   Una acción sin entrada no se limita: `verificar()` y `registrar()` son no-op.
+
+3. Integrar el flujo de tres pasos en el controlador (sección 3.2, después de `Session::validateCsrf()` y las validaciones de campos obligatorios):
+
+   ```php
+   // 1. Bloqueado → flash genérico con espera estimada y redirect
+   if ($espera = RateLimiter::verificar('mi_accion', $email)) {
+       Session::flash('error', 'Demasiados intentos. Volvé a intentarlo en ' . RateLimiter::formatearEspera($espera) . '.');
+       $this->redirect('ruta');
+   }
+
+   // 2. En cada fallo (o solicitud, si es una acción sin fallo posible):
+   RateLimiter::registrar('mi_accion', $email);
+
+   // 3. Al éxito:
+   RateLimiter::resetear('mi_accion', $email);
+   ```
+
+### 12.2 Reglas
+
+- **El mensaje de bloqueo es genérico** y no revela si la cuenta existe (ver `conventions.md` — "Mensajes de autenticación no reveladores").
+- **`registrar()` va después de las validaciones de formato** en acciones con formulario: solo cuentan los requests bien formados.
+- **No escribir en `IntentoAcceso` a mano**: la tabla se manipula exclusivamente desde `RateLimiter`; la depuración de filas vencidas la hace `registrar()` en cada invocación.
+- **El identificador de cuenta se normaliza adentro** (`mb_strtolower` + trim): pasar el email tal como llega del formulario, sin normalizar afuera.

@@ -216,7 +216,10 @@ $ubicacion = array_filter(
                     <?php if (!empty($esDueno)) : ?>
                         <?php if ($estado === 'ACTIVO') : ?>
                             <form method="POST" action="<?php echo APP_URL ?>/evento/<?php echo (int) $evento['Id_Evento'] ?>/estado"
-                                  class="pt-3 border-top mt-4" onsubmit="return confirm('¿Querés marcar este evento como resuelto o cancelarlo?')">
+                                  class="pt-3 border-top mt-4"
+                                  data-confirm-titulo="Cerrar publicación"
+                                  data-confirm-texto="¿Querés marcar este evento como resuelto o cancelarlo?"
+                                  data-confirm-boton="Sí, cerrar">
                                 <input type="hidden" name="_csrf" value="<?php echo Session::csrfToken() ?>">
 
                                 <div class="d-flex align-items-end gap-2">
@@ -238,7 +241,10 @@ $ubicacion = array_filter(
 
                         <form method="POST" action="<?php echo APP_URL ?>/evento/<?php echo (int) $evento['Id_Evento'] ?>/eliminar"
                               class="<?php echo $estado === 'ACTIVO' ? 'pt-2' : 'pt-3 border-top mt-4' ?>"
-                              onsubmit="return confirm('¿Seguro que querés eliminar este evento? También desaparecerá del feed.')">
+                              data-confirm-titulo="Eliminar publicación"
+                              data-confirm-texto="¿Seguro que querés eliminar este evento? También desaparecerá del feed."
+                              data-confirm-boton="Sí, eliminar"
+                              data-confirm-color="#9F1239">
                             <input type="hidden" name="_csrf" value="<?php echo Session::csrfToken() ?>">
                             <button type="submit"
                                     style="background:none; color:#9F1239; border:none; font-size:0.85rem; font-weight:600; padding:0; cursor:pointer;">

@@ -48,22 +48,6 @@
             letter-spacing: -0.5px;
         }
 
-        .pb-flash {
-            border-radius: var(--pb-radius);
-            border: 1px solid transparent;
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 0.75rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .pb-flash.success { background: #F0FDF4; border-color: #BBF7D0; color: #166534; }
-        .pb-flash.error   { background: #FFF1F2; border-color: #FECDD3; color: #9F1239; }
-        .pb-flash.warning { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
-        .pb-flash.info    { background: #EEF0FF; border-color: #C7D0FF; color: #3730A3; }
-
         .pb-footer {
             border-top: 1px solid var(--pb-border);
             padding: 1.25rem 0;
@@ -132,10 +116,13 @@
                     <span style="font-size:0.9rem; color:var(--pb-muted);">
                         <?= htmlspecialchars($usuario['nombre'], ENT_QUOTES, 'UTF-8') ?>
                     </span>
-                    <a href="<?= APP_URL ?>/logout"
-                       style="font-size:0.88rem; color:var(--pb-violet); text-decoration:none; font-weight:500;">
-                        Salir
-                    </a>
+                    <form method="POST" action="<?= APP_URL ?>/logout" style="margin:0;">
+                        <input type="hidden" name="_csrf" value="<?= \App\Core\Session::csrfToken() ?>">
+                        <button type="submit"
+                                style="background:none; border:0; padding:0; font:inherit; font-size:0.88rem; color:var(--pb-violet); text-decoration:none; font-weight:500; cursor:pointer;">
+                            Salir
+                        </button>
+                    </form>
                 </div>
             <?php endif; ?>
         </div>
@@ -143,18 +130,9 @@
 
     <?php $flashes = \App\Core\Session::getFlash(); ?>
     <?php if (!empty($flashes)): ?>
-        <div class="container mt-3">
-            <?php foreach ($flashes as $tipo => $mensaje): ?>
-                <div class="pb-flash <?= htmlspecialchars($tipo, ENT_QUOTES, 'UTF-8') ?>">
-                    <?php if ($tipo === 'success'): ?><i class="bi bi-check-circle-fill"></i>
-                    <?php elseif ($tipo === 'error'):   ?><i class="bi bi-exclamation-circle-fill"></i>
-                    <?php elseif ($tipo === 'warning'): ?><i class="bi bi-exclamation-triangle-fill"></i>
-                    <?php else:                         ?><i class="bi bi-info-circle-fill"></i>
-                    <?php endif; ?>
-                    <?= htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
+        <script>
+            window.pbFlashes = <?= json_encode($flashes, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        </script>
     <?php endif; ?>
 
     <?php
@@ -198,5 +176,7 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="<?= APP_URL ?>/js/pb-alerts.js"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
+use App\Core\Validator;
 use App\Models\Especie;
 use App\Models\Mascota;
 use App\Models\HistorialEstadoEvento;
@@ -60,11 +61,12 @@ class EventoController extends Controller
     {
         Auth::requireAuth();
 
-        $idEvento = (int) $id;
-
         // Resguardo: /evento/crear sin tipo matchearía /evento/:id antes
-        // de caer acá con $id="crear"; (int) y ambos casos resuelven a 404.
-        if ($idEvento <= 0) {
+        // de caer acá con $id="crear"; idDeRuta() lo rechaza y ambos casos
+        // resuelven a 404. Ídem "12abc" o IDs fuera del rango de un INT.
+        $idEvento = Validator::idDeRuta($id);
+
+        if ($idEvento === null) {
             $this->responder404();
             return;
         }
@@ -100,10 +102,15 @@ class EventoController extends Controller
     public function cambiarEstado(string $id): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
-        $idEvento = (int) $id;
-        $modelo   = new EventoMascota();
+        $idEvento = Validator::idDeRuta($id);
+
+        if ($idEvento === null) {
+            $this->responder404();
+            return;
+        }
+
+        $modelo = new EventoMascota();
 
         $evento = $modelo->buscarDetalle($idEvento);
 
@@ -158,10 +165,15 @@ class EventoController extends Controller
     public function eliminar(string $id): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
-        $idEvento = (int) $id;
-        $evento   = (new EventoMascota())->buscarDetalle($idEvento);
+        $idEvento = Validator::idDeRuta($id);
+
+        if ($idEvento === null) {
+            $this->responder404();
+            return;
+        }
+
+        $evento = (new EventoMascota())->buscarDetalle($idEvento);
 
         if (
             $evento === false
@@ -172,7 +184,7 @@ class EventoController extends Controller
         }
 
         try {
-            (new EventoMascota())->darBaja($idEvento);
+            (new EventoMascota())->darBaja($idEvento, (int) Session::user()['id']);
         } catch (\Throwable $e) {
             error_log('[EVENTO ERROR] ' . $e->getMessage());
             Session::flash('error', 'No se pudo eliminar el evento. Intentá de nuevo.');
@@ -198,7 +210,6 @@ class EventoController extends Controller
     public function store(string $tipo): void
     {
         Auth::requireAuth();
-        Session::validateCsrf();
 
         $tipoNombre = $this->resolverTipo($tipo);
 
@@ -208,9 +219,10 @@ class EventoController extends Controller
         }
 
         if ($tipoNombre !== 'ENCONTRADA') {
-            $idMascota = (int) $this->input('mascota');
+            // Solo dígitos: "12abc" no debe convertirse en la mascota 12.
+            $idMascota = Validator::enteroPositivo($this->input('mascota'), 'La mascota');
 
-            if ($idMascota <= 0 || !(new Mascota())->perteneceAUsuario($idMascota, (int) Session::user()['id'])) {
+            if ($idMascota === null || !(new Mascota())->perteneceAUsuario($idMascota, (int) Session::user()['id'])) {
                 Session::flash('error', 'La mascota indicada no existe o no te pertenece.');
                 $this->renderCrear($tipoNombre);
                 return;
@@ -267,10 +279,14 @@ class EventoController extends Controller
      */
     private function leerDatosFormulario(string $tipoNombre): array|false
     {
-        $descripcion = $this->input('descripcion');
-
-        if ($descripcion === null || $descripcion === '') {
-            Session::flash('error', 'La descripción es obligatoria.');
+        // Descripción obligatoria con tope sanitario: la columna es TEXT
+        // (64 KB), pero el detalle de un evento no necesita más que esto.
+        // Los textos y números se validan contra las longitudes y tipos del
+        // esquema antes de tocar la base.
+        try {
+            $descripcion = Validator::texto($this->input('descripcion'), 'La descripción', 2000, true);
+        } catch (\InvalidArgumentException $e) {
+            Session::flash('error', $e->getMessage());
             return false;
         }
 
@@ -280,7 +296,20 @@ class EventoController extends Controller
         ];
 
         if ($tipoNombre === 'ENCONTRADA') {
-            $idEspecie = (int) $this->input('especie');
+            try {
+                $idEspecie     = Validator::enteroPositivo($this->input('especie'), 'La especie');
+                $nombreMascota = Validator::texto($this->input('nombre_mascota'), 'El nombre de la mascota', 100);
+                $colorMascota  = Validator::texto($this->input('color_mascota'), 'El color de la mascota', 100);
+            } catch (\InvalidArgumentException $e) {
+                Session::flash('error', $e->getMessage());
+                return false;
+            }
+
+            if ($idEspecie === null) {
+                Session::flash('error', 'Elegí una especie válida para la mascota encontrada.');
+                return false;
+            }
+
             $especie = (new Especie())->buscarPorId($idEspecie);
 
             if ($especie === null) {
@@ -289,12 +318,12 @@ class EventoController extends Controller
             }
 
             $datos['mascota_nueva'] = [
-                'Nombre'     => $this->input('nombre_mascota') ?: 'Mascota encontrada',
+                'Nombre'     => $nombreMascota ?? 'Mascota encontrada',
                 'Id_Especie' => $idEspecie,
-                'Color'      => $this->input('color_mascota') ?: null,
+                'Color'      => $colorMascota,
             ];
         } else {
-            $datos['Id_Mascota'] = (int) $this->input('mascota');
+            $datos['Id_Mascota'] = Validator::enteroPositivo($this->input('mascota'), 'La mascota');
         }
 
         // Ubicación: disponible en PERDIDA y ENCONTRADA, no aplica a ADOPCION.
@@ -310,25 +339,23 @@ class EventoController extends Controller
 
         // Recompensa y fecha de última vista: exclusivos de PERDIDA.
         if ($tipoNombre === 'PERDIDA') {
-            $recompensa = $this->input('recompensa');
+            try {
+                // DECIMAL(10,2): máximo 99999999.99, sin notación exponencial.
+                $recompensa = Validator::decimal($this->input('recompensa'), 'La recompensa', 0, 99999999.99, 2);
 
-            if ($recompensa !== null && $recompensa !== '') {
-                if (!is_numeric($recompensa) || (float) $recompensa < 0) {
-                    Session::flash('error', 'La recompensa debe ser un número mayor o igual a cero.');
-                    return false;
-                }
-                $datos['Recompensa'] = (float) $recompensa;
+                // Fecha estricta y no futura: una última vista no puede ser
+                // posterior a hoy.
+                $fechaUltimaVista = Validator::fecha($this->input('fecha_ultima_vista'), 'La fecha de última vista');
+            } catch (\InvalidArgumentException $e) {
+                Session::flash('error', $e->getMessage());
+                return false;
             }
 
-            $fechaUltimaVista = $this->input('fecha_ultima_vista');
+            if ($recompensa !== null) {
+                $datos['Recompensa'] = $recompensa;
+            }
 
-            if ($fechaUltimaVista !== null && $fechaUltimaVista !== '') {
-                $fecha = \DateTime::createFromFormat('Y-m-d', $fechaUltimaVista);
-
-                if (!$fecha || $fecha->format('Y-m-d') !== $fechaUltimaVista) {
-                    Session::flash('error', 'La fecha de última vista no es válida.');
-                    return false;
-                }
+            if ($fechaUltimaVista !== null) {
                 $datos['Fecha_UltimaVista'] = $fechaUltimaVista . ' 00:00:00';
             }
         }
@@ -353,23 +380,31 @@ class EventoController extends Controller
      */
     private function leerUbicacion(): array|null|false
     {
-        $direccion  = $this->input('direccion');
-        $ciudad     = $this->input('ciudad');
-        $provincia  = $this->input('provincia');
-        $pais       = $this->input('pais');
+        $latitudRaw  = $this->input('latitud');
+        $longitudRaw = $this->input('longitud');
 
-        $latitud  = $this->input('latitud');
-        $longitud = $this->input('longitud');
+        // Longitudes del esquema (Direccion VARCHAR(255), Ciudad/Provincia/
+        // Pais VARCHAR(100)) y coordenadas con precisión DECIMAL(10,7):
+        // formato decimal plano, rango geográfico y hasta 7 decimales.
+        try {
+            $direccion = Validator::texto($this->input('direccion'), 'La dirección', 255);
+            $ciudad    = Validator::texto($this->input('ciudad'), 'La ciudad', 100);
+            $provincia = Validator::texto($this->input('provincia'), 'La provincia', 100);
+            $pais      = Validator::texto($this->input('pais'), 'El país', 100);
 
-        $latitud  = ($latitud !== null && $latitud !== '')  ? $latitud  : null;
-        $longitud = ($longitud !== null && $longitud !== '') ? $longitud : null;
+            $latitud  = Validator::decimal($latitudRaw, 'La latitud', -90, 90, 7);
+            $longitud = Validator::decimal($longitudRaw, 'La longitud', -180, 180, 7);
+        } catch (\InvalidArgumentException $e) {
+            Session::flash('error', $e->getMessage());
+            return false;
+        }
 
         // Sin nada aportado: no crear registro de ubicación.
         if (
-            ($direccion === null || $direccion === '')
-            && ($ciudad === null || $ciudad === '')
-            && ($provincia === null || $provincia === '')
-            && ($pais === null || $pais === '')
+            $direccion === null
+            && $ciudad === null
+            && $provincia === null
+            && $pais === null
             && $latitud === null
             && $longitud === null
         ) {
@@ -382,23 +417,13 @@ class EventoController extends Controller
             return false;
         }
 
-        if ($latitud !== null && (!is_numeric($latitud) || $latitud < -90 || $latitud > 90)) {
-            Session::flash('error', 'La latitud debe ser un número entre -90 y 90.');
-            return false;
-        }
-
-        if ($longitud !== null && (!is_numeric($longitud) || $longitud < -180 || $longitud > 180)) {
-            Session::flash('error', 'La longitud debe ser un número entre -180 y 180.');
-            return false;
-        }
-
         return [
-            'direccion' => $direccion  !== null && $direccion  !== '' ? $direccion  : null,
-            'ciudad'    => $ciudad     !== null && $ciudad     !== '' ? $ciudad     : null,
-            'provincia' => $provincia  !== null && $provincia  !== '' ? $provincia  : null,
-            'pais'      => $pais       !== null && $pais       !== '' ? $pais       : null,
-            'latitud'   => $latitud  !== null ? (float) $latitud  : null,
-            'longitud'  => $longitud !== null ? (float) $longitud : null,
+            'direccion' => $direccion,
+            'ciudad'    => $ciudad,
+            'provincia' => $provincia,
+            'pais'      => $pais,
+            'latitud'   => $latitud,
+            'longitud'  => $longitud,
         ];
     }
 

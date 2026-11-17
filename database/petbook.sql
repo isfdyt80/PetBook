@@ -1,11 +1,9 @@
 -- =============================================================================
--- PETBOOK — Script de creación de base de datos
+-- PETBOOK — Instalación inicial (solo para una base vacía)
 -- Motor: InnoDB | Charset: utf8mb4 | Collation: utf8mb4_unicode_ci
 -- =============================================================================
 
-SET FOREIGN_KEY_CHECKS = 0;
-DROP DATABASE IF EXISTS petbook;
-CREATE DATABASE petbook
+CREATE DATABASE IF NOT EXISTS petbook
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 USE petbook;
@@ -70,6 +68,28 @@ CREATE TABLE TokenRecuperacion (
     CONSTRAINT uq_token UNIQUE (Token),
     CONSTRAINT fk_token_usuario
         FOREIGN KEY (Id_Usuario) REFERENCES Usuario (Id_Usuario)
+) ENGINE=InnoDB;
+
+-- =============================================================================
+-- DOMINIO: SEGURIDAD (límite de intentos repetidos)
+-- =============================================================================
+
+-- Registro de intentos fallidos de acciones sensibles (login, registro,
+-- recuperación de contraseña). Cada intento genera una fila por clave:
+--   Tipo = 'cuenta' → Identificador = email normalizado (lowercase + trim)
+--   Tipo = 'origen' → Identificador = IP del cliente
+-- La ventana de conteo es por fecha; los registros viejos se depuran
+-- automáticamente desde App\Core\RateLimiter. Sin FK a Usuario: la fila
+-- también cubre intentos con emails inexistentes.
+CREATE TABLE IntentoAcceso (
+    Id_Intento    INT          NOT NULL AUTO_INCREMENT,
+    Accion        VARCHAR(20)  NOT NULL,
+    Tipo          VARCHAR(10)  NOT NULL,
+    Identificador VARCHAR(191) NOT NULL,
+    Fecha         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_intentoacceso PRIMARY KEY (Id_Intento),
+    CONSTRAINT uq_intentoacceso UNIQUE (Accion, Tipo, Identificador, Fecha),
+    CONSTRAINT ck_intentoacceso_tipo CHECK (Tipo IN ('cuenta', 'origen'))
 ) ENGINE=InnoDB;
 
 -- =============================================================================
@@ -416,6 +436,10 @@ CREATE INDEX idx_reporte_moderador    ON Reporte (Id_Moderador);
 CREATE INDEX idx_token_usuario        ON TokenRecuperacion (Id_Usuario);
 CREATE INDEX idx_token_valor          ON TokenRecuperacion (Token);
 
+-- IntentoAcceso (conteo por ventana de tiempo desde RateLimiter)
+CREATE INDEX idx_intentoacceso_clave  ON IntentoAcceso (Accion, Tipo, Identificador, Fecha);
+CREATE INDEX idx_intentoacceso_fecha  ON IntentoAcceso (Fecha);
+
 -- =============================================================================
 -- DATOS DE CATÁLOGO (seed obligatorio para que el sistema funcione)
 -- =============================================================================
@@ -461,4 +485,11 @@ INSERT INTO Especie (Nombre) VALUES
     ('Hurón'),
     ('Otro');
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- Registro de versiones. La instalación inicial queda marcada como aplicada.
+CREATE TABLE schema_migrations (
+    version     VARCHAR(64)  NOT NULL,
+    applied_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_schema_migrations PRIMARY KEY (version)
+) ENGINE=InnoDB;
+
+INSERT INTO schema_migrations (version) VALUES ('202611120001_baseline');

@@ -11,7 +11,9 @@ $router->get( '/login',     'AuthController', 'index');
 $router->post('/login',     'AuthController', 'login');
 $router->get( '/registro',  'AuthController', 'showRegistro');
 $router->post('/registro',  'AuthController', 'registro');
-$router->get( '/logout',    'AuthController', 'logout');
+// Logout: acción destructiva → POST (con token CSRF validado por el Router).
+// Nunca exponer acciones que modifican estado mediante un enlace GET.
+$router->post('/logout',    'AuthController', 'logout');
 
 // Recuperación de contraseña
 $router->get( '/recuperar',          'AuthController', 'showRecuperar');

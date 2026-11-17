@@ -13,8 +13,9 @@ Documento que define las funcionalidades del sistema desde la perspectiva de los
 
 **Criterios de aceptación:**
 - Se ingresan nombre, email y contraseña
-- El email no puede repetirse
-- La contraseña se guarda hasheada
+- El email no puede repetirse — la UNIQUE uq_usuario_email lo garantiza incluso ante registros simultáneos
+- La contraseña se guarda hasheada con el algoritmo adaptativo por defecto (PASSWORD_DEFAULT, cost 12)
+- Las solicitudes de registro repetidas desde un mismo origen quedan limitadas
 - Se crea Persona + Usuario + UsuarioRol
 - El sistema confirma el registro
 
@@ -29,7 +30,9 @@ Documento que define las funcionalidades del sistema desde la perspectiva de los
 - Se valida email y contraseña
 - Usuario debe estar Activo = true y Eliminado = false
 - Se inicia sesión con $_SESSION
-- Se muestra error si las credenciales son incorrectas
+- El error de credenciales es un mensaje único: no revela si el email no existe, la contraseña es incorrecta o la cuenta está desactivada
+- Los intentos fallidos quedan limitados por cuenta y por origen (IP) dentro de una ventana de tiempo; alcanzado el máximo, la respuesta bloquea con la espera estimada
+- Un login exitoso limpia el conteo de intentos de la cuenta
 
 ---
 
@@ -53,6 +56,7 @@ Documento que define las funcionalidades del sistema desde la perspectiva de los
 - Se genera un token único
 - Tiene fecha de expiración
 - Permite cambiar contraseña si el token es válido
+- Las solicitudes de recuperación repetidas quedan limitadas por cuenta y por origen
 
 ---
 
