@@ -25,15 +25,32 @@ class MascotaUsuario extends Model
      */
     public function asociar(array $datos): bool
     {
-        $stmt = $this->execute(
-            'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, FechaDesde)
-             VALUES (:mascota, :usuario, :esDueno, NOW())',
-            [
-                ':mascota' => $datos['Id_Mascota'],
-                ':usuario' => $datos['Id_Usuario'],
-                ':esDueno' => $datos['EsDueno'],
-            ]
-        );
+        try {
+            $stmt = $this->execute(
+                'INSERT INTO MascotaUsuario (Id_Mascota, Id_Usuario, EsDueno, FechaDesde)
+                SELECT :mascota, :usuario, :esDueno, NOW()
+                FROM DUAL
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM MascotaUsuario
+                    WHERE Id_Mascota = :mascotaActiva
+                    AND Id_Usuario = :usuarioActivo
+                    AND FechaHasta IS NULL
+                )',
+                [
+                    ':mascota'       => $datos['Id_Mascota'],
+                    ':usuario'       => $datos['Id_Usuario'],
+                    ':esDueno'       => $datos['EsDueno'],
+                    ':mascotaActiva' => $datos['Id_Mascota'],
+                    ':usuarioActivo' => $datos['Id_Usuario'],
+                ]
+            );
+        } catch (\PDOException $e) {
+            // 23000 = violación del índice único (dos solicitudes simultáneas).
+            if ($e->getCode() === '23000') {
+                return false;
+            }
+            throw $e;
+        }
 
         return $stmt->rowCount() > 0;
     }
