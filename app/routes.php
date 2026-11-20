@@ -33,6 +33,7 @@ $router->post('/evento/crear/:tipo',  'EventoController', 'store');
 $router->get( '/evento/:id',          'EventoController', 'ver');
 $router->post('/evento/:id/estado',   'EventoController', 'cambiarEstado');
 $router->post('/evento/:id/eliminar', 'EventoController', 'eliminar');
+$router->post('/evento/:id/ubicacion', 'EventoController', 'actualizarUbicacion');
 
 // ── Mascotas ──────────────────────────────────────────────────────────────
 $router->get( '/mascota',            'MascotaController', 'index');

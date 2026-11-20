@@ -34,10 +34,13 @@ class EventoMascota extends Model
                     m.Nombre  AS Mascota_Nombre,
                     s2.Nombre AS Especie,
                     r.Nombre  AS Raza,
+                    e.Id_Ubicacion,
                     u.Direccion,
                     u.Ciudad,
                     u.Provincia,
-                    u.Pais
+                    u.Pais,
+                    u.Latitud,
+                    u.Longitud
                 FROM EventoMascota e
                 JOIN TipoEvento   t ON t.Id_TipoEvento   = e.Id_TipoEvento
                 JOIN EstadoEvento s ON s.Id_EstadoEvento = e.Id_EstadoEvento
@@ -327,6 +330,61 @@ class EventoMascota extends Model
             // contrato de RuntimeException que consume EventoController.
             throw new \RuntimeException('Error al crear el evento: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    /**
+     * Crea, reemplaza o quita la ubicación de un evento ya publicado.
+     *
+     * La edición posterior es opcional para el dueño: si el evento no tenía
+     * ubicación (por ejemplo, una publicación vieja) se crea; si ya tenía
+     * una, se actualiza la misma fila; y si el formulario llega vacío se
+     * desvincula del evento y se elimina la fila huérfana de Ubicacion.
+     *
+     * Lectura y escritura van en una sola transacción: el evento nunca
+     * queda apuntando a una ubicación inexistente.
+     *
+     * @param  int        $idEvento    Id_Evento a modificar.
+     * @param  array|null $ubicacion   Datos con claves direccion/ciudad/
+     *                                 provincia/pais/latitud/longitud, o
+     *                                 null para quitar la ubicación.
+     * @return bool                    true si la transacción se completó.
+     * @throws \RuntimeException       Si el evento no existe.
+     */
+    public function guardarUbicacion(int $idEvento, ?array $ubicacion): bool
+    {
+        $evento = $this->buscarPorId($idEvento);
+
+        if ($evento === false) {
+            throw new \RuntimeException('Evento no encontrado.');
+        }
+
+        $idUbicacionActual = $evento['Id_Ubicacion'] !== null
+            ? (int) $evento['Id_Ubicacion']
+            : null;
+
+        return $this->transactional(function () use ($idEvento, $idUbicacionActual, $ubicacion) {
+            // Formulario vacío: el dueño decidió quitar la ubicación.
+            if ($ubicacion === null) {
+                if ($idUbicacionActual !== null) {
+                    $this->update($idEvento, ['Id_Ubicacion' => null]);
+                    // Ya no hay FK que la referencie: la fila queda huérfana.
+                    $this->execute(
+                        'DELETE FROM Ubicacion WHERE Id_Ubicacion = :id',
+                        [':id' => $idUbicacionActual]
+                    );
+                }
+
+                return true;
+            }
+
+            if ($idUbicacionActual !== null) {
+                return (new Ubicacion())->actualizar($idUbicacionActual, $ubicacion);
+            }
+
+            $idUbicacion = (new Ubicacion())->crear($ubicacion);
+
+            return $this->update($idEvento, ['Id_Ubicacion' => $idUbicacion]);
+        });
     }
 
     /**
