@@ -10,14 +10,34 @@ $tipo = $evento['Tipo_Evento'] ?? '';
 
 $iconoPorTipo = ['PERDIDA' => 'bi-search-heart', 'ENCONTRADA' => 'bi-handbag', 'ADOPCION' => 'bi-stars'];
 
-$ubicacion = array_filter(
+$ubicacionTexto = implode(', ', array_filter(
     [
     $evento['Direccion'] ?? null,
     $evento['Ciudad'] ?? null,
     $evento['Provincia'] ?? null,
     $evento['Pais'] ?? null,
     ]
-);
+));
+
+// Coordenadas capturadas con el navegador: pueden existir sin dirección.
+$latitud  = ($evento['Latitud']  ?? '') !== '' && ($evento['Latitud']  ?? null) !== null
+    ? (string) $evento['Latitud']
+    : null;
+$longitud = ($evento['Longitud'] ?? '') !== '' && ($evento['Longitud'] ?? null) !== null
+    ? (string) $evento['Longitud']
+    : null;
+
+$mapaUrl = null;
+if ($latitud !== null && $longitud !== null) {
+    // Sin texto de dirección, las coordenadas son la única referencia.
+    if ($ubicacionTexto === '') {
+        $ubicacionTexto = $latitud . ', ' . $longitud;
+    }
+
+    $mapaUrl = 'https://www.openstreetmap.org/?mlat=' . rawurlencode($latitud)
+        . '&mlon=' . rawurlencode($longitud)
+        . '#map=16/' . rawurlencode($latitud) . '/' . rawurlencode($longitud);
+}
 ?>
 
 <style>
@@ -180,14 +200,25 @@ $ubicacion = array_filter(
                         <?php endif; ?>
                     </div>
 
-                    <?php if (!empty($ubicacion)) : ?>
+                    <?php if ($ubicacionTexto !== '' || $mapaUrl !== null) : ?>
                         <div class="pt-3 border-top">
                             <div class="pb-list-label">
                                 <i class="bi bi-geo-alt"></i> Ubicación
                             </div>
-                            <p class="pb-list-value">
-                                <?php echo htmlspecialchars(implode(', ', $ubicacion), ENT_QUOTES, 'UTF-8') ?>
-                            </p>
+
+                            <?php if ($ubicacionTexto !== '') : ?>
+                                <p class="pb-list-value mb-1">
+                                    <?php echo htmlspecialchars($ubicacionTexto, ENT_QUOTES, 'UTF-8') ?>
+                                </p>
+                            <?php endif; ?>
+
+                            <?php if ($mapaUrl !== null) : ?>
+                                <a href="<?php echo htmlspecialchars($mapaUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                   target="_blank" rel="noopener noreferrer"
+                                   style="font-size:0.85rem; color:var(--pb-violet); font-weight:600; text-decoration:none;">
+                                    <i class="bi bi-map"></i> Ver en el mapa
+                                </a>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
@@ -214,6 +245,61 @@ $ubicacion = array_filter(
                     </div>
 
                     <?php if (!empty($esDueno)) : ?>
+                        <?php if ($tipo !== 'ADOPCION') : ?>
+                            <details class="pt-3 border-top mt-4">
+                                <summary style="cursor:pointer; font-size:0.87rem; font-weight:600; color:var(--pb-violet);">
+                                    <i class="bi bi-geo-alt"></i> Editar ubicación
+                                </summary>
+
+                                <form method="POST"
+                                      action="<?php echo APP_URL ?>/evento/<?php echo (int) $evento['Id_Evento'] ?>/ubicacion"
+                                      class="mt-3">
+                                    <input type="hidden" name="_csrf" value="<?php echo Session::csrfToken() ?>">
+
+                                    <label class="pb-label" for="direccion">Dirección</label>
+                                    <input class="pb-input mb-2" type="text" id="direccion" name="direccion"
+                                        value="<?php echo htmlspecialchars($evento['Direccion'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        maxlength="255" placeholder="Ej: Av. Illia 480" autocomplete="off">
+
+                                    <div class="row">
+                                        <div class="col-md-4 mb-1">
+                                            <input class="pb-input" type="text" name="ciudad" maxlength="100"
+                                                value="<?php echo htmlspecialchars($evento['Ciudad'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                placeholder="Ciudad" autocomplete="off">
+                                        </div>
+                                        <div class="col-md-4 mb-1">
+                                            <input class="pb-input" type="text" name="provincia" maxlength="100"
+                                                value="<?php echo htmlspecialchars($evento['Provincia'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                placeholder="Provincia" autocomplete="off">
+                                        </div>
+                                        <div class="col-md-4 mb-1">
+                                            <input class="pb-input" type="text" name="pais" maxlength="100"
+                                                value="<?php echo htmlspecialchars($evento['Pais'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                placeholder="País" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="latitud" name="latitud"
+                                        value="<?php echo htmlspecialchars($latitud ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                                    <input type="hidden" id="longitud" name="longitud"
+                                        value="<?php echo htmlspecialchars($longitud ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                                    <button type="button" id="btn-geo"
+                                            style="background:none; color:var(--pb-violet); border:1.5px solid var(--pb-border); border-radius:8px; padding:0.42rem 0.8rem; font-size:0.82rem; font-weight:600; font-family:'DM Sans', sans-serif; cursor:pointer; margin-top:0.35rem;">
+                                        <i class="bi bi-crosshair"></i> Usar mi ubicación actual
+                                    </button>
+
+                                    <div class="pb-hint mb-2" id="geo-hint">Si dejás todos los campos vacíos y no capturás coordenadas, se quita la ubicación.</div>
+
+                                    <button type="submit"
+                                            style="background:var(--pb-violet); color:#fff; border:none; border-radius:8px; padding:0.5rem 1rem; font-weight:600; font-size:0.88rem; cursor:pointer;">
+                                        Guardar ubicación
+                                    </button>
+                                </form>
+                            </details>
+                        <?php endif; ?>
+
                         <?php if ($estado === 'ACTIVO') : ?>
                             <form method="POST" action="<?php echo APP_URL ?>/evento/<?php echo (int) $evento['Id_Evento'] ?>/estado"
                                   class="pt-3 border-top mt-4"
@@ -268,6 +354,8 @@ $ubicacion = array_filter(
 
     </div>
 </div>
+
+<script src="<?php echo APP_URL ?>/js/evento/geolocalizacion.js"></script>
 
 <?php
 $content = ob_get_clean();

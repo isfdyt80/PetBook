@@ -23,6 +23,20 @@ class Ubicacion extends Model
         ]);
     }
 
+    // Actualiza los datos de una ubicacion existente.
+    // Recibe las mismas claves que crear() (direccion/ciudad/...).
+    public function actualizar(int $id, array $datos): bool
+    {
+        return $this->update($id, [
+            'Direccion' => $datos['direccion']   ?? null,
+            'Ciudad'    => $datos['ciudad']      ?? null,
+            'Provincia' => $datos['provincia']   ?? null,
+            'Pais'      => $datos['pais']        ?? null,
+            'Latitud'   => $datos['latitud']     ?? null,
+            'Longitud'  => $datos['longitud']    ?? null,
+        ]);
+    }
+
     // Busca una ubicacion por su ID
     public function buscarPorId(int $id){
         $sql = "SELECT 

@@ -196,6 +196,70 @@ class EventoController extends Controller
         $this->redirect('feed');
     }
 
+    // ── POST /evento/:id/ubicacion ────────────────────────────────────────
+
+    /**
+     * Crea, reemplaza o quita la ubicación de un evento ya publicado.
+     *
+     * Solo el dueño puede editar. La validación de los campos es la misma
+     * que en el alta (leerUbicacion): textos dentro de las longitudes del
+     * esquema, coordenadas decimales por pares y dentro del rango
+     * geográfico. Un formulario completamente vacío quita la ubicación.
+     */
+    public function actualizarUbicacion(string $id): void
+    {
+        Auth::requireAuth();
+
+        $idEvento = Validator::idDeRuta($id);
+
+        if ($idEvento === null) {
+            $this->responder404();
+            return;
+        }
+
+        $modelo = new EventoMascota();
+        $evento = $modelo->buscarDetalle($idEvento);
+
+        if (
+            $evento === false
+            || (int) $evento['Id_Usuario'] !== (int) Session::user()['id']
+        ) {
+            $this->responder404();
+            return;
+        }
+
+        // ADOPCION nunca tuvo bloque de ubicación en el formulario de alta.
+        if ($evento['Tipo_Evento'] === 'ADOPCION') {
+            Session::flash('error', 'La ubicación no aplica a las publicaciones de adopción.');
+            $this->redirect('evento/' . $idEvento);
+            return;
+        }
+
+        $ubicacion = $this->leerUbicacion();
+
+        if ($ubicacion === false) {
+            $this->redirect('evento/' . $idEvento);
+            return;
+        }
+
+        try {
+            $modelo->guardarUbicacion($idEvento, $ubicacion);
+        } catch (\Throwable $e) {
+            error_log('[EVENTO ERROR] ' . $e->getMessage());
+            Session::flash('error', 'No se pudo guardar la ubicación. Intentá de nuevo.');
+            $this->redirect('evento/' . $idEvento);
+            return;
+        }
+
+        Session::flash(
+            'success',
+            $ubicacion === null
+                ? 'Se quitó la ubicación del evento.'
+                : 'Ubicación actualizada.'
+        );
+        $this->redirect('evento/' . $idEvento);
+    }
+
     // ── POST /evento/crear/:tipo ──────────────────────────────────────────
 
     /**
