@@ -150,13 +150,13 @@ class EventoMascota extends Model
 
         // Un evento nace ACTIVO en crear() y solo avanza a un estado terminal:
         // nunca vuelve a ACTIVO.
-        if ($estadoDestino === 'ACTIVO') {
+        if ($nuevoEstadoNombre === 'ACTIVO') {
             throw new \RuntimeException('Un evento no puede volver a estado activo.');
         }
 
         // Catálogos resueltos por nombre, antes de abrir la transacción.
-        $idNuevoEstado     = $this->idEstadoPorNombre($estadoDestino);
-        $esTerminal        = in_array($estadoDestino, ['RESUELTO', 'CANCELADO'], true);
+        $idNuevoEstado     = $this->idEstadoPorNombre($nuevoEstadoNombre);
+        $esTerminal        = in_array($nuevoEstadoNombre, ['RESUELTO', 'CANCELADO'], true);
         $idEstadoArchivada = $esTerminal ? $this->idEstadoPublicacionPorNombre('ARCHIVADA') : null;
 
         return $this->transactional(function () use (
