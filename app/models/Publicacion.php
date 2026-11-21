@@ -80,7 +80,7 @@ class Publicacion extends Model
                     sp.Nombre AS Nombre_Especie,
                     COALESCE(
                         NULLIF(CONCAT_WS(', ', u.Ciudad, u.Provincia), ''),
-                        NULL
+                        CONCAT(u.Latitud, ', ', u.Longitud)
                     ) AS Ubicacion_Texto,
                     (
                         SELECT COUNT(*)

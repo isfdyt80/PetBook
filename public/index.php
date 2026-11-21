@@ -21,7 +21,9 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header("Content-Security-Policy: frame-ancestors 'none'");
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+// geolocation=(self): el formulario de eventos necesita la API de
+// geolocalización para el botón "Usar mi ubicación actual".
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(self)');
 header_remove('X-Powered-By');
 if (APP_HTTPS) {
     header('Strict-Transport-Security: max-age=31536000');
